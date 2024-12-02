@@ -2234,7 +2234,7 @@ namespace Win32xx
             for (int i = 0; i < menu.GetMenuItemCount(); ++i)
             {
                 // The MenuItemData pointer is deleted in OnUnInitMenuPopup.
-                MenuItemDataPtr itemDataPtr(std::make_unique<MenuItemData>());
+                MenuItemDataPtr itemDataPtr(new MenuItemData);
                 MENUITEMINFO mii;
                 ZeroMemory(&mii, sizeof(mii));
                 mii.cbSize = GetSizeofMenuItemInfo();
@@ -2252,10 +2252,6 @@ namespace Win32xx
                 UINT position = static_cast<UINT>(i);
                 if (menu.GetMenuItemInfo(position, mii, TRUE))
                 {
-                    itemDataPtr->itemText.ReleaseBuffer();
-                    if (itemDataPtr->itemText.Find(_T("\t")) >= 0)
-                        hasTabs = true;
-
                     if (mii.dwItemData == 0)
                     {
                         itemDataPtr->menu = menu;
@@ -2264,9 +2260,12 @@ namespace Win32xx
                         mii.dwItemData = reinterpret_cast<ULONG_PTR>(itemDataPtr.get());
                         mii.fType |= MFT_OWNERDRAW;
                         menu.SetMenuItemInfo(position, mii, TRUE); // Store pItem in mii
-                        menuData.push_back(std::move(itemDataPtr));
+                        menuData.push_back(itemDataPtr);
                     }
                 }
+                itemDataPtr->itemText.ReleaseBuffer();
+                if (itemDataPtr->itemText.Find(_T("\t")) >= 0)
+                    hasTabs = true;
             }
 
             // If one item has a tab, all should have a tab.
@@ -2284,7 +2283,7 @@ namespace Win32xx
             // m_menuItemIDs can store the menu item data for multiple popup menus.
             // There will be multiple popup menus if submenus are opened.
             if (menuData.size() != 0)
-                m_menusData.push_back(std::move(menuData));
+                m_menusData.push_back(menuData);
         }
 
         return 0;

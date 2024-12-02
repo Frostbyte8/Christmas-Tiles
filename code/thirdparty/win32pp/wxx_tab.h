@@ -106,9 +106,6 @@ namespace Win32xx
         virtual CWnd*  AddTabPage(CWnd* pView, LPCTSTR tabText, HICON icon, int tabID);
         virtual CWnd*  AddTabPage(CWnd* pView, LPCTSTR tabText, UINT iconID, int tabID = 0);
         virtual CWnd*  AddTabPage(CWnd* pView, LPCTSTR tabText);
-        virtual CWnd*  AddTabPage(WndPtr view, LPCTSTR tabText, HICON icon, int tabID);
-        virtual CWnd*  AddTabPage(WndPtr view, LPCTSTR tabText, UINT iconID, int tabID = 0);
-        virtual CWnd*  AddTabPage(WndPtr view, LPCTSTR tabText);
         virtual void   SelectPage(int page);
         virtual void   RecalcLayout();
         virtual void   RemoveTabPage(int page);
@@ -248,7 +245,6 @@ namespace Win32xx
         virtual ~CTabbedMDI();
 
         virtual CWnd* AddMDIChild(CWnd* pView, LPCTSTR tabText, int mdiChildID = 0);
-        virtual CWnd* AddMDIChild(WndPtr view, LPCTSTR tabText, int mdiChildID);
         virtual void  CloseActiveMDI();
         virtual void  CloseAllMDIChildren();
         virtual void  CloseMDIChild(int tab);
@@ -271,7 +267,7 @@ namespace Win32xx
         void    SetTab(CTab& tab) { m_pTab = &tab; }
 
     protected:
-        virtual WndPtr  NewMDIChildFromID(int mdiChildID);
+        virtual CWnd*   NewMDIChildFromID(int mdiChildID);
         virtual void    OnAttach();
         virtual void    OnDestroy();
         virtual LRESULT OnNotify(WPARAM wparam, LPARAM lparam);
@@ -425,7 +421,7 @@ namespace Win32xx
     // The framework assumes ownership of the CWnd pointer provided,
     // and deletes the CWnd object when the tab is removed or destroyed.
     // Use RemoveTabPage to remove the tab and page added in this manner.
-    inline CWnd* CTab::AddTabPage(CWnd* pView, LPCTSTR tabText, UINT iconID, int tabID /* = 0*/)
+    inline CWnd* CTab::AddTabPage(CWnd* pView, LPCTSTR tabText, UINT iconID, int tabID)
     {
         HICON icon = static_cast<HICON>(GetApp()->LoadImage(iconID, IMAGE_ICON, 0, 0, LR_SHARED));
         return AddTabPage(pView, tabText, icon, tabID);
@@ -438,65 +434,6 @@ namespace Win32xx
     inline CWnd* CTab::AddTabPage(CWnd* pView, LPCTSTR tabText)
     {
         return AddTabPage(pView, tabText, reinterpret_cast<HICON>(0), 0);
-    }
-
-    // Adds a tab along with the specified view window.
-    // The framework assumes ownership of the WndPtr provided,
-    // and deletes the CWnd object when the tab is removed or destroyed.
-    // Returns a pointer to the view window that was supplied.
-    // Use RemoveTabPage to remove the tab and page added in this manner.
-    inline CWnd* CTab::AddTabPage(WndPtr view, LPCTSTR tabText, HICON icon, int tabID)
-    {
-        assert(IsWindow());
-        CWnd* pView = view.get();
-        assert(pView);
-        assert(lstrlen(tabText) < WXX_MAX_STRING_SIZE);
-
-        // Set the TabPageInfo.
-        TabPageInfo tpi;
-        tpi.pView = pView;
-        tpi.tabIcon = icon;
-        tpi.tabID = tabID;
-        tpi.tabText = tabText;
-        if (icon != NULL)
-            tpi.tabImage = GetImages().Add(icon);
-        else
-            tpi.tabImage = -1;
-
-        int page = static_cast<int>(m_allTabPageInfo.size());
-        m_allTabPageInfo.push_back(tpi);
-        m_tabViews.push_back(std::move(view));
-
-        // Add the tab to the tab control.
-        TCITEM tie;
-        ZeroMemory(&tie, sizeof(tie));
-        tie.mask = TCIF_TEXT | TCIF_IMAGE;
-        tie.iImage = tpi.tabImage;
-        tie.pszText = const_cast<LPTSTR>(tpi.tabText.c_str());
-        InsertItem(page, &tie);
-        SetTabSize();
-        SelectPage(page);
-
-        return pView;
-    }
-
-    // Adds a tab along with the specified view window.
-    // The framework assumes ownership of the WndPtr provided,
-    // and deletes the CWnd object when the tab is removed or destroyed.
-    // Use RemoveTabPage to remove the tab and page added in this manner.
-    inline CWnd* CTab::AddTabPage(WndPtr view, LPCTSTR tabText, UINT iconID, int tabID /* = 0 */)
-    {
-        HICON icon = static_cast<HICON>(GetApp()->LoadImage(iconID, IMAGE_ICON, 0, 0, LR_SHARED));
-        return AddTabPage(std::move(view), tabText, icon, tabID);
-    }
-
-    // Adds a tab along with the specified view window.
-    // The framework assumes ownership of the WndPtr provided,
-    // and deletes the CWnd object when the tab is removed or destroyed.
-    // Use RemoveTabPage to remove the tab and page added in this manner.
-    inline CWnd* CTab::AddTabPage(WndPtr view, LPCTSTR tabText)
-    {
-        return AddTabPage(std::move(view), tabText, reinterpret_cast<HICON>(0), 0);
     }
 
     // Draws the close button
@@ -1932,19 +1869,7 @@ namespace Win32xx
         assert(pView); // Cannot add null CWnd*.
         assert(lstrlen(tabText) < WXX_MAX_STRING_SIZE);
 
-        return AddMDIChild(WndPtr(pView), tabText, mdiChildID);
-    }
-
-    // Adds a MDI tab, given a pointer to the view window, and the tab's text.
-    // The framework assumes ownership of the CWnd pointer provided, and deletes
-    // the CWnd object when the window is destroyed.
-    inline CWnd* CTabbedMDI::AddMDIChild(WndPtr view, LPCTSTR tabText, int mdiChildID)
-    {
-        CWnd* pView = view.get();
-        assert(pView); // Cannot add null CWnd*.
-        assert(lstrlen(tabText) < WXX_MAX_STRING_SIZE);
-
-        GetTab().AddTabPage(std::move(view), tabText, 0U, mdiChildID);
+        GetTab().AddTabPage(pView, tabText, 0U, mdiChildID);
 
         // Fake a WM_MOUSEACTIVATE to propagate focus change to dockers.
         if (IsWindow())
@@ -2082,10 +2007,10 @@ namespace Win32xx
                     }
 
                     int tabID = static_cast<int>(dwTabID);
-                    WndPtr child = NewMDIChildFromID(tabID);
-                    if (child.get())
+                    CWnd* pWnd = NewMDIChildFromID(tabID);
+                    if (pWnd)
                     {
-                        AddMDIChild(std::move(child), TabText, tabID);
+                        AddMDIChild(pWnd, TabText, tabID);
                         i++;
                         tabKeyName.Format(_T("ID%d"), i);
                         isLoaded = TRUE;
@@ -2118,24 +2043,24 @@ namespace Win32xx
     }
 
     // Override this function to create new MDI children from IDs.
-    inline WndPtr CTabbedMDI::NewMDIChildFromID(int /* mdiChildID */)
+    inline CWnd* CTabbedMDI::NewMDIChildFromID(int /* mdiChildID */)
     {
         // Override this function to create new MDI children from IDs as shown below
-        WndPtr view;
+        CWnd* pView = NULL;
     /*  switch(mdiChildID)
         {
         case ID_SIMPLE:
-            view = std::make_unique<CViewSimple>();
+            pView = new CViewSimple;
             break;
         case ID_RECT:
-            view = std::make_unique<CViewRect>();
+            pView = new CViewRect;
             break;
         default:
             TRACE("Unknown MDI child ID\n");
             break;
         } */
 
-        return view;
+        return pView;
     }
 
     // Called when the TabbeMDI window is created. (The HWND is attached to CTabbedMDI).

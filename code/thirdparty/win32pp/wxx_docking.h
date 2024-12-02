@@ -527,10 +527,8 @@ namespace Win32xx
 
         // Operations
         virtual CDocker* AddDockedChild(CDocker* pDocker, DWORD dockStyle, int dockSize, int dockID = 0);
-        virtual CDocker* AddDockedChild(DockPtr docker, DWORD dockStyle, int dockSize, int dockID = 0);
         virtual CDocker* AddUndockedChild(CDocker* pDocker, DWORD dockStyle,
                                           int dockSize, const RECT& rc, int dockID = 0);
-        virtual CDocker* AddUndockedChild(DockPtr docker, DWORD dockStyle, int dockSize, const RECT& rc, int dockID = 0);
         virtual void CloseAllDockers();
         virtual void Dock(CDocker* pDocker, UINT dockSide);
         virtual void DockInContainer(CDocker* pDocker, DWORD dockStyle, BOOL selectPage = TRUE);
@@ -592,7 +590,7 @@ namespace Win32xx
         void SetView(CWnd& view);
 
     protected:
-        virtual DockPtr NewDockerFromID(int dockID);
+        virtual CDocker* NewDockerFromID(int dockID);
         virtual void OnClose();
         virtual int  OnCreate(CREATESTRUCT& cs);
         virtual void OnDestroy();
@@ -2153,29 +2151,15 @@ namespace Win32xx
     // This function creates the docker, and adds it to the docker hierarchy as docked.
     inline CDocker* CDocker::AddDockedChild(CDocker* pDocker, DWORD dockStyle, int dockSize, int dockID /* = 0*/)
     {
-        // Create the new docker window as a child of this docker.
+        // Create the docker window as a child of the frame window.
         // This permanently sets the frame window as the docker window's owner,
         // even when its parent is subsequently changed.
 
         assert(pDocker);
         if (!pDocker) return NULL;
 
-        return AddDockedChild(DockPtr(pDocker), dockStyle, dockSize, dockID);
-    }
-
-    // This function creates the docker, and adds it to the docker hierarchy as docked.
-    inline CDocker* CDocker::AddDockedChild(DockPtr docker, DWORD dockStyle, int dockSize, int dockID /* = 0*/)
-    {
-        // Create the new docker window as a child of this docker.
-        // This permanently sets the frame window as the docker window's owner,
-        // even when its parent is subsequently changed.
-
-        CDocker* pDocker = docker.get();
-        assert(pDocker);
-        if (!pDocker) return NULL;
-
-        // Store the docker's unique pointer in the DockAncestor's vector for later deletion.
-        GetAllChildren().push_back(std::move(docker));
+        // Store the docker's pointer in the DockAncestor's vector for later deletion.
+        GetAllChildren().push_back(DockPtr(pDocker));
         GetDockAncestor()->m_allDockers.push_back(pDocker);
 
         pDocker->SetDockStyle(dockStyle);
@@ -2195,7 +2179,7 @@ namespace Win32xx
         pDocker->SetDockSize(dockSize);
 
         // Issue TRACE warnings for any missing resources.
-        HMODULE module = GetApp()->GetResourceHandle();
+        HMODULE module= GetApp()->GetResourceHandle();
 
         if (!(dockStyle & DS_NO_RESIZE))
         {
@@ -2235,19 +2219,8 @@ namespace Win32xx
         assert(pDocker);
         if (!pDocker) return NULL;
 
-        DockPtr docker(pDocker);
-        return AddUndockedChild(std::move(docker), dockStyle, dockSize, rc, dockID);
-    }
-
-    // This function creates the docker, and adds it to the docker hierarchy as undocked.
-    inline CDocker* CDocker::AddUndockedChild(DockPtr docker, DWORD dockStyle, int dockSize, const RECT& rc, int dockID /* = 0*/)
-    {
-        CDocker* pDocker = docker.get();
-        assert(pDocker);
-        if (!pDocker) return NULL;
-
-        // Store the Docker's unique pointer in the DockAncestor's vector for later deletion.
-        GetAllChildren().push_back(std::move(docker));
+        // Store the Docker's pointer in the DockAncestor's vector for later deletion.
+        GetAllChildren().push_back(DockPtr(pDocker));
         GetDockAncestor()->m_allDockers.push_back(pDocker);
 
         pDocker->SetDockSize(dockSize);
@@ -2263,7 +2236,7 @@ namespace Win32xx
         pDocker->SetParent(*this);
 
         // Change the Docker to a POPUP window.
-        DWORD style = WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_VISIBLE;
+        DWORD style = WS_POPUP| WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_VISIBLE;
         pDocker->SetStyle(style);
         pDocker->SetRedraw(FALSE);
         pDocker->SetParent(0);
@@ -3047,15 +3020,14 @@ namespace Win32xx
                     di = (*iter);
                     if ((di.dockParentID == 0) || (di.isInAncestor))
                     {
-                        DockPtr docker = NewDockerFromID(di.dockID);
-                        CDocker* pDocker = docker.get();
+                        CDocker* pDocker = NewDockerFromID(di.dockID);
                         if (!pDocker)
                             throw CUserException();
 
                         if ((di.dockStyle & 0xF) || (di.isInAncestor))
-                            AddDockedChild(std::move(docker), di.dockStyle, di.dockSize, di.dockID);
+                            AddDockedChild(pDocker, di.dockStyle, di.dockSize, di.dockID);
                         else
-                            AddUndockedChild(std::move(docker), di.dockStyle, di.dockSize, di.rect, di.dockID);
+                            AddUndockedChild(pDocker, di.dockStyle, di.dockSize, di.rect, di.dockID);
                     }
                 }
 
@@ -3080,11 +3052,11 @@ namespace Win32xx
 
                         if (pDockParent != NULL)
                         {
-                            DockPtr docker = NewDockerFromID(di.dockID);
-                            if (docker.get() == NULL)
+                            CDocker* pDocker = NewDockerFromID(di.dockID);
+                            if (!pDocker)
                                 throw CUserException();
 
-                            pDockParent->AddDockedChild(std::move(docker), di.dockStyle, di.dockSize, di.dockID);
+                            pDockParent->AddDockedChild(pDocker, di.dockStyle, di.dockSize, di.dockID);
                             found = true;
                             dockList.erase(iter);
                             break;
@@ -3138,26 +3110,25 @@ namespace Win32xx
     }
 
     // Used in LoadRegistrySettings. Creates a new Docker from the specified ID.
-    // Returns a unique_ptr<CDocker>.
-    inline DockPtr CDocker::NewDockerFromID(int /*id*/)
+    inline CDocker* CDocker::NewDockerFromID(int /*id*/)
     {
         // Override this function to create the Docker objects as shown below.
 
-        DockPtr docker;
+        CDocker* pDocker = NULL;
     /*  switch(id)
         {
         case ID_CLASSES:
-            docker = std::make_unique<CDockClasses>();
+            pDocker = new CDockClasses;
             break;
         case ID_FILES:
-            docker = std::make_unique<CDockFiles>();
+            pDocker = new CDockFiles;
             break;
         default:
             TRACE("Unknown Dock ID\n");
             break;
         } */
 
-        return docker;
+        return pDocker;
     }
 
     // Called when the this docker is activated.
@@ -3557,8 +3528,8 @@ namespace Win32xx
                 m_newDpi = newDPI;
                 m_oldDpi = newDPI;
 
-                const std::vector<DockPtr>& v = GetAllDockChildren();
-                std::vector<DockPtr>::const_iterator it;
+                std::vector<DockPtr> v = GetAllDockChildren();
+                std::vector<DockPtr>::iterator it;
                 for (it = v.begin(); it != v.end(); ++it)
                 {
                     if ((*it)->IsWindow() && IsChildOfDocker((*it)->GetHwnd()))

@@ -101,8 +101,6 @@ namespace Win32xx
     // the various data types to the archive.
     class CArchive
     {
-        typedef std::unique_ptr<CFile> FilePtr;
-
     public:
         // file modes
         enum Mode {store = 0, load = 1};
@@ -187,10 +185,10 @@ namespace Win32xx
         CArchive& operator=(const CArchive&);   // Disable assignment operator
 
         // private data members
-        CFile*  m_pFile;            // pointer to the archive CFile
-        FilePtr m_file;             // unique_ptr to locally created CFile
+        CFile*  m_pFile;            // archive file FILE
         UINT    m_schema;           // archive version schema
         bool    m_isStoring;        // archive direction switch
+        bool    m_isFileManaged;    // delete the CFile pointer in destructor;
     };
 
 } // namespace Win32xx
@@ -207,7 +205,7 @@ namespace Win32xx
 
     // Constructs a CArchive object.
     // The specified file must already be open for loading or storing.
-    inline CArchive::CArchive(CFile& file, CArchive::Mode mode) : m_schema(static_cast<UINT>(-1))
+    inline CArchive::CArchive(CFile& file, CArchive::Mode mode) : m_schema(static_cast<UINT>(-1)), m_isFileManaged(false)
     {
         m_pFile = &file;
 
@@ -226,21 +224,29 @@ namespace Win32xx
     // also opened. A failure to open the file will throw an exception.
     inline CArchive::CArchive(LPCTSTR fileName, Mode mode) : m_pFile(0), m_schema(static_cast<UINT>(-1))
     {
+        m_isFileManaged = true;
 
-        if (mode == load)
+        try
         {
-            // Open the archive for loading.
-            m_file = std::make_unique<CFile>(fileName, CFile::modeRead);
-            m_isStoring = false;
-        }
-        else
-        {
-            // Open the archive for storing. Creates file if required.
-            m_file = std::make_unique<CFile>(fileName, CFile::modeCreate);
-            m_isStoring = true;
+            if (mode == load)
+            {
+                // Open the archive for loading.
+                m_pFile = new CFile(fileName, CFile::modeRead);
+                m_isStoring = false;
+            }
+            else
+            {
+                // Open the archive for storing. Creates file if required.
+                m_pFile = new CFile(fileName, CFile::modeCreate);
+                m_isStoring = true;
+            }
         }
 
-        m_pFile = m_file.get();
+        catch(...)
+        {
+            delete m_pFile;
+            throw; // Rethrow the exception.
+        }
     }
 
     inline CArchive::~CArchive()
@@ -255,6 +261,11 @@ namespace Win32xx
                     m_pFile->Flush();
 
                 m_pFile->Close();
+            }
+
+            if (m_isFileManaged)
+            {
+                delete m_pFile;
             }
         }
     }

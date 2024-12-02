@@ -183,13 +183,13 @@ namespace Win32xx
     /////////////////////////////////////////////////////
     // Definitions for the the CEnhMetaFile class
     //
-    inline CEnhMetaFile::CEnhMetaFile() : m_pData(std::make_shared<EnhMetaFileData>())
+    inline CEnhMetaFile::CEnhMetaFile() : m_pData(new EnhMetaFileData)
     {
     }
 
     // A private constructor used by CEnhMetaFileDC.
     inline CEnhMetaFile::CEnhMetaFile(HENHMETAFILE enhMetaFile)
-        : m_pData(std::make_shared<EnhMetaFileData>())
+        : m_pData(new EnhMetaFileData)
     {
         m_pData->enhMetaFile = enhMetaFile;
     }

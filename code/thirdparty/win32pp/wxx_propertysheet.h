@@ -128,7 +128,6 @@ namespace Win32xx
 
         // Operations
         virtual CPropertyPage* AddPage(CPropertyPage* pPage);
-        virtual CPropertyPage* AddPage(PropertyPagePtr page);
         virtual HWND Create(HWND parent = NULL);
         virtual INT_PTR CreatePropertySheet(LPCPROPSHEETHEADER pPSH);
         virtual void DestroyButton(int button);
@@ -556,19 +555,7 @@ namespace Win32xx
         assert(pPage != NULL);
         if (!pPage) return NULL;
 
-        return AddPage(PropertyPagePtr(pPage));
-    }
-
-    // Adds a Property Page to the Property Sheet.
-    // The framework assumes ownership of the CPropertyPage pointer provided,
-    // and deletes the CPropertyPage object when the PropertySheet is destroyed.
-    inline CPropertyPage* CPropertySheet::AddPage(PropertyPagePtr page)
-    {
-        CPropertyPage* pPage = page.get();
-        assert(pPage != NULL);
-        if (!pPage) return NULL;
-
-        m_allPages.push_back(std::move(page));
+        m_allPages.push_back(PropertyPagePtr(pPage));
 
         if (*this)
         {

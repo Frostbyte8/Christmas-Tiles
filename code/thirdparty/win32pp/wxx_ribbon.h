@@ -138,7 +138,9 @@ namespace Win32xx
             WCHAR m_fullPath[MAX_PATH];
         };
 
-        typedef std::unique_ptr<CRecentFiles> RecentFilesPtr;
+        // Note: Modern C++ compilers can use this typedef instead.
+        // typedef std::shared_ptr<CRecentFiles> RecentFilesPtr;
+        typedef Shared_Ptr<CRecentFiles> RecentFilesPtr;
 
         CRibbonFrameT() {}
         virtual ~CRibbonFrameT() {}
@@ -477,9 +479,9 @@ namespace Win32xx
                 WCHAR curFileName[MAX_PATH] = {0};
                 StrCopyW(curFileName, TtoW(*iter), MAX_PATH);
 
-                RecentFilesPtr recentFiles(std::make_unique<CRecentFiles>(curFileName));
-                result = SafeArrayPutElement(psa, &currentFile, static_cast<void*>(recentFiles.get()));
-                m_recentFiles.push_back(std::move(recentFiles));
+                RecentFilesPtr pRecentFiles(new CRecentFiles(curFileName));
+                m_recentFiles.push_back(pRecentFiles);
+                result = SafeArrayPutElement(psa, &currentFile, static_cast<void*>(pRecentFiles.get()));
                 ++currentFile;
             }
 

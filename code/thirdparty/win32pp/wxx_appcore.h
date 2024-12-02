@@ -549,9 +549,9 @@ namespace Win32xx
         TLSData* pTLSData = GetTlsData();
         if (pTLSData == NULL)
         {
-            TLSDataPtr dataPtr = std::make_unique<TLSData>();
+            TLSDataPtr dataPtr(new TLSData);
+            m_allTLSData.push_back(dataPtr);
             VERIFY(::TlsSetValue(m_tlsData, dataPtr.get()));
-            m_allTLSData.push_back(std::move(dataPtr));
         }
     }
 

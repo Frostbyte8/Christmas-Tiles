@@ -96,16 +96,29 @@ namespace Win32xx
     const int WXX_MAX_STRING_SIZE = 255;
 
     // Some useful smart pointers
-    typedef std::unique_ptr<CDocker> DockPtr;
-    typedef std::shared_ptr<EnhMetaFileData> EnhMetaDataPtr;
-    typedef std::unique_ptr<CMDIChild> MDIChildPtr;
-    typedef std::unique_ptr<MenuItemData> MenuItemDataPtr;
-    typedef std::shared_ptr<MetaFileData> MetaDataPtr;
-    typedef std::unique_ptr<CPropertyPage> PropertyPagePtr;
-    typedef std::unique_ptr<TLSData> TLSDataPtr;
-    typedef std::unique_ptr<CWinThread> WinThreadPtr;
-    typedef std::unique_ptr<CWorkThread> WorkThreadPtr;
-    typedef std::unique_ptr<CWnd> WndPtr;
+    // Note: Modern C++ compilers can use these typedefs instead.
+    // typedef std::shared_ptr<CDocker> DockPtr;
+    // typedef std::shared_ptr<EnhMetaFileData> EnhMetaDataPtr;
+    // typedef std::shared_ptr<CMDIChild> MDIChildPtr;
+    // typedef std::shared_ptr<MenuItemData> MenuItemDataPtr;
+    // typedef std::shared_ptr<MetaFileData> MetaDataPtr;
+    // typedef std::shared_ptr<CPropertyPage> PropertyPagePtr;
+    // typedef std::shared_ptr<TLSData> TLSDataPtr;
+    // typedef std::shared_ptr<CWinThread> WinThreadPtr;
+    // typedef std::shared_ptr<CWorkThread> WorkThreadPtr;
+    // typedef std::shared_ptr<CWnd> WndPtr;
+
+    typedef Shared_Ptr<CDocker> DockPtr;
+    typedef Shared_Ptr<EnhMetaFileData> EnhMetaDataPtr;
+    typedef Shared_Ptr<CMDIChild> MDIChildPtr;
+    typedef Shared_Ptr<MenuItemData> MenuItemDataPtr;
+    typedef Shared_Ptr<MetaFileData> MetaDataPtr;
+    typedef Shared_Ptr<CPropertyPage> PropertyPagePtr;
+    typedef Shared_Ptr<TLSData> TLSDataPtr;
+    typedef Shared_Ptr<CWinThread> WinThreadPtr;
+    typedef Shared_Ptr<CWorkThread> WorkThreadPtr;
+    typedef Shared_Ptr<CWnd> WndPtr;
+
 
     // A structure that contains the data members for CGDIObject.
     struct CGDI_Data

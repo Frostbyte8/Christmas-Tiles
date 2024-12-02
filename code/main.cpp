@@ -1,6 +1,6 @@
-#include <windows.h>
+#include "win32pp\xmastiles_app.h"
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    MessageBox(NULL, "Hello World!", "It Begins. . .", MB_OK);
-    return 0;
+    XmasTilesApp app;
+    return app.Run();
 }

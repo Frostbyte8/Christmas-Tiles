@@ -1,57 +1,3 @@
-Version 9.7
-===========
-This version updates the library to support features available in C++14.
-Shared_ptr is now deprecated. It has been replaced by std::unique_ptr 
-and std::shared_ptr.
-
-Incompatibilities with previous versions
-----------------------------------------
-CDocker::NewDockFromID and CTabbedMDI::NewMDIChildFromID now returns
-a std::unique_ptr. Code that overrides these function will need to
-return a std:unique_ptr as well. For example:
-
-DockPtr CMainFrame::NewDockerFromID(int /*id*/)
-{
-    DockPtr docker;
-    switch(id)
-    {
-    case ID_CLASSES:
-        docker = std::make_unique<CDockClasses>();
-        break;
-    case ID_FILES:
-        docker = std::make_unique<CDockFiles>();
-        break;
-    default:
-        TRACE("Unknown Dock ID\n");
-        break;
-    }
-
-    return docker;
-}
-
-
-New Features and Enhancements
------------------------------
- * Updated CDocker. Dockers are stored as std::unique_ptr.
- * Updated CMDIFrame. MDIChild windows are stored as std::unique_ptr.
- * Updated CMDITab. Tab windows are stored as std::unique_ptr.
- * Updated CPropertySheet. CPropertyPage windows are stored as std::unique_ptr.
- * Updated CTab. Tab windows are stored as std::unique_ptr.
-
-
-Changes in detail
------------------
-Added CDocker::AddDockedChild    - additional override for std::unique_ptr
-Added CDocker::AddUndockedChild  - additional override for std::unique_ptr
-Added CMDIFrameT::AddMDIChild    - Additional override for std::uniqe_ptr
-Added CPropertySheet::AddPage    - additional override for std::unique_ptr
-Added CTab::AddTabPage           - Additional override for std::uniqe_ptr
-Added CTabbedMDI::AddMDIChild    - Additional override for std::uniqe_ptr
-Modified CDocker::NewDockFromID  - returns a std::unique_ptr
-Modified CTabbedMDI::NewMDIChildFromID - returns a std::unique_ptr
-
-Shared_Ptr is now deprecated. It will be removed in future versions of Win32++/
-
 Version 9.6.1
 =============
 This version contains minor updates to CDocker and the docking samples.
@@ -59,7 +5,7 @@ This version contains minor updates to CDocker and the docking samples.
 Version 9.6
 ===========
 This version adds support for std::min and std::max. The MIN and MAX macros
-are now deprecated. Users should use std::min and std::max in place of the
+are now depricated. Users should use std::min and std::max in place of the
 MIN and MAX macros.
 
 Support has been added for the C++ compiler from Embarcadero.
