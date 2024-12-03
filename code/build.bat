@@ -1,5 +1,7 @@
 @echo off
 
+cd /D "%~dp0"
+
 if NOT exist "..\build" (
     mkdir ..\build
 )
