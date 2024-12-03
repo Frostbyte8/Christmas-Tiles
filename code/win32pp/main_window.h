@@ -10,7 +10,7 @@ class MainWindow : public CFrame {
 
     public:
 
-        MainWindow() {}
+        MainWindow() : prevMonitor(0) {}
         virtual ~MainWindow() {}
 
         virtual HWND Create(HWND parent = 0) {
@@ -19,14 +19,18 @@ class MainWindow : public CFrame {
             return CFrame::Create(parent);
         }
 
+        virtual int OnCreate(CREATESTRUCT& cs);
+
     protected:
 
-        virtual void PreCreate(CREATESTRUCT& cs) {
-            CFrame::PreCreate(cs);
-        }
+        virtual void PreCreate(CREATESTRUCT& cs);
+        virtual LRESULT WndProc(UINT msg, WPARAM wParam, LPARAM lPARAM);
 
     private:
 
+        void onWindowMoved();
+
+        HMONITOR prevMonitor;
         GameBoardView gameView;
         
         //MainWindow(const MainWindow&);
