@@ -1,7 +1,6 @@
 #include "main_window.h"
 
 int MainWindow::OnCreate(CREATESTRUCT& cs) {
-
     UseThemes(FALSE);
     UseIndicatorStatus(FALSE);
     UseMenuStatus(FALSE);
@@ -9,7 +8,7 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseToolBar(FALSE);
     UseOwnerDrawnMenu(FALSE);
     CenterWindow();
-    return CWnd::OnCreate(cs);
+    return CFrame::OnCreate(cs);
 
 }
 

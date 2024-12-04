@@ -14,7 +14,7 @@ class MainWindow : public CFrame {
         virtual ~MainWindow() {}
 
         virtual HWND Create(HWND parent = 0) {
-            SetView(gameView);
+            SetView(mainView);
             // Load Settings Here
             return CFrame::Create(parent);
         }
@@ -31,7 +31,7 @@ class MainWindow : public CFrame {
         void onWindowMoved();
 
         HMONITOR prevMonitor;
-        GameBoardView gameView;
+        MainWindowView mainView;
         
         //MainWindow(const MainWindow&);
         //MainWindow& operator= (const MainWindow&);

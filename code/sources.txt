@@ -1,2 +1,3 @@
 main.cpp
 win32pp\main_window.cpp
+win32pp\main_window_views.cpp
