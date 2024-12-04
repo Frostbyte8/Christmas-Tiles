@@ -30,7 +30,7 @@ goto :eof
 :appendSourcesEnd
 
 "../misc/lastmodified.exe" %sources% > "../misc/current.txt"
-"../misc/comm.exe" -13 "../misc/current.txt" "../misc/stale.txt" > ../misc/_filech_temp.txt
+comm.exe -13 "../misc/current.txt" "../misc/stale.txt" > ../misc/_filech_temp.txt
 
 set sources=
 
