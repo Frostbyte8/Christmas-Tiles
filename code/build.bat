@@ -8,11 +8,13 @@ if NOT exist "..\build" (
 
 pushd ..\build
 
+set rebuild=%1
+
 :: Set Compiler Settings
 
 set libsShared=user32.lib comctl32.lib Ole32.lib Gdi32.lib Advapi32.lib
 
-set compFlagsDebug=/nologo /c /Zi /FC /EHsc
+set compFlagsDebug=/nologo /c /Zi /FC /EHsc /DUNICODE /D_UNICODE
 
 set libsDebug=%libsShared%
 set linkFlagsDebug=/nologo /SUBSYSTEM:WINDOWS /DEBUG /DEFAULTLIB:%libsDebug%
@@ -32,6 +34,8 @@ goto :eof
 "../misc/lastmodified.exe" %sources% > "../misc/current.txt"
 REM comm.exe -13 "../misc/current.txt" "../misc/stale.txt" > ../misc/_filech_temp.txt
 "../misc/cmpfile.exe" "../misc/current.txt" "../misc/stale.txt" > ../misc/_filech_temp.txt
+
+if defined rebuild goto :getChangedSourcesEnd
 
 set sources=
 

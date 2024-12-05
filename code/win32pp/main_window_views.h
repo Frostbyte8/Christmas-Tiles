@@ -3,6 +3,7 @@
 
 #include "..\thirdparty\win32pp\wxx_wincore.h"
 #include "..\thirdparty\win32pp\wxx_stdcontrols.h"
+#include "..\win32\window_metrics.h"
 
 class MainWindowView : public CWnd {
 
@@ -10,6 +11,7 @@ class MainWindowView : public CWnd {
 
         MainWindowView() {}
         LRESULT WndProc(UINT msg, WPARAM wParam, LPARAM lParam) { return WndProcDefault(msg, wParam, lParam); }
+        void setWindowMetrics(WindowMetrics* inMetrics);
 
     protected:
         
@@ -22,12 +24,13 @@ class MainWindowView : public CWnd {
         virtual void PreRegisterClass(WNDCLASS& wc) {
             wc.hCursor          = ::LoadCursor(NULL, IDC_ARROW);
             wc.hbrBackground    = (HBRUSH)(COLOR_BTNFACE + 1);
-            wc.lpszClassName    = "MainWindowView";
+            wc.lpszClassName    = L"MainWindowView";
         }
 
     private:
-        CButton     grpInfo[3];
-        CButton     btnPause;
+        WindowMetrics*  wMetrics;
+        CButton         grpInfo[3];
+        CButton         btnPause;
 
 };
 

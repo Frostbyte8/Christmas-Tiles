@@ -7,9 +7,16 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseReBar(FALSE);
     UseToolBar(FALSE);
     UseOwnerDrawnMenu(FALSE);
+    UseStatusBar(FALSE);
     CenterWindow();
     return CFrame::OnCreate(cs);
+}
 
+HWND MainWindow::Create(HWND parent) {
+    mainView.setWindowMetrics(&wMetrics);
+    SetView(mainView);
+    // Load Settings Here
+    return CFrame::Create(parent);
 }
 
 void MainWindow::PreCreate(CREATESTRUCT& cs) {

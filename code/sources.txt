@@ -1,3 +1,5 @@
 main.cpp
+win32\window_metrics.cpp
 win32pp\main_window.cpp
 win32pp\main_window_views.cpp
+

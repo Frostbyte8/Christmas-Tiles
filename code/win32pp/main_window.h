@@ -3,7 +3,7 @@
 
 #include "..\thirdparty\win32pp\wxx_wincore.h"
 #include "..\thirdparty\win32pp\wxx_frame.h"
-
+#include "..\win32\window_metrics.h"
 #include "main_window_views.h"
 
 class MainWindow : public CFrame {
@@ -13,13 +13,11 @@ class MainWindow : public CFrame {
         MainWindow() : prevMonitor(0) {}
         virtual ~MainWindow() {}
 
-        virtual HWND Create(HWND parent = 0) {
-            SetView(mainView);
-            // Load Settings Here
-            return CFrame::Create(parent);
-        }
+        virtual HWND Create(HWND parent = 0);
 
         virtual int OnCreate(CREATESTRUCT& cs);
+
+
 
     protected:
 
@@ -30,11 +28,12 @@ class MainWindow : public CFrame {
 
         void onWindowMoved();
 
+        WindowMetrics wMetrics;
         HMONITOR prevMonitor;
         MainWindowView mainView;
         
-        //MainWindow(const MainWindow&);
-        //MainWindow& operator= (const MainWindow&);
+        MainWindow(const MainWindow&);
+        MainWindow& operator= (const MainWindow&);
 
 };
 
