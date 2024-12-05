@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __WINDOW_METRICS_H__
 #define __WINDOW_METRICS_H__
 

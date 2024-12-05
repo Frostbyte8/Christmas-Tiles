@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __MAIN_WINDOW_H__
 #define __MAIN_WINDOW_H__
 

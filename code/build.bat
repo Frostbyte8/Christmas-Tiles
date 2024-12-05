@@ -14,7 +14,7 @@ set rebuild=%1
 
 set libsShared=user32.lib comctl32.lib Ole32.lib Gdi32.lib Advapi32.lib
 
-set compFlagsDebug=/nologo /c /Zi /FC /EHsc /DUNICODE /D_UNICODE
+set compFlagsDebug=/MP4 /nologo /c /Zi /FC /EHsc /DUNICODE /D_UNICODE
 
 set libsDebug=%libsShared%
 set linkFlagsDebug=/nologo /SUBSYSTEM:WINDOWS /DEBUG /DEFAULTLIB:%libsDebug%

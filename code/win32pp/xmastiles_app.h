@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __XMASTILES_APP_H__
 #define __XMASTILES_APP_H__
 
