@@ -9,7 +9,7 @@ class MainWindowView : public CWnd {
 
     public:
 
-        MainWindowView() {}
+        MainWindowView() : wMetrics(NULL) {}
         LRESULT WndProc(UINT msg, WPARAM wParam, LPARAM lParam) { return WndProcDefault(msg, wParam, lParam); }
         void setWindowMetrics(WindowMetrics* inMetrics);
 
