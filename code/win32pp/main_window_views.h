@@ -18,10 +18,6 @@ class MainWindowView : public CWnd {
         
         virtual int OnCreate(CREATESTRUCT& cs);
 
-        virtual void PreCreate(CREATESTRUCT& cs) {
-            //cs.dwExStyle = WS_EX_CLIENTEDGE;
-        }
-
         virtual void PreRegisterClass(WNDCLASS& wc) {
             wc.hCursor          = ::LoadCursor(NULL, IDC_ARROW);
             wc.hbrBackground    = (HBRUSH)(COLOR_BTNFACE + 1);
