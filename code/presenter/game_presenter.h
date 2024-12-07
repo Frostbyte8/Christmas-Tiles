@@ -32,18 +32,28 @@ struct GameTile {
 class GamePresenter {
 
     public:
-        inline const GameTile* getTiles() const { return gameTiles; }
-        inline const uint8_t getWidth() const { return width; }
-        inline const uint8_t getHeight() const { return height; }
+
+        // Constructors
 
         GamePresenter();
         ~GamePresenter();
 
+        // Accessors
+
+        inline const GameTile* getTiles() const;
+        inline const uint8_t getWidth() const;
+        inline const uint8_t getHeight() const;
+
+        // Public Functions
+
+        inline const bool isGameInited() const;
         uint8_t initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes);
         bool tryMatch(const int& index1, const int& index2);
         inline bool validIndex(const int& index) const;
 
     private:
+        // Normally this would go into a model, but since it is so small, I've
+        // opted not to at this time.
         uint8_t width;
         uint8_t height;
         uint8_t numTileTypes;

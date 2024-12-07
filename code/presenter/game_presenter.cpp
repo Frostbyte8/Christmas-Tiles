@@ -6,6 +6,59 @@ GamePresenter::GamePresenter() : width(0), height(0), numTileTypes(0), tileCount
                                  matchesNeeded(0), matchesMade(0), gameTiles(NULL) {
 }
 
+//=============================================================================
+// Accessors
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// getHeight - Returns the height of the current game board
+// @return a uint8_t containing the width of the game board
+//-----------------------------------------------------------------------------
+
+inline const uint8_t GamePresenter::getHeight() const {
+    return height;
+}
+
+//-----------------------------------------------------------------------------
+// getTiles - Returns a pointer to a const game tiles structure.
+// @return a pointer to a constant GameTile structure
+//-----------------------------------------------------------------------------
+
+inline const GameTile* GamePresenter::getTiles() const {
+    return gameTiles;
+}
+
+//-----------------------------------------------------------------------------
+// getWidth - Returns the width of the current game board
+// @return a uint8_t containing the width of the game board
+//-----------------------------------------------------------------------------
+
+inline const uint8_t GamePresenter::getWidth() const {
+    return width;
+}
+
+//=============================================================================
+// Public Functions
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// isGameInited - Checks to see if the game has been initialized.
+// @return true if it has, false if it has not
+//-----------------------------------------------------------------------------
+
+inline const bool GamePresenter::isGameInited() const {
+    return gameTiles != NULL ? true : false;
+}
+
+//-----------------------------------------------------------------------------
+// initGame - Creates a new game with the given width, height, and number of
+// tileTypes.
+// @param uint8_t containing the new width.
+// @param uint8_t containing the new height.
+// @param uint8_t containing the number of tile types.
+// @return 0 on success, any other number if an error occurred see InitGameErrors for error codes
+//-----------------------------------------------------------------------------
+
 uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) {
 
     width = inWidth > GameConstants::MAX_WIDTH ? GameConstants::MAX_WIDTH : inWidth;
@@ -23,6 +76,11 @@ uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight,
 
     tileCount = width * height;
     matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
+
+    if(gameTiles) {
+        delete gameTiles;
+        gameTiles = NULL;
+    }
 
     gameTiles = new (std::nothrow) GameTile[tileCount];
 
