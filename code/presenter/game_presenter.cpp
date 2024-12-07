@@ -2,10 +2,23 @@
 #include <math.h> // MSVC does this anyways if you include CMATH
 #include <stdexcept>
 
-GamePresenter::GamePresenter(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) : matchesMade(0), gameTiles(0) {
+GamePresenter::GamePresenter() : width(0), height(0), numTileTypes(0), tileCount(0),
+                                 matchesNeeded(0), matchesMade(0), gameTiles(NULL) {
+}
+
+uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) {
 
     width = inWidth > GameConstants::MAX_WIDTH ? GameConstants::MAX_WIDTH : inWidth;
     height = inHeight > GameConstants::MAX_HEIGHT ? GameConstants::MAX_HEIGHT : inHeight;
+
+    if(width < GameConstants::MIN_WIDTH) {
+        width = GameConstants::MIN_WIDTH;
+    }
+    
+    if(height < GameConstants::MIN_HEIGHT) {
+        height = GameConstants::MIN_HEIGHT;
+    }
+
     numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? GameConstants::MAX_TYPES : inNumTypes;
 
     tileCount = width * height;
@@ -14,7 +27,7 @@ GamePresenter::GamePresenter(const uint8_t& inWidth, const uint8_t& inHeight, co
     gameTiles = new (std::nothrow) GameTile[tileCount];
 
     if(!gameTiles) {
-        throw std::bad_alloc("");
+        return InitGameErrors::OUT_OF_MEMORY;
     }
 
     // If the board is not divisible by 2, set the middle tile to the free tile,
@@ -23,6 +36,7 @@ GamePresenter::GamePresenter(const uint8_t& inWidth, const uint8_t& inHeight, co
         gameTiles[matchesNeeded].tileType = numTileTypes + 1;
     }
 
+    return InitGameErrors::SUCCESS;
 }
 
 GamePresenter::~GamePresenter() {

@@ -10,7 +10,7 @@ LNK     = link
 LFLAGS  = /OUT:$@.exe /nologo /SUBSYSTEM:WINDOWS /DEBUG /DEFAULTLIB:user32.lib comctl32.lib Ole32.lib Gdi32.lib Advapi32.lib
 
 # NOTE, THERE IS A SPACE AT THE END OF THIS LINE, DO NO REMOVE IT OR THE BUILD BREAKS
-CFLAGS  = /nologo /c /Zi /FC /W4 /EHsc /DUNICODE /D_UNICODE /Fo..\build\ 
+CFLAGS  = /nologo /MP4 /c /Zi /FC /W4 /EHsc /DUNICODE /D_UNICODE /Fo..\build\ 
 
 # Headers
 WIN32_DIR       = ..\code\win32\window_metrics.h
