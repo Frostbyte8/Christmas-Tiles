@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <cassert>
 
+#define FREE_TILE (numTileTypes + 1)
+
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(GameConstants::DEF_WIDTH), height(GameConstants::DEF_HEIGHT),
 numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
@@ -127,40 +129,38 @@ void GamePresenter::tryNewGame() {
         gameTiles[matchesNeeded].matched = 1;
     }
 
+    size_t lastEmptyIndex = 0;
     for(uint16_t i = 0; i < matchesNeeded; ++i) {
 
-        size_t index1 = static_cast<size_t>(rand() % tileCount);
-        size_t index2 = static_cast<size_t>(rand() % tileCount);
-
+        size_t index[2] = {static_cast<size_t>(rand() % tileCount), static_cast<size_t>(rand() % tileCount)};
         int8_t newType = static_cast<int8_t>(rand() % numTileTypes) + 1;
 
-        // Find a free Index.
-        if(gameTiles[index1].tileType) {
-            findFreeIndex(index1);
+        // Loop through both new tiles, and find them an unused tile to be set to.
+
+        for(size_t k = 0; k < 2; ++k) {
+
+            if(gameTiles[index[k]].tileType) {
+                // No need to check
+                continue;
+            }
+
+            index[k] = lastEmptyIndex;
+            for(;;) {
+                if(gameTiles[index[k]].tileType) {
+                    index[k]++;
+                }
+                else {
+                    // No need to start over every iteration, just continue
+                    // from the last unfilled tile found.
+                    lastEmptyIndex = index[k] + 1;
+                    break;
+                }
+            }
         }
 
-        gameTiles[index1].tileType = newType;
+        gameTiles[index[0]].tileType = newType;
+        gameTiles[index[1]].tileType = newType;
 
-        if(gameTiles[index2].tyleType) {
-            findFreeIndex(index2);
-        }
-
-        gameTiles[index2].tileType = newType;
-
-    }
-}
-
-void GamePresenter::findFreeIndex(size_t& index) {
-
-    index = 0;
-
-    for(;;) {
-        if(gameTiles[index].tileType) {
-            index1++;
-        }
-        else {
-            return
-        }
     }
 }
 
@@ -180,7 +180,7 @@ bool GamePresenter::tryMatch(const int& index1, const int& index2) {
 
 inline bool GamePresenter::validIndex(const int& index) const {
 
-    if(index >= tileCount || gameTiles[index].tileType == GameConstants::FREE_TILE) {
+    if(index >= tileCount || gameTiles[index].tileType == FREE_TILE) {
         return false;
     }
 

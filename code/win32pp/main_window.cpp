@@ -17,7 +17,8 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseOwnerDrawnMenu(FALSE);
     UseStatusBar(FALSE);
     CenterWindow();
-    gamePresenter.initGame();
+    // [DEBUG]
+    gamePresenter.initGame(0, 0, 0);
     return CFrame::OnCreate(cs);
 }
 
