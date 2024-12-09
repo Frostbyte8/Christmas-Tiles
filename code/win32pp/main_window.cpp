@@ -1,7 +1,12 @@
 #include "main_window.h"
 
+// GamePresenter only sets the member variable and does not use it, so we can
+// safely ignore this warning.
+#pragma warning( push )
+#pragma warning( disable: 4355 )
 MainWindow::MainWindow() : prevMonitor(0), gamePresenter(this) {
 }
+#pragma warning ( pop )
 
 int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseThemes(FALSE);
@@ -12,6 +17,7 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseOwnerDrawnMenu(FALSE);
     UseStatusBar(FALSE);
     CenterWindow();
+    gamePresenter.initGame();
     return CFrame::OnCreate(cs);
 }
 

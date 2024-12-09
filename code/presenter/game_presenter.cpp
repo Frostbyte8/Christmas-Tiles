@@ -1,12 +1,21 @@
 #include "game_presenter.h"
 #include <math.h> // MSVC does this anyways if you include CMATH
+#include <time.h>
 #include <stdexcept>
 #include <cassert>
 
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
-width(0), height(0), numTileTypes(0), tileCount(0), matchesNeeded(0),
-matchesMade(0), gameTiles(NULL) {
+width(GameConstants::DEF_WIDTH), height(GameConstants::DEF_HEIGHT),
+numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
+gameTiles(NULL), timeElapsed(0) {
     assert(view);
+}
+
+GamePresenter::~GamePresenter() {
+    if(gameTiles) {
+        delete[] gameTiles;
+        gameTiles = NULL;
+    }
 }
 
 //=============================================================================
@@ -54,8 +63,8 @@ inline const bool GamePresenter::isGameInited() const {
 }
 
 //-----------------------------------------------------------------------------
-// initGame - Creates a new game with the given width, height, and number of
-// tileTypes.
+// initGame 
+// TODO: Figure out what belongs here, and what belongs in tryNewGame
 // @param uint8_t containing the new width.
 // @param uint8_t containing the new height.
 // @param uint8_t containing the number of tile types.
@@ -65,6 +74,8 @@ inline const bool GamePresenter::isGameInited() const {
 uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) {
 
     assert(view);
+    // TODO: Better Randomness later
+    srand(time(NULL));
 
     width = inWidth > GameConstants::MAX_WIDTH ? GameConstants::MAX_WIDTH : inWidth;
     height = inHeight > GameConstants::MAX_HEIGHT ? GameConstants::MAX_HEIGHT : inHeight;
@@ -79,42 +90,83 @@ uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight,
 
     numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? GameConstants::MAX_TYPES : inNumTypes;
 
-    tileCount = width * height;
-    matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
-
-    if(gameTiles) {
-        delete gameTiles;
-        gameTiles = NULL;
-    }
-
-    gameTiles = new (std::nothrow) GameTile[tileCount];
-
-    if(!gameTiles) {
-        return InitGameErrors::OUT_OF_MEMORY;
-    }
-
     // If the board is not divisible by 2, set the middle tile to the free tile,
     // which is always numTileTypes+1;
-    if(tileCount % 2) {
-        gameTiles[matchesNeeded].tileType = numTileTypes + 1;
-    }
 
-    // [DEBUG]
-    view->displayMessageBox(0);
 
     return InitGameErrors::SUCCESS;
 }
 
-GamePresenter::~GamePresenter() {
-    if(gameTiles) {
-        delete gameTiles;
-        gameTiles = NULL;
+//-----------------------------------------------------------------------------
+// tryNewGame - Attempts to create a new game.
+//-----------------------------------------------------------------------------
+
+void GamePresenter::tryNewGame() {
+
+    assert(width >= GameConstants::MIN_WIDTH);
+    assert(height >= GameConstants::MIN_HEIGHT);
+
+    timeElapsed = 0;
+    timeStarted = 0;
+    gameState = GameState::NOT_STARTED;
+    matchesMade = 0;
+
+    tileCount = width * height;
+    matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
+
+    if(!gameTiles) {
+        gameTiles = new (std::nothrow) GameTile[tileCount];
+        if(!gameTiles) {
+            return; // [TODO]: Handle error allocating tiles
+        }
+    }
+
+    // Locate possible free tile
+    if(tileCount % 2) {
+        gameTiles[matchesNeeded].tileType = numTileTypes + 1;
+        gameTiles[matchesNeeded].matched = 1;
+    }
+
+    for(uint16_t i = 0; i < matchesNeeded; ++i) {
+
+        size_t index1 = static_cast<size_t>(rand() % tileCount);
+        size_t index2 = static_cast<size_t>(rand() % tileCount);
+
+        int8_t newType = static_cast<int8_t>(rand() % numTileTypes) + 1;
+
+        // Find a free Index.
+        if(gameTiles[index1].tileType) {
+            findFreeIndex(index1);
+        }
+
+        gameTiles[index1].tileType = newType;
+
+        if(gameTiles[index2].tyleType) {
+            findFreeIndex(index2);
+        }
+
+        gameTiles[index2].tileType = newType;
+
+    }
+}
+
+void GamePresenter::findFreeIndex(size_t& index) {
+
+    index = 0;
+
+    for(;;) {
+        if(gameTiles[index].tileType) {
+            index1++;
+        }
+        else {
+            return
+        }
     }
 }
 
 bool GamePresenter::tryMatch(const int& index1, const int& index2) {
 
-    // You should ensure that indexes are valid before using this function.
+    // [TODO]: Add assert to test indices
 
     if(gameTiles[index1].tileType == gameTiles[index2].tileType) {
         gameTiles[index1].matched = GameConstants::TILE_MATCHED;
