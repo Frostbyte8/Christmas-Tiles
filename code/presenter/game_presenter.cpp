@@ -1,9 +1,12 @@
 #include "game_presenter.h"
 #include <math.h> // MSVC does this anyways if you include CMATH
 #include <stdexcept>
+#include <cassert>
 
-GamePresenter::GamePresenter() : width(0), height(0), numTileTypes(0), tileCount(0),
-                                 matchesNeeded(0), matchesMade(0), gameTiles(NULL) {
+GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
+width(0), height(0), numTileTypes(0), tileCount(0), matchesNeeded(0),
+matchesMade(0), gameTiles(NULL) {
+    assert(view);
 }
 
 //=============================================================================
@@ -61,6 +64,8 @@ inline const bool GamePresenter::isGameInited() const {
 
 uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) {
 
+    assert(view);
+
     width = inWidth > GameConstants::MAX_WIDTH ? GameConstants::MAX_WIDTH : inWidth;
     height = inHeight > GameConstants::MAX_HEIGHT ? GameConstants::MAX_HEIGHT : inHeight;
 
@@ -93,6 +98,9 @@ uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight,
     if(tileCount % 2) {
         gameTiles[matchesNeeded].tileType = numTileTypes + 1;
     }
+
+    // [DEBUG]
+    view->displayMessageBox(0);
 
     return InitGameErrors::SUCCESS;
 }

@@ -4,21 +4,26 @@
 
 #include "..\thirdparty\win32pp\wxx_wincore.h"
 #include "..\thirdparty\win32pp\wxx_frame.h"
-#include "..\win32\window_metrics.h"
+#include "..\interface\main_window_interface.h"
+#include "..\presenter\game_presenter.h"
 #include "main_window_views.h"
 
-class MainWindow : public CFrame {
+#include "..\win32\window_metrics.h"
+
+class MainWindow : public CFrame, public MainWindowInterface {
 
     public:
 
-        MainWindow() : prevMonitor(0) {}
+        MainWindow();
+
         virtual ~MainWindow() {}
 
         virtual HWND Create(HWND parent = 0);
 
         virtual int OnCreate(CREATESTRUCT& cs);
 
-
+        // Interface Implementation
+        virtual void displayMessageBox(const uint32_t& langID);
 
     protected:
 
@@ -28,6 +33,8 @@ class MainWindow : public CFrame {
     private:
 
         void onWindowMoved();
+
+        GamePresenter gamePresenter;
 
         WindowMetrics wMetrics;
         HMONITOR prevMonitor;

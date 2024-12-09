@@ -1,5 +1,8 @@
 #include "main_window.h"
 
+MainWindow::MainWindow() : prevMonitor(0), gamePresenter(this) {
+}
+
 int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseThemes(FALSE);
     UseIndicatorStatus(FALSE);
@@ -34,10 +37,10 @@ void MainWindow::PreCreate(CREATESTRUCT& cs) {
     CFrame::PreCreate(cs);
 }
 
-///----------------------------------------------------------------------------
-/// WndProc - Window Procedure for the Frame.
-/// Refer to the Win32++ documentation for more information.
-///----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// WndProc - Window Procedure for the Frame.
+// Refer to the Win32++ documentation for more information.
+//-----------------------------------------------------------------------------
 
 LRESULT MainWindow::WndProc(UINT msg, WPARAM wParam, LPARAM lParam) {
     switch(msg) {
@@ -64,4 +67,19 @@ void MainWindow::onWindowMoved() {
         CenterWindow();
     }
 
+}
+
+//=============================================================================
+// Public Interface Functions
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// displayMessageBox - Displays a message box. See the implementation file
+// for more information
+//-----------------------------------------------------------------------------
+
+void MainWindow::displayMessageBox(const uint32_t& langID) {
+    //LOWORD(TITLE)
+    //HIWORD(MSG)
+    MessageBoxW(L"This will eventually contain a message", L"Ok", MB_OK);
 }

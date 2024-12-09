@@ -16,7 +16,8 @@ CFLAGS  = /nologo /MP4 /c /Zi /FC /W4 /EHsc /DUNICODE /D_UNICODE /Fo..\build\
 WIN32_DIR       = ..\code\win32\window_metrics.h
 WIN32PP_DIR     = ..\code\win32pp\main_window.h ..\code\win32pp\main_window_views.h ..\code\win32pp\xmastiles_app.h
 PRESENTER_DIR	= ..\code\presenter\game_presenter.h
-HEADERS         = $(WIN32_DIR) $(WIN32PP_DIR) $(PRESNTER_DIR)
+INTERFACE_DIR	= ..\code\interface\main_window_interface.h
+HEADERS         = $(WIN32_DIR) $(WIN32PP_DIR) $(PRESNTER_DIR) $(INTERFACE_DIR)
 
 OBJECTS = main.obj window_metrics.obj main_window.obj main_window_views.obj game_presenter.obj
 

@@ -3,6 +3,7 @@
 #define __GAME_PRESENTER_H__
 
 #include "..\stdint_compat.h"
+#include "..\interface\main_window_interface.h"
 
 namespace GameConstants {
     enum {
@@ -35,7 +36,7 @@ class GamePresenter {
 
         // Constructors
 
-        GamePresenter();
+        GamePresenter(MainWindowInterface* mwi);
         ~GamePresenter();
 
         // Accessors
@@ -61,6 +62,8 @@ class GamePresenter {
         uint16_t matchesNeeded;
         uint16_t matchesMade;
         GameTile* gameTiles;
+
+        MainWindowInterface* view;
 };
 
 #endif //__GAME_PRESENTER_H__
