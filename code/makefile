@@ -7,10 +7,10 @@
 # Options
 CPP     = cl
 LNK     = link
-LFLAGS  = /OUT:$@.exe /nologo /SUBSYSTEM:WINDOWS /DEBUG /DEFAULTLIB:user32.lib comctl32.lib Ole32.lib Gdi32.lib Advapi32.lib
+LFLAGS  = /OUT:$@.exe /nologo /SUBSYSTEM:WINDOWS /DEBUG kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib comctl32.lib Gdiplus.lib
 
 # NOTE, THERE IS A SPACE AT THE END OF THIS LINE, DO NO REMOVE IT OR THE BUILD BREAKS
-CFLAGS  = /nologo /MP4 /c /Zi /FC /W4 /EHsc /DUNICODE /D_UNICODE /Fo..\build\ 
+CFLAGS  = /nologo /MP4 /MTd /c /Zi /FC /W4 /EHsc /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_UNICODE" /D "UNICODE" /Fo..\build\ 
 
 # Headers
 WIN32_DIR       = ..\code\win32\window_metrics.h

@@ -7,7 +7,7 @@
 #define FREE_TILE (numTileTypes + 1)
 
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
-width(GameConstants::DEF_WIDTH), height(GameConstants::DEF_HEIGHT),
+width(0), height(0),
 numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
 gameTiles(NULL), timeElapsed(0) {
     assert(view);
@@ -65,38 +65,61 @@ inline const bool GamePresenter::isGameInited() const {
 }
 
 //-----------------------------------------------------------------------------
-// initGame 
-// TODO: Figure out what belongs here, and what belongs in tryNewGame
-// @param uint8_t containing the new width.
-// @param uint8_t containing the new height.
+// changeBoardSettings - Changes either the Width, Height, Number of Tile types,
+// or any combination of the three.
+// @param uint8_t containing the new width, and also returns the width chosen by the game.
+// @param uint8_t containing the new height, and also returns the height chosen by the game
 // @param uint8_t containing the number of tile types.
-// @return 0 on success, any other number if an error occurred see InitGameErrors for error codes
 //-----------------------------------------------------------------------------
 
-uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes) {
+void GamePresenter::changeBoardSize(uint8_t& ioWidth, uint8_t& ioHeight, uint8_t inNumTypes) {
 
     assert(view);
     // TODO: Better Randomness later
     srand(time(NULL));
 
-    width = inWidth > GameConstants::MAX_WIDTH ? GameConstants::MAX_WIDTH : inWidth;
-    height = inHeight > GameConstants::MAX_HEIGHT ? GameConstants::MAX_HEIGHT : inHeight;
+    bool tileArrayInvalid = false;
 
-    if(width < GameConstants::MIN_WIDTH) {
-        width = GameConstants::MIN_WIDTH;
+    // Clamp Values
+    if(ioWidth > GameConstants::MAX_WIDTH) {
+        ioWidth = GameConstants::MAX_WIDTH;
+    }
+    else if(ioWidth < GameConstants::MIN_WIDTH) {
+        ioWidth = GameConstants::MIN_WIDTH;
+    }
+
+    if(ioHeight > GameConstants::MAX_HEIGHT) {
+        ioHeight = GameConstants::MAX_HEIGHT;
+    }
+    else if(ioHeight < GameConstants::MIN_HEIGHT) {
+        ioHeight = GameConstants::MIN_HEIGHT;
+    }
+
+    if(width != ioWidth || height != ioHeight) {
+        tileArrayInvalid = true;
+        width = ioWidth;
+        height = ioHeight;
+        tileCount = width * height;
+        matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
     }
     
-    if(height < GameConstants::MIN_HEIGHT) {
-        height = GameConstants::MIN_HEIGHT;
+    if(inNumTypes > GameConstants::MAX_TYPES) {
+        inNumTypes = GameConstants::MAX_TYPES;
     }
+    // TODO: Minimum types.
 
+    // If the user tries to have more than 100 types, tile 101 will be the free tile and the rest will be ignored.
+
+    if(numTileTypes != inNumTypes) {
+    }
     numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? GameConstants::MAX_TYPES : inNumTypes;
 
-    // If the board is not divisible by 2, set the middle tile to the free tile,
-    // which is always numTileTypes+1;
+    // Avoid unnecessary delete
+    if(tileArrayInvalid && gameTiles) {
+        delete[] gameTiles;
+        gameTiles = NULL;
+    }
 
-
-    return InitGameErrors::SUCCESS;
 }
 
 //-----------------------------------------------------------------------------
@@ -105,16 +128,14 @@ uint8_t GamePresenter::initGame(const uint8_t& inWidth, const uint8_t& inHeight,
 
 void GamePresenter::tryNewGame() {
 
-    assert(width >= GameConstants::MIN_WIDTH);
-    assert(height >= GameConstants::MIN_HEIGHT);
+    if(!tileCount) {
+        return;
+    }
 
     timeElapsed = 0;
     timeStarted = 0;
-    gameState = GameState::NOT_STARTED;
+    gameState   = GameState::NOT_STARTED;
     matchesMade = 0;
-
-    tileCount = width * height;
-    matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
 
     if(!gameTiles) {
         gameTiles = new (std::nothrow) GameTile[tileCount];
@@ -123,9 +144,9 @@ void GamePresenter::tryNewGame() {
         }
     }
 
-    // Locate possible free tile
+    // If the board is not divisible by 2, set the middle tile to the free tile.
     if(tileCount % 2) {
-        gameTiles[matchesNeeded].tileType = numTileTypes + 1;
+        gameTiles[matchesNeeded].tileType = FREE_TILE;
         gameTiles[matchesNeeded].matched = 1;
     }
 
@@ -164,7 +185,7 @@ void GamePresenter::tryNewGame() {
     }
 }
 
-bool GamePresenter::tryMatch(const int& index1, const int& index2) {
+bool GamePresenter::tryMatch(const size_t& index1, const size_t& index2) {
 
     // [TODO]: Add assert to test indices
 

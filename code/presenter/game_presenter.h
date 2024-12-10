@@ -18,6 +18,7 @@ namespace GameConstants {
         TILE_UNMATCHED  = 0,
         TILE_MATCHED    = 1,    
         MAX_TIME        = 5999000,
+        TILESET_NOT_SET = 0,
     };
 }
 
@@ -38,7 +39,7 @@ namespace GameState {
 }
 
 struct GameTile {
-    GameTile() : matched(0), tileType(0) {}
+    GameTile() : matched(GameConstants::TILE_UNMATCHED), tileType(GameConstants::UNSET_TILE) {}
     int8_t tileType;
     uint8_t matched;
 };
@@ -59,11 +60,11 @@ class GamePresenter {
         inline const uint8_t getHeight() const;
 
         // Public Functions
-
+        void changeBoardSize(uint8_t& ioNewWidth, uint8_t& inNewHeight, uint8_t inNumTypes);
         void tryNewGame();
         inline const bool isGameInited() const;
-        uint8_t initGame(const uint8_t& inWidth, const uint8_t& inHeight, const uint8_t& inNumTypes);
-        bool tryMatch(const int& index1, const int& index2);
+        
+        bool tryMatch(const size_t& index1, const size_t& index2);
         inline bool validIndex(const int& index) const;
 
     private:
@@ -74,12 +75,15 @@ class GamePresenter {
         uint8_t width;
         uint8_t height;
         uint8_t numTileTypes;
+
         uint8_t gameState;
+
         uint16_t tileCount;
         uint16_t matchesNeeded;
         uint16_t matchesMade;
         uint32_t timeElapsed;
         uint32_t timeStarted;
+        
         GameTile* gameTiles;
 
 

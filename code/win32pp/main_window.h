@@ -9,6 +9,16 @@
 #include "main_window_views.h"
 
 #include "..\win32\window_metrics.h"
+#include <windows.h>
+#define NOMINMAX
+// [TODO]: Something keeps Undefing Min and Max, but who?
+namespace Gdiplus
+{
+  using std::min;
+  using std::max;
+};
+#include <gdiplus.h>
+#undef NOMINMAX
 
 class MainWindow : public CFrame, public MainWindowInterface {
 
@@ -17,9 +27,7 @@ class MainWindow : public CFrame, public MainWindowInterface {
         MainWindow();
 
         virtual ~MainWindow() {}
-
         virtual HWND Create(HWND parent = 0);
-
         virtual int OnCreate(CREATESTRUCT& cs);
 
         // Interface Implementation
@@ -33,9 +41,11 @@ class MainWindow : public CFrame, public MainWindowInterface {
     private:
 
         void onWindowMoved();
+        void loadResources();
 
         GamePresenter gamePresenter;
 
+        Gdiplus::Bitmap* tileset;
         WindowMetrics wMetrics;
         HMONITOR prevMonitor;
         MainWindowView mainView;

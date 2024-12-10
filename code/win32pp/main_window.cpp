@@ -8,6 +8,8 @@ MainWindow::MainWindow() : prevMonitor(0), gamePresenter(this) {
 }
 #pragma warning ( pop )
 
+using namespace Gdiplus;
+
 int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseThemes(FALSE);
     UseIndicatorStatus(FALSE);
@@ -17,14 +19,19 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseOwnerDrawnMenu(FALSE);
     UseStatusBar(FALSE);
     CenterWindow();
-    // [DEBUG]
-    gamePresenter.initGame(0, 0, 0);
+    loadResources();
+    uint8_t width    = GameConstants::DEF_WIDTH;
+    uint8_t height   = GameConstants::DEF_HEIGHT;
+    uint8_t numTypes = static_cast<uint8_t>(tileset->GetWidth() / tileset->GetHeight());
+    gamePresenter.changeBoardSize(width, height, numTypes);
+    min(1, 2);
     return CFrame::OnCreate(cs);
 }
 
 HWND MainWindow::Create(HWND parent) {
     mainView.setWindowMetrics(&wMetrics);
     SetView(mainView);
+
     // Load Settings Here
     return CFrame::Create(parent);
 }
@@ -89,4 +96,14 @@ void MainWindow::displayMessageBox(const uint32_t& langID) {
     //LOWORD(TITLE)
     //HIWORD(MSG)
     MessageBoxW(L"This will eventually contain a message", L"Ok", MB_OK);
+}
+
+//=============================================================================
+// Private Functions
+//=============================================================================
+
+void MainWindow::loadResources() {
+    // TODO: Error checking, custom sets, and so on.
+    tileset = new Gdiplus::Bitmap(L"gfx.png");
+    tileset->SetResolution(96, 96);
 }
