@@ -11,7 +11,8 @@
 #include "..\win32\window_metrics.h"
 #include <windows.h>
 #define NOMINMAX
-// [TODO]: Something keeps Undefing Min and Max, but who?
+// [TODO]: Something keeps Undefing Min and Max, but who? Look into this more
+// but for now, use the versions found in min and max
 namespace Gdiplus
 {
   using std::min;
@@ -19,6 +20,12 @@ namespace Gdiplus
 };
 #include <gdiplus.h>
 #undef NOMINMAX
+
+/*
+class GameBoardPanel : public CWnd {
+
+};
+*/
 
 class MainWindow : public CFrame, public MainWindowInterface {
 

@@ -13,6 +13,7 @@ class MainWindowView : public CWnd {
         MainWindowView() : wMetrics(NULL) {}
         LRESULT WndProc(UINT msg, WPARAM wParam, LPARAM lParam) { return WndProcDefault(msg, wParam, lParam); }
         void setWindowMetrics(WindowMetrics* inMetrics);
+        void sizeControls();
 
     protected:
         

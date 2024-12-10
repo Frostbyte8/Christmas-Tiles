@@ -8,8 +8,6 @@ MainWindow::MainWindow() : prevMonitor(0), gamePresenter(this) {
 }
 #pragma warning ( pop )
 
-using namespace Gdiplus;
-
 int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseThemes(FALSE);
     UseIndicatorStatus(FALSE);
@@ -20,11 +18,12 @@ int MainWindow::OnCreate(CREATESTRUCT& cs) {
     UseStatusBar(FALSE);
     CenterWindow();
     loadResources();
+
     uint8_t width    = GameConstants::DEF_WIDTH;
     uint8_t height   = GameConstants::DEF_HEIGHT;
     uint8_t numTypes = static_cast<uint8_t>(tileset->GetWidth() / tileset->GetHeight());
     gamePresenter.changeBoardSize(width, height, numTypes);
-    min(1, 2);
+
     return CFrame::OnCreate(cs);
 }
 
