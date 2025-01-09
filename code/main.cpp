@@ -1,6 +1,15 @@
-#include "win32pp\xmastiles_app.h"
+#include "win32\main_window_view.h"
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    XmasTilesApp app;
-    return app.Run();
+    MainWindowView mainWindowView;
+    
+    if(!mainWindowView.registerSelf(hInstance)) {
+        return 0;
+    }
+
+    if(!mainWindowView.createWindow(hInstance)) {
+        return 0;
+    }
+    
+    return mainWindowView.doLoop();
 }

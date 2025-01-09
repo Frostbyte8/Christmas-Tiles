@@ -14,12 +14,12 @@ CFLAGS  = /nologo /MP4 /MTd /c /Zi /FC /W4 /EHsc /D "WIN32" /D "_DEBUG" /D "_WIN
 
 # Headers
 WIN32_DIR       = ..\code\win32\window_metrics.h
-WIN32PP_DIR     = ..\code\win32pp\main_window.h ..\code\win32pp\main_window_views.h ..\code\win32pp\xmastiles_app.h
+WIN32PP_DIR     = ..\code\win32\main_window_view.h
 PRESENTER_DIR	= ..\code\presenter\game_presenter.h
 INTERFACE_DIR	= ..\code\interface\main_window_interface.h
 HEADERS         = $(WIN32_DIR) $(WIN32PP_DIR) $(PRESNTER_DIR) $(INTERFACE_DIR)
 
-OBJECTS = main.obj window_metrics.obj main_window.obj main_window_views.obj game_presenter.obj
+OBJECTS = main.obj window_metrics.obj main_window_view.obj game_presenter.obj
 
 default:
     @echo To build, run build.bat instead.
@@ -36,11 +36,8 @@ main.obj: ..\code\main.cpp
 window_metrics.obj: ..\code\win32\window_metrics.cpp
     $(CPP) $(CFLAGS) ..\code\win32\window_metrics.cpp
     
-main_window.obj: ..\code\win32pp\main_window.cpp
-    $(CPP) $(CFLAGS) ..\code\win32pp\main_window.cpp
-    
-main_window_views.obj: ..\code\win32pp\main_window_views.cpp
-    $(CPP) $(CFLAGS) ..\code\win32pp\main_window_views.cpp
+main_window_view.obj: ..\code\win32\main_window_view.cpp
+    $(CPP) $(CFLAGS) ..\code\win32\main_window_view.cpp
        
 game_presenter.obj: ..\code\presenter\game_presenter.cpp
     $(CPP) $(CFLAGS) ..\code\presenter\game_presenter.cpp
