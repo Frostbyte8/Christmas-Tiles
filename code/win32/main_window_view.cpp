@@ -15,7 +15,7 @@ bool MainWindowView::registerSelf(HINSTANCE hInstance) {
     WNDCLASSEX wc;
 
     wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = CS_HREDRAW | CS_VREDRAW;
+    wc.style         = 0;
     wc.lpfnWndProc   = MainWindowView::WndProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
@@ -46,7 +46,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
         return true; // Already created.
     }
 
-    window = CreateWindowEx(0,
+    window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
         WS_OVERLAPPEDWINDOW,
@@ -149,7 +149,18 @@ void MainWindowView::centerWindow() {
 
 bool MainWindowView::createControls() {
     
-    controls[ControlIDs::GRP_SCORE] = createGroupBox(L"Score", 0, 0, 200, 200, window, ControlIDs::GRP_SCORE + MAKE_ID(ControlIDs::GRP_SCORE));
+    const size_t NUM_STRS = 3;
+    wchar_t* captions[NUM_STRS] = { L"Score", L"Points", L"Time" };
+
+
+    for(size_t i = 0; i < NUM_STRS; ++i) {
+        const int CTRLID = ControlIDs::GRP_SCORE + i; 
+        controls[CTRLID] = createGroupBox(captions[i], 0, 0, 200, 200, window, MAKE_ID(CTRLID));
+    }
+
+    controls[ControlIDs::BTN_PAUSE] = CreateWindowEx(0, L"Button", L"Pause", WS_CHILD | WS_VISIBLE,
+                                                     0, 0, 200, 200,
+                                                     window, (HMENU)MAKE_ID(ControlIDs::BTN_PAUSE), GetModuleHandle(NULL), NULL);  
 
     return true;
 }
@@ -178,6 +189,7 @@ LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
     if(msg == WM_NCCREATE) {
         // Store a copy of an instance of this window in the USERDATA section
         self = static_cast<MainWindowView*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
+        self->window = hWnd;
 
         SetLastError(0);
 
