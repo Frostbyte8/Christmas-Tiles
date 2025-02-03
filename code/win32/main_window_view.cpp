@@ -1,7 +1,12 @@
 #include "main_window_view.h"
+#include <math.h>
 
 __forceinline HWND createGroupBox(LPCWSTR windowName, int x, int y, int height, int width, HWND parent, int ID) {
     return CreateWindowEx(0, L"Button", windowName, WS_VISIBLE | WS_CHILD | BS_GROUPBOX, x, y, width, height, parent, (HMENU)ID, GetModuleHandle(NULL), NULL);
+}
+
+__forceinline HWND createLabel(LPCWSTR windowName, HWND parent, int ID) {
+    return CreateWindowEx(0, L"STATIC", windowName, WS_VISIBLE | WS_CHILD | SS_CENTER, 0, 0, 0, 0, parent, (HMENU)ID, GetModuleHandle(NULL), NULL);
 }
 
 #define MAKE_ID(X) (X + 101)
@@ -35,7 +40,6 @@ bool MainWindowView::registerSelf(HINSTANCE hInstance) {
     return true;
 }
 
-
 //-----------------------------------------------------------------------------
 // createWindow - Creates the main Window.
 //-----------------------------------------------------------------------------
@@ -63,7 +67,8 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
 
-    //centerWindow();
+    centerWindow();
+    moveControls();
     ShowWindow(window, SW_NORMAL);
     UpdateWindow(window);
 
@@ -155,14 +160,57 @@ bool MainWindowView::createControls() {
 
     for(size_t i = 0; i < NUM_STRS; ++i) {
         const int CTRLID = ControlIDs::GRP_SCORE + i; 
+        const int LBLID = ControlIDs::LBL_SCORE + i;
         controls[CTRLID] = createGroupBox(captions[i], 0, 0, 200, 200, window, MAKE_ID(CTRLID));
+        controls[LBLID] = createLabel(L"0000000000", window, MAKE_ID(LBLID));
     }
 
     controls[ControlIDs::BTN_PAUSE] = CreateWindowEx(0, L"Button", L"Pause", WS_CHILD | WS_VISIBLE,
                                                      0, 0, 200, 200,
                                                      window, (HMENU)MAKE_ID(ControlIDs::BTN_PAUSE), GetModuleHandle(NULL), NULL);  
 
+    HFONT dialogFont = wm.GetCurrentFont();
+    EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
+
     return true;
+}
+
+//-----------------------------------------------------------------------------
+// moveControls - Move the controls to the correct position
+//-----------------------------------------------------------------------------
+
+void MainWindowView::moveControls() {
+    
+    // First, we must find the widest Label. Likely, that will be score/time/points label.
+
+    const WindowMetrics::ControlSpacing& CSPC       = wm.GetControlSpacing();
+    const WindowMetrics::ControlDimensions& CDIM    = wm.GetControlDimensions();
+
+    const size_t NUM_STRS = 6;
+    wchar_t* captions[NUM_STRS] = { L"Score", L"Points", L"Time", L"Pause", L"Resume", L"0000000000" };
+
+    LONG widestLabel = 0;
+
+    for(size_t i = 0; i < NUM_STRS; ++i) {
+        widestLabel = max(widestLabel, wm.CalculateStringWidth(captions[i]));
+    }
+
+    // Next we find out how much height a groupbox needs, and any left over
+    // space will be taken up by the button
+
+    LONG grpHeight = CDIM.YLABEL + CSPC.YFIRST_GROUPBOX_MARGIN + CSPC.YLAST_GROUPBOX_MARGIN;
+    LONG grpXSpacing = CSPC.XGROUPBOX_SPACING * 2;
+
+    for(int i = 0; i < 3; ++i) {
+        const int CTRLID = ControlIDs::GRP_SCORE + i;
+        const int LBLID = ControlIDs::LBL_SCORE + i;
+        MoveWindow(controls[CTRLID], 0, grpHeight * i, widestLabel + grpXSpacing, grpHeight, TRUE);
+        MoveWindow(controls[LBLID], CSPC.XGROUPBOX_SPACING, (grpHeight * i) + CSPC.YFIRST_GROUPBOX_MARGIN, widestLabel, CDIM.YLABEL, TRUE);
+    }
+
+    ShowWindow(controls[ControlIDs::BTN_PAUSE], SW_HIDE);
+
+    return;
 }
 
 //-----------------------------------------------------------------------------

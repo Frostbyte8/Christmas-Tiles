@@ -2,6 +2,7 @@
 #define __MAIN_WINDOW_VIEW_H__
 
 #include <windows.h>
+#include "window_metrics.h"
 
 namespace ControlIDs {
     enum ControlIDs {
@@ -26,12 +27,21 @@ class MainWindowView {
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
     
     private:
+
         HWND window;
         HWND controls[ControlIDs::COUNT];
         HMONITOR prevMonitor;
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
+        static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
+            ::SendMessage(child, WM_SETFONT, font, true);
+            return true;
+        }
+
+        WindowMetrics wm;
+
         bool createControls();
+        void moveControls();
         void onWindowMoved();
         void centerWindow();
 };
