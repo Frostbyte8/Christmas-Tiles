@@ -13,7 +13,6 @@ namespace ControlIDs {
         BTN_PAUSE,
         LBL_SCORE,
         LBL_POINTS,
-        LBL_GAMEBOARD,
         COUNT,
     };
 }
