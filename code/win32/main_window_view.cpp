@@ -11,6 +11,9 @@ __forceinline HWND createLabel(LPCWSTR windowName, HWND parent, int ID) {
 
 #define MAKE_ID(X) (X + 101)
 
+// TODO: This will be obtained from the sprite sheet
+const int TILE_SIZE    = 32;
+
 //-----------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
 //-----------------------------------------------------------------------------
@@ -50,6 +53,8 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
         return true; // Already created.
     }
 
+    gameBG = CreateSolidBrush(RGB(0, 0, 0));
+
     window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
@@ -64,10 +69,10 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
 
     createControls();
 
+
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
 
-    centerWindow();
     moveControls();
     ShowWindow(window, SW_NORMAL);
     UpdateWindow(window);
@@ -104,6 +109,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
         case WM_EXITSIZEMOVE:
             onWindowMoved();            
+            break;
+
+        case WM_PAINT:
+            onPaint();
             break;
 
         case WM_CLOSE:
@@ -181,7 +190,8 @@ bool MainWindowView::createControls() {
 
 void MainWindowView::moveControls() {
     
-    // First, we must find the widest Label. Likely, that will be score/time/points label.
+
+    // find the widest Label. Likely, that will be score/time/points label.
 
     const WindowMetrics::ControlSpacing& CSPC       = wm.GetControlSpacing();
     const WindowMetrics::ControlDimensions& CDIM    = wm.GetControlDimensions();
@@ -201,6 +211,18 @@ void MainWindowView::moveControls() {
     LONG grpHeight = CDIM.YLABEL + CSPC.YFIRST_GROUPBOX_MARGIN + CSPC.YLAST_GROUPBOX_MARGIN;
     LONG grpXSpacing = CSPC.XGROUPBOX_SPACING * 2;
 
+    // The minimum height of the client area will be either the height of 4 Groupboxes, or
+    // the height of the board, whichever is largest. With Groupbox 4 (The Button) taking up the rest
+    // of the space remaining.
+
+    const int BOARD_HEIGHT = (grpHeight * 4 > GameConstants::DEF_HEIGHT * TILE_SIZE)
+                             ? grpHeight * 4
+                             : GameConstants::DEF_HEIGHT * TILE_SIZE;
+
+    const int BOARD_WIDTH   = GameConstants::DEF_WIDTH * TILE_SIZE;
+
+    gameXPos = static_cast<WORD>(widestLabel + grpXSpacing);
+
     for(int i = 0; i < 3; ++i) {
         const int CTRLID = ControlIDs::GRP_SCORE + i;
         const int LBLID = ControlIDs::LBL_SCORE + i;
@@ -208,9 +230,36 @@ void MainWindowView::moveControls() {
         MoveWindow(controls[LBLID], CSPC.XGROUPBOX_SPACING, (grpHeight * i) + CSPC.YFIRST_GROUPBOX_MARGIN, widestLabel, CDIM.YLABEL, TRUE);
     }
 
-    ShowWindow(controls[ControlIDs::BTN_PAUSE], SW_HIDE);
+    MoveWindow(controls[ControlIDs::BTN_PAUSE], 0, grpHeight * 3, widestLabel + grpXSpacing,
+               BOARD_HEIGHT - (grpHeight * 3), TRUE);
+
+    const DWORD style   = static_cast<DWORD>(GetWindowLongPtr(window, GWL_STYLE));
+    const DWORD exStyle = static_cast<DWORD>(GetWindowLongPtr(window, GWL_EXSTYLE));
+            
+    RECT rc = {0, 0, BOARD_WIDTH + widestLabel + grpXSpacing, BOARD_HEIGHT};
+    AdjustWindowRectEx(&rc, style, FALSE, exStyle);
+    // TODO: Get X/Y Pos
+    MoveWindow(window, 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
+    centerWindow();
 
     return;
+}
+
+//-----------------------------------------------------------------------------
+// onPaint - Draw the Gameboard
+//-----------------------------------------------------------------------------
+
+void MainWindowView::onPaint() {
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(window, &ps);
+    RECT rc; 
+    
+    GetClientRect(window, &rc);
+    rc.left = gameXPos;
+
+    FillRect(hdc, &rc, gameBG);
+
+    EndPaint(window, &ps);
 }
 
 //-----------------------------------------------------------------------------

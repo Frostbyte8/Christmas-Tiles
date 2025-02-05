@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include "window_metrics.h"
+#include "..\presenter\game_presenter.h"
 
 namespace ControlIDs {
     enum ControlIDs {
@@ -40,10 +41,14 @@ class MainWindowView {
 
         WindowMetrics wm;
 
+        WORD gameXPos;
+        HBRUSH gameBG;
+
         bool createControls();
         void moveControls();
         void onWindowMoved();
         void centerWindow();
+        void onPaint();
 };
 
 #endif // __MAIN_WINDOW_VIEW_H__
