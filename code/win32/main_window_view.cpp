@@ -111,6 +111,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             onWindowMoved();            
             break;
 
+        case WM_LBUTTONDOWN:
+            onClick(wParam, lParam);
+            break;
+
         case WM_PAINT:
             onPaint();
             break;
@@ -273,6 +277,46 @@ void MainWindowView::onWindowMoved() {
         prevMonitor = currentMonitor;
         centerWindow();
     }
+}
+
+//-----------------------------------------------------------------------------
+// onClick - Sent when the client area of the window has been clicked
+//-----------------------------------------------------------------------------
+
+void MainWindowView::onClick(const WPARAM& wParam, const LPARAM& lParam) {
+
+    WORD xPos = LOWORD(lParam);
+    WORD yPos = HIWORD(lParam);
+
+    // Make sure the cursor is within the bounds of the gameboard
+
+    if(xPos < gameXPos) {
+        return;
+    }
+
+    // Convert x/y to Index
+
+    xPos = (xPos - gameXPos) / TILE_SIZE;
+    yPos /= TILE_SIZE;
+
+    // DEBUG: For test
+    const int BOARD_WIDTH = 3;
+    const int BOARD_HEIGHT = 5;
+
+    if(xPos > BOARD_WIDTH - 1) {
+        return;
+    }
+
+    if(yPos > BOARD_HEIGHT - 1) {
+        return;
+    }
+
+    yPos = (yPos * BOARD_WIDTH) + xPos;
+
+    wchar_t buf[256] = {0};
+    wsprintf(buf, L"%d", yPos);
+    SetWindowTextW(window, buf);
+
 }
 
 //-----------------------------------------------------------------------------

@@ -13,6 +13,7 @@ namespace ControlIDs {
         BTN_PAUSE,
         LBL_SCORE,
         LBL_POINTS,
+        LBL_TIME,
         COUNT,
     };
 }
@@ -48,6 +49,7 @@ class MainWindowView {
         void onWindowMoved();
         void centerWindow();
         void onPaint();
+        void onClick(const WPARAM& wParam, const LPARAM& lParam);
 };
 
 #endif // __MAIN_WINDOW_VIEW_H__
