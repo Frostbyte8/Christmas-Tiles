@@ -21,7 +21,7 @@ namespace ControlIDs {
 class MainWindowView {
     
     public:
-        MainWindowView() : window(NULL) {}
+        MainWindowView() : window(NULL), tileset(NULL) {}
         bool registerSelf(HINSTANCE hInstance);
         bool createWindow(HINSTANCE hInstance);
         UINT doLoop();
@@ -43,6 +43,7 @@ class MainWindowView {
 
         WORD gameXPos;
         HBRUSH gameBG;
+        HBITMAP tileset;
 
         bool createControls();
         void moveControls();

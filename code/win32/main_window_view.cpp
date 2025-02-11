@@ -67,6 +67,14 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
         return false;
     }
 
+    // Load resources
+    tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
+
+    if(!tileset) {
+        MessageBox(NULL, L"Could not load gfx.bmp", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+        return false;
+    }
+
     createControls();
 
 
@@ -257,11 +265,24 @@ void MainWindowView::onPaint() {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(window, &ps);
     RECT rc; 
-    
+
     GetClientRect(window, &rc);
     rc.left = gameXPos;
 
     FillRect(hdc, &rc, gameBG);
+
+    if(tileset) {
+        HDC hdcSrc = CreateCompatibleDC(hdc);
+        HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
+
+        for(int k = 0; k < 5; ++k) {
+            for(int i = 0; i < 3; ++i) {
+                BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
+            }
+        }
+
+        SelectObject(hdcSrc, oldBMP);
+    }
 
     EndPaint(window, &ps);
 }
@@ -343,9 +364,10 @@ LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
     }
     else {
         self = reinterpret_cast<MainWindowView*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-        if(self) {
-            return self->windowProc(msg, wParam, lParam);
-        }
+    }
+
+    if(self) {
+        return self->windowProc(msg, wParam, lParam);
     }
 
     return DefWindowProc(hWnd, msg, wParam, lParam);
