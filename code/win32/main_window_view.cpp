@@ -67,6 +67,11 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
         return false;
     }
 
+    // TODO: Bind presenter to view
+    gamePresenter = new GamePresenter(NULL);
+    gamePresenter->changeBoardSize(5, 9, 13);
+    gamePresenter->tryNewGame();
+
     // Load resources
     tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
 
@@ -271,13 +276,24 @@ void MainWindowView::onPaint() {
 
     FillRect(hdc, &rc, gameBG);
 
-    if(tileset) {
+    if(tileset && gamePresenter) {
+
+        const uint8_t& width = gamePresenter->getWidth();
+        const uint8_t& height = gamePresenter->getHeight();
+        const uint16_t& hasFreeTile = gamePresenter->hasFreeTile();
+
         HDC hdcSrc = CreateCompatibleDC(hdc);
         HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
 
-        for(int k = 0; k < 5; ++k) {
-            for(int i = 0; i < 3; ++i) {
-                BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
+        for(int k = 0; k < height; ++k) {
+            for(int i = 0; i < width; ++i) {
+
+                if((k * width) + i == hasFreeTile && hasFreeTile != 0) { 
+                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 544, 0, SRCCOPY);
+                }
+                else {
+                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
+                }
             }
         }
 

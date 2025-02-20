@@ -8,9 +8,9 @@
 
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(0), height(0),
-numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
+freeTile(0), numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
 gameTiles(NULL), timeElapsed(0) {
-    assert(view);
+    //assert(view);
 }
 
 GamePresenter::~GamePresenter() {
@@ -29,7 +29,7 @@ GamePresenter::~GamePresenter() {
 // @return a uint8_t containing the width of the game board
 //-----------------------------------------------------------------------------
 
-inline const uint8_t GamePresenter::getHeight() const {
+const uint8_t& GamePresenter::getHeight() const {
     return height;
 }
 
@@ -47,7 +47,7 @@ inline const GameTile* GamePresenter::getTiles() const {
 // @return a uint8_t containing the width of the game board
 //-----------------------------------------------------------------------------
 
-inline const uint8_t GamePresenter::getWidth() const {
+const uint8_t& GamePresenter::getWidth() const {
     return width;
 }
 
@@ -72,9 +72,9 @@ inline const bool GamePresenter::isGameInited() const {
 // @param uint8_t containing the number of tile types.
 //-----------------------------------------------------------------------------
 
-void GamePresenter::changeBoardSize(uint8_t& ioWidth, uint8_t& ioHeight, uint8_t inNumTypes) {
+void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t inNumTypes) {
 
-    assert(view);
+    //assert(view);
     // TODO: Better Randomness later
     srand(time(NULL));
 
@@ -101,6 +101,7 @@ void GamePresenter::changeBoardSize(uint8_t& ioWidth, uint8_t& ioHeight, uint8_t
         height = ioHeight;
         tileCount = width * height;
         matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
+        freeTile = matchesNeeded * 2 == tileCount ? 0 : matchesNeeded;
     }
     
     if(inNumTypes > GameConstants::MAX_TYPES) {

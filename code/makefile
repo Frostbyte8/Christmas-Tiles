@@ -17,9 +17,9 @@ WIN32_DIR       = ..\code\win32\window_metrics.h
 WIN32PP_DIR     = ..\code\win32\main_window_view.h
 PRESENTER_DIR	= ..\code\presenter\game_presenter.h
 INTERFACE_DIR	= ..\code\interface\main_window_interface.h
-HEADERS         = $(WIN32_DIR) $(WIN32PP_DIR) $(PRESNTER_DIR) $(INTERFACE_DIR)
+HEADERS         = $(WIN32_DIR) $(WIN32PP_DIR) $(PRESENTER_DIR) $(INTERFACE_DIR)
 
-OBJECTS = main.obj window_metrics.obj main_window_view.obj game_presenter.obj
+OBJECTS = main.obj window_metrics.obj game_presenter.obj main_window_view.obj 
 
 default:
     @echo To build, run build.bat instead.
@@ -35,9 +35,9 @@ main.obj: ..\code\main.cpp
 
 window_metrics.obj: ..\code\win32\window_metrics.cpp ..\code\win32\window_metrics.h
     $(CPP) $(CFLAGS) ..\code\win32\window_metrics.cpp
-    
+
+game_presenter.obj: ..\code\presenter\game_presenter.cpp ..\code\presenter\game_presenter.h
+    $(CPP) $(CFLAGS) ..\code\presenter\game_presenter.cpp   
+
 main_window_view.obj: ..\code\win32\main_window_view.cpp ..\code\win32\main_window_view.h ..\code\win32\window_metrics.h
     $(CPP) $(CFLAGS) ..\code\win32\main_window_view.cpp
-       
-game_presenter.obj: ..\code\presenter\game_presenter.cpp ..\code\presenter\game_presenter.h
-    $(CPP) $(CFLAGS) ..\code\presenter\game_presenter.cpp

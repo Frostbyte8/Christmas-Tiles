@@ -56,25 +56,27 @@ class GamePresenter {
         // Accessors
 
         inline const GameTile* getTiles() const;
-        inline const uint8_t getWidth() const;
-        inline const uint8_t getHeight() const;
+        const uint8_t& getWidth() const;
+        const uint8_t& getHeight() const;
+        const uint16_t& hasFreeTile() const { return freeTile; }
+        //inline const int findFreeTileIndex() const;
 
         // Public Functions
-        void changeBoardSize(uint8_t& ioNewWidth, uint8_t& inNewHeight, uint8_t inNumTypes);
+        void changeBoardSize(uint8_t ioNewWidth, uint8_t inNewHeight, uint8_t inNumTypes);
         void tryNewGame();
         inline const bool isGameInited() const;
+        
         
         bool tryMatch(const size_t& index1, const size_t& index2);
         inline bool validIndex(const int& index) const;
 
     private:
 
-        inline void findFreeIndex(size_t& index);
-
         // [TODO]: This will eventually go into a model
         uint8_t width;
         uint8_t height;
         uint8_t numTileTypes;
+        uint16_t freeTile;
 
         uint8_t gameState;
 
