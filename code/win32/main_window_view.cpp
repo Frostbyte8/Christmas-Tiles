@@ -320,7 +320,7 @@ void MainWindowView::onWindowMoved() {
 // onClick - Sent when the client area of the window has been clicked
 //-----------------------------------------------------------------------------
 
-void MainWindowView::onClick(const WPARAM& wParam, const LPARAM& lParam) {
+void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     WORD xPos = LOWORD(lParam);
     WORD yPos = HIWORD(lParam);

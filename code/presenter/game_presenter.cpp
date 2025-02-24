@@ -25,30 +25,12 @@ GamePresenter::~GamePresenter() {
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// getHeight - Returns the height of the current game board
-// @return a uint8_t containing the width of the game board
-//-----------------------------------------------------------------------------
-
-const uint8_t& GamePresenter::getHeight() const {
-    return height;
-}
-
-//-----------------------------------------------------------------------------
 // getTiles - Returns a pointer to a const game tiles structure.
 // @return a pointer to a constant GameTile structure
 //-----------------------------------------------------------------------------
 
 inline const GameTile* GamePresenter::getTiles() const {
     return gameTiles;
-}
-
-//-----------------------------------------------------------------------------
-// getWidth - Returns the width of the current game board
-// @return a uint8_t containing the width of the game board
-//-----------------------------------------------------------------------------
-
-const uint8_t& GamePresenter::getWidth() const {
-    return width;
 }
 
 //=============================================================================

@@ -56,8 +56,8 @@ class GamePresenter {
         // Accessors
 
         inline const GameTile* getTiles() const;
-        const uint8_t& getWidth() const;
-        const uint8_t& getHeight() const;
+        const inline uint8_t& getWidth() const { return width; }
+        const inline uint8_t& getHeight() const { return height; }
         const uint16_t& hasFreeTile() const { return freeTile; }
         //inline const int findFreeTileIndex() const;
 

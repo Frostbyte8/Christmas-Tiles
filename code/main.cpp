@@ -1,6 +1,6 @@
 #include "win32\main_window_view.h"
 
-int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     MainWindowView mainWindowView;
     
     if(!mainWindowView.registerSelf(hInstance)) {
