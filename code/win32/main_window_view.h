@@ -18,7 +18,7 @@ namespace ControlIDs {
     };
 }
 
-class MainWindowView {
+class MainWindowView : public MainWindowInterface {
     
     public:
         MainWindowView() : window(NULL), tileset(NULL), gamePresenter(NULL) {}
@@ -28,7 +28,7 @@ class MainWindowView {
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
         // Interface Functions
-    
+        virtual void gameWon();    
     private:
 
         HWND window;

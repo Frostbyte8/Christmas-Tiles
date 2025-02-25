@@ -68,8 +68,8 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     }
 
     // TODO: Bind presenter to view
-    gamePresenter = new GamePresenter(NULL);
-    gamePresenter->changeBoardSize(5, 9, 16);
+    gamePresenter = new GamePresenter(this);
+    gamePresenter->changeBoardSize(3, 3, 16);
     gamePresenter->tryNewGame();
 
     // Load resources
@@ -335,7 +335,6 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     xPos = (xPos - gameXPos) / TILE_SIZE;
     yPos /= TILE_SIZE;
-
     
     // DEBUG: For test
     const uint8_t& width = gamePresenter->getWidth();
@@ -354,11 +353,7 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
     const GameTile* tiles = gamePresenter->getTiles();
 
     if(gamePresenter->tryFlipTile(yPos)) {
-
-        wchar_t msg[256] = {0};
-        wsprintf(msg, L"%d | %d\n", tiles[yPos].tileType, tiles[yPos].matched);
-        OutputDebugStringW(msg);
-        InvalidateRect(window, NULL, TRUE);
+        InvalidateRect(window, NULL, FALSE);
     }
 
 }
@@ -401,4 +396,6 @@ LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
 // Public Interface Functions
 //=============================================================================
 
-
+void MainWindowView::gameWon() {
+    MessageBox(NULL, L"WIN", L"WIN", MB_OK);
+}

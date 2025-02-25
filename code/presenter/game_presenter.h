@@ -20,6 +20,7 @@ namespace GameConstants {
         TILE_MATCHED    = 2,    
         MAX_TIME        = 5999000,
         TILESET_NOT_SET = 0,
+        NO_TILE_SELECTED = -1,
     };
 }
 
@@ -88,6 +89,7 @@ class GamePresenter {
         uint16_t matchesMade;
         uint32_t timeElapsed;
         uint32_t timeStarted;
+        int tileIndex[2];
         
         GameTile* gameTiles;
 

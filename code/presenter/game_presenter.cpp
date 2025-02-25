@@ -10,7 +10,9 @@ GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(0), height(0),
 freeTile(0), numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
 gameTiles(NULL), timeElapsed(0) {
-    //assert(view);
+    tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+    tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+    assert(view);
 }
 
 GamePresenter::~GamePresenter() {
@@ -56,7 +58,7 @@ inline const bool GamePresenter::isGameInited() const {
 
 void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t inNumTypes) {
 
-    //assert(view);
+    assert(view);
     // TODO: Better Randomness later
     srand(static_cast<unsigned int>(time(NULL)));
 
@@ -200,10 +202,43 @@ bool GamePresenter::validIndex(const unsigned int& index) const {
 
 bool GamePresenter::tryFlipTile(const unsigned int& index) {
 
+    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED && tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
+        gameTiles[tileIndex[0]].matched = 0;
+        gameTiles[tileIndex[1]].matched = 0;
+        tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+        tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+    }
+
     if(!validIndex(index) || gameTiles[index].matched) {
         return false;
     }
     
     gameTiles[index].matched = 1;
+
+    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED) {
+
+        if(gameTiles[index].tileType == gameTiles[tileIndex[0]].tileType) {
+
+            gameTiles[tileIndex[0]].matched = 2;
+            gameTiles[index].matched = 2;
+
+            tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+            tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+
+            matchesMade++;
+            if(matchesMade == matchesNeeded) {
+                view->gameWon();
+            }
+
+        }
+        else {
+            tileIndex[1] = index;
+        }
+
+    }
+    else {
+        tileIndex[0] = index;
+    }
+
     return true;
 }
