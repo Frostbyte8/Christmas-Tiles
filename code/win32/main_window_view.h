@@ -26,6 +26,8 @@ class MainWindowView {
         bool createWindow(HINSTANCE hInstance);
         UINT doLoop();
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+        // Interface Functions
     
     private:
 
@@ -55,3 +57,4 @@ class MainWindowView {
 };
 
 #endif // __MAIN_WINDOW_VIEW_H__
+

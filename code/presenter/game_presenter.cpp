@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <cassert>
 
-#define FREE_TILE (numTileTypes + 1)
+#define FREE_TILE (numTileTypes + 2)
 
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(0), height(0),
@@ -29,7 +29,7 @@ GamePresenter::~GamePresenter() {
 // @return a pointer to a constant GameTile structure
 //-----------------------------------------------------------------------------
 
-inline const GameTile* GamePresenter::getTiles() const {
+const GameTile* GamePresenter::getTiles() const {
     return gameTiles;
 }
 
@@ -58,7 +58,7 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
 
     //assert(view);
     // TODO: Better Randomness later
-    srand(time(NULL));
+    srand(static_cast<unsigned int>(time(NULL)));
 
     bool tileArrayInvalid = false;
 
@@ -83,7 +83,7 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
         height = ioHeight;
         tileCount = width * height;
         matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
-        freeTile = matchesNeeded * 2 == tileCount ? 0 : matchesNeeded;
+        //freeTile = matchesNeeded * 2 == tileCount ? 0 : matchesNeeded;
     }
     
     if(inNumTypes > GameConstants::MAX_TYPES) {
@@ -130,7 +130,7 @@ void GamePresenter::tryNewGame() {
     // If the board is not divisible by 2, set the middle tile to the free tile.
     if(tileCount % 2) {
         gameTiles[matchesNeeded].tileType = FREE_TILE;
-        gameTiles[matchesNeeded].matched = 1;
+        gameTiles[matchesNeeded].matched = 2;
     }
 
     size_t lastEmptyIndex = 0;
@@ -143,27 +143,34 @@ void GamePresenter::tryNewGame() {
 
         for(size_t k = 0; k < 2; ++k) {
 
-            if(gameTiles[index[k]].tileType) {
-                // No need to check
+            if(k != 0) {
+                // Avoid setting tile already set.
+            }
+
+            if(!gameTiles[index[k]].tileType) {
+                // Tile empty, No need to check anymore
+                gameTiles[index[k]].tileType = newType;
                 continue;
             }
 
             index[k] = lastEmptyIndex;
             for(;;) {
+
                 if(gameTiles[index[k]].tileType) {
+                    // Tile not empty, go to next
                     index[k]++;
                 }
                 else {
+
+                    // Tile found, and as such, 
                     // No need to start over every iteration, just continue
                     // from the last unfilled tile found.
+                    gameTiles[index[k]].tileType = newType;
                     lastEmptyIndex = index[k] + 1;
                     break;
                 }
             }
         }
-
-        gameTiles[index[0]].tileType = newType;
-        gameTiles[index[1]].tileType = newType;
 
     }
 }
@@ -182,11 +189,21 @@ bool GamePresenter::tryMatch(const size_t& index1, const size_t& index2) {
     return false;
 }
 
-inline bool GamePresenter::validIndex(const int& index) const {
+bool GamePresenter::validIndex(const unsigned int& index) const {
 
     if(index >= tileCount || gameTiles[index].tileType == FREE_TILE) {
         return false;
     }
 
+    return true;
+}
+
+bool GamePresenter::tryFlipTile(const unsigned int& index) {
+
+    if(!validIndex(index) || gameTiles[index].matched) {
+        return false;
+    }
+    
+    gameTiles[index].matched = 1;
     return true;
 }

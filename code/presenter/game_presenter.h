@@ -16,7 +16,8 @@ namespace GameConstants {
         MAX_HEIGHT      = 100,
         MAX_TYPES       = 100,
         TILE_UNMATCHED  = 0,
-        TILE_MATCHED    = 1,    
+        TILE_FLIPPED    = 1,
+        TILE_MATCHED    = 2,    
         MAX_TIME        = 5999000,
         TILESET_NOT_SET = 0,
     };
@@ -41,7 +42,7 @@ namespace GameState {
 struct GameTile {
     GameTile() : matched(GameConstants::TILE_UNMATCHED), tileType(GameConstants::UNSET_TILE) {}
     int8_t tileType;
-    uint8_t matched;
+    uint8_t matched; // 0 Unflipped, 1, Flipped, 2, Matched
 };
 
 class GamePresenter {
@@ -55,10 +56,10 @@ class GamePresenter {
 
         // Accessors
 
-        inline const GameTile* getTiles() const;
+        const GameTile* getTiles() const;
         const inline uint8_t& getWidth() const { return width; }
         const inline uint8_t& getHeight() const { return height; }
-        const uint16_t& hasFreeTile() const { return freeTile; }
+        //const uint16_t& hasFreeTile() const { return freeTile; }
         //inline const int findFreeTileIndex() const;
 
         // Public Functions
@@ -68,7 +69,9 @@ class GamePresenter {
         
         
         bool tryMatch(const size_t& index1, const size_t& index2);
-        inline bool validIndex(const int& index) const;
+        bool validIndex(const unsigned int& index) const;
+        bool tryFlipTile(const unsigned int& index);
+
 
     private:
 

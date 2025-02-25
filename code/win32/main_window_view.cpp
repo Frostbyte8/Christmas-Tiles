@@ -69,7 +69,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
 
     // TODO: Bind presenter to view
     gamePresenter = new GamePresenter(NULL);
-    gamePresenter->changeBoardSize(5, 9, 13);
+    gamePresenter->changeBoardSize(5, 9, 16);
     gamePresenter->tryNewGame();
 
     // Load resources
@@ -280,7 +280,7 @@ void MainWindowView::onPaint() {
 
         const uint8_t& width = gamePresenter->getWidth();
         const uint8_t& height = gamePresenter->getHeight();
-        const uint16_t& hasFreeTile = gamePresenter->hasFreeTile();
+        const GameTile* gameTiles = gamePresenter->getTiles();
 
         HDC hdcSrc = CreateCompatibleDC(hdc);
         HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
@@ -288,11 +288,11 @@ void MainWindowView::onPaint() {
         for(int k = 0; k < height; ++k) {
             for(int i = 0; i < width; ++i) {
 
-                if((k * width) + i == hasFreeTile && hasFreeTile != 0) { 
-                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 544, 0, SRCCOPY);
+                if(gameTiles[(k * width) + i].matched == 0) {
+                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
                 }
                 else {
-                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
+                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 32 * (gameTiles[(k * width) + i].tileType - 1), 0, SRCCOPY);
                 }
             }
         }
@@ -327,7 +327,7 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     // Make sure the cursor is within the bounds of the gameboard
 
-    if(xPos < gameXPos) {
+    if(xPos < gameXPos || yPos < 0) {
         return;
     }
 
@@ -336,23 +336,30 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
     xPos = (xPos - gameXPos) / TILE_SIZE;
     yPos /= TILE_SIZE;
 
+    
     // DEBUG: For test
-    const int BOARD_WIDTH = 3;
-    const int BOARD_HEIGHT = 5;
+    const uint8_t& width = gamePresenter->getWidth();
+    const uint8_t& height = gamePresenter->getHeight();
 
-    if(xPos > BOARD_WIDTH - 1) {
+    if(xPos > width - 1) {
         return;
     }
 
-    if(yPos > BOARD_HEIGHT - 1) {
+    if(yPos > height - 1) {
         return;
     }
 
-    yPos = (yPos * BOARD_WIDTH) + xPos;
+    yPos = (yPos * width) + xPos;
 
-    wchar_t buf[256] = {0};
-    wsprintf(buf, L"%d", yPos);
-    SetWindowTextW(window, buf);
+    const GameTile* tiles = gamePresenter->getTiles();
+
+    if(gamePresenter->tryFlipTile(yPos)) {
+
+        wchar_t msg[256] = {0};
+        wsprintf(msg, L"%d | %d\n", tiles[yPos].tileType, tiles[yPos].matched);
+        OutputDebugStringW(msg);
+        InvalidateRect(window, NULL, TRUE);
+    }
 
 }
 
@@ -389,3 +396,9 @@ LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
     return DefWindowProc(hWnd, msg, wParam, lParam);
 
 }
+
+//=============================================================================
+// Public Interface Functions
+//=============================================================================
+
+
