@@ -29,6 +29,9 @@ elseif(CMAKE_COMPILER_IS_GNUCXX)
 
 endif(MSVC)
 
+# This is to fix OmniCPPComplete in Vim
+include_directories(${CMAKE_SOURCE_DIR}/code/compat)
+
 message("Output directory is ${CMAKE_BINARY_DIR}")
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
@@ -84,7 +87,7 @@ file(GLOB PRESENTERS
 #)
 
 #------------------------------------------------------------------------------
-# Setup Windows with Win32++
+# Setup Windows with Win32
 #------------------------------------------------------------------------------
 
 file(GLOB WIN_SOURCES
@@ -157,7 +160,6 @@ endif()
 if(MSVC)
 
     # TODO: Confirm that this works with a newer VC.
-
 	add_definitions(-D_UNICODE -DUNICODE)
 	
 	# Get rid of "ZERO_CHECK" in the project file
@@ -168,7 +170,7 @@ if(MSVC)
     # Set CFlags
     set(CMAKE_CXX_FLAGS_RELEASE "/MT")
     set(CMAKE_CXX_FLAGS_DEBUG "/MTd")
-    set(CMAKE_CXX_FLAGS "/nologo /MP4 /c /Zi /FC /W4 /EHsc")
+    set(CMAKE_CXX_FLAGS "/nologo /MP4 /c /Zi /FC /W4 /EHsc /FI omnifix.h")
     
     # Set LFlags
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFEST:NO /MANIFESTUAC:NO /SUBSYSTEM:WINDOWS /DEBUG")
@@ -182,7 +184,7 @@ if(MSVC)
 
         # Setup the executable
         add_executable(${PROJECT_NAME} WIN32 ${SOURCES} ${INTERFACES} ${PRESENTERS} ${WIN_SOURCES})
-        set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "advedit")
+        set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "XmasTiles")
 
         # Set the libs to link
         target_link_libraries(${PROJECT_NAME} ${WIN32_LIBS})

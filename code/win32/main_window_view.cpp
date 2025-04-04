@@ -335,9 +335,11 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     xPos = (xPos - gameXPos) / TILE_SIZE;
     yPos /= TILE_SIZE;
+
+    OMNICPP_DECL(gamePresenter);
     
     // DEBUG: For test
-    const uint8_t& width = gamePresenter->getWidth();
+    const uint8_t& width = gamePresenter->getWidth(); 
     const uint8_t& height = gamePresenter->getHeight();
 
     if(xPos > width - 1) {
