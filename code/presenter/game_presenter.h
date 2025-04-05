@@ -60,10 +60,12 @@ class GamePresenter {
         const GameTile* getTiles() const;
         const inline uint8_t& getWidth() const { return width; }
         const inline uint8_t& getHeight() const { return height; }
+        const inline uint8_t& getGameState() const { return gameState; }
         //const uint16_t& hasFreeTile() const { return freeTile; }
         //inline const int findFreeTileIndex() const;
 
         // Public Functions
+        const uint32_t getElapsedTime();
         void changeBoardSize(uint8_t ioNewWidth, uint8_t inNewHeight, uint8_t inNumTypes);
         void tryNewGame();
         inline const bool isGameInited() const;
@@ -76,6 +78,7 @@ class GamePresenter {
 
 
     private:
+
 
         // [TODO]: This will eventually go into a model
         uint8_t width;

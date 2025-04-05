@@ -59,7 +59,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
-        WS_OVERLAPPEDWINDOW,
+        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
         CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
         NULL, NULL, hInstance, this);
 
@@ -90,6 +90,8 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     moveControls();
     ShowWindow(window, SW_NORMAL);
     UpdateWindow(window);
+
+    SetTimer(window, TimerIDs::UPDATE_TIMER, 100, NULL);
 
     return true;
 }
@@ -124,7 +126,8 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         case WM_LBUTTONDOWN:    return onClick(wParam, lParam);
         case WM_PAINT:          return onPaint();
         case WM_TIMER:          return onTimer(wParam);
-        case WM_EXITSIZEMOVE:   return onWindowMoved();            
+        case WM_EXITSIZEMOVE:   return onWindowMoved();
+        case WM_ERASEBKGND:     return 1;                                
 
         case WM_CLOSE: DestroyWindow(window);
             break;
@@ -331,8 +334,6 @@ LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
     xPos = (xPos - gameXPos) / TILE_SIZE;
     yPos /= TILE_SIZE;
 
-    OMNICPP_DECL(gamePresenter);
-    
     // DEBUG: For test
     const uint8_t& width = gamePresenter->getWidth(); 
     const uint8_t& height = gamePresenter->getHeight();
@@ -372,6 +373,16 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
             InvalidateRect(window, NULL, FALSE);
         }
         KillTimer(window, timerID);
+    }
+    else if(timerID == TimerIDs::UPDATE_TIMER) {
+        if(gamePresenter->getGameState() == GameState::PLAYING) {
+            uint16_t seconds = gamePresenter->getElapsedTime() / 1000;
+            uint16_t minutes = seconds / 60;
+            seconds = seconds - (minutes * 60);
+            wchar_t timeStr[32] = {0};
+            wsprintf(timeStr, L"%d:%d", minutes, seconds);
+            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETTEXT, 0, (LPARAM)timeStr);
+        }
     }
     return 0;
 }

@@ -21,6 +21,7 @@ namespace ControlIDs {
 namespace TimerIDs {
     enum TimerIDs {
         UNFLIP_TIMER = 1,
+        UPDATE_TIMER = 2,
     };
 }
 
@@ -62,6 +63,7 @@ class MainWindowView : public MainWindowInterface {
         LRESULT onPaint();
         LRESULT onTimer(const UINT& timerID);
         LRESULT onWindowMoved();
+
 };
 
 #endif // __MAIN_WINDOW_VIEW_H__

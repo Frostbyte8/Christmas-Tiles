@@ -4,10 +4,20 @@
 #include <stdexcept>
 #include <cassert>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif // _WIN32
+
 #define FREE_TILE (numTileTypes + 2)
 
+__forceinline uint32_t getMSCount() {
+#ifdef _WIN32
+    return GetTickCount();
+#endif // _WIN32
+}
+
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
-width(0), height(0),
+width(0), height(0), gameState(GameState::NOT_STARTED),
 freeTile(0), numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
 gameTiles(NULL), timeElapsed(0) {
     tileIndex[0] = GameConstants::NO_TILE_SELECTED;
@@ -21,6 +31,7 @@ GamePresenter::~GamePresenter() {
         gameTiles = NULL;
     }
 }
+
 
 //=============================================================================
 // Accessors
@@ -177,20 +188,6 @@ void GamePresenter::tryNewGame() {
     }
 }
 
-bool GamePresenter::tryMatch(const size_t& index1, const size_t& index2) {
-
-    // [TODO]: Add assert to test indices
-
-    if(gameTiles[index1].tileType == gameTiles[index2].tileType) {
-        gameTiles[index1].matched = GameConstants::TILE_MATCHED;
-        gameTiles[index2].matched = GameConstants::TILE_MATCHED;    
-        matchesMade++;
-        return true;
-    }
-
-    return false;
-}
-
 bool GamePresenter::validIndex(const unsigned int& index) const {
 
     if(index >= tileCount || gameTiles[index].tileType == FREE_TILE) {
@@ -214,7 +211,20 @@ void GamePresenter::unflip() {
     tileIndex[1] = GameConstants::NO_TILE_SELECTED;
 }
 
+const uint32_t GamePresenter::getElapsedTime() {
+    uint32_t tempTick = getMSCount();
+    timeElapsed += tempTick - timeStarted;
+    timeStarted = tempTick;
+    return timeElapsed;
+}
+
 bool GamePresenter::tryFlipTile(const unsigned int& index) {
+
+    if(gameState == GameState::NOT_STARTED) {
+        timeStarted = getMSCount();
+        timeElapsed = 0;
+        gameState = GameState::PLAYING;
+    }
 
     if(bothFlipped()) {
         unflip();
