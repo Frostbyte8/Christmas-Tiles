@@ -208,19 +208,16 @@ bool GamePresenter::bothFlipped() {
 }
 
 void GamePresenter::unflip() {
-        gameTiles[tileIndex[0]].matched = 0;
-        gameTiles[tileIndex[1]].matched = 0;
-        tileIndex[0] = GameConstants::NO_TILE_SELECTED;
-        tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+    gameTiles[tileIndex[0]].matched = 0;
+    gameTiles[tileIndex[1]].matched = 0;
+    tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+    tileIndex[1] = GameConstants::NO_TILE_SELECTED;
 }
 
 bool GamePresenter::tryFlipTile(const unsigned int& index) {
 
     if(bothFlipped()) {
         unflip();
-    }
-
-    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED && tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
     }
 
     if(!validIndex(index) || gameTiles[index].matched) {
