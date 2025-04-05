@@ -367,9 +367,11 @@ LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 LRESULT MainWindowView::onTimer(const UINT& timerID) {
 
     if(timerID == TimerIDs::UNFLIP_TIMER) {
-        gamePresenter->unflip();
+        if(gamePresenter->bothFlipped()) {
+            gamePresenter->unflip();
+            InvalidateRect(window, NULL, FALSE);
+        }
         KillTimer(window, timerID);
-        InvalidateRect(window, NULL, FALSE);
     }
     return 0;
 }
