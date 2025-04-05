@@ -18,6 +18,12 @@ namespace ControlIDs {
     };
 }
 
+namespace TimerIDs {
+    enum TimerIDs {
+        UNFLIP_TIMER = 1,
+    };
+}
+
 class MainWindowView : public MainWindowInterface {
     
     public:
@@ -28,7 +34,7 @@ class MainWindowView : public MainWindowInterface {
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
         // Interface Functions
-        virtual void gameWon();    
+        virtual void gameWon();
     private:
 
         HWND window;
@@ -50,10 +56,12 @@ class MainWindowView : public MainWindowInterface {
         GamePresenter* gamePresenter;
         bool createControls();
         void moveControls();
-        void onWindowMoved();
         void centerWindow();
-        void onPaint();
-        void onClick(const WPARAM& wParam, const LPARAM& lParam);
+
+        LRESULT onClick(const WPARAM& wParam, const LPARAM& lParam);
+        LRESULT onPaint();
+        LRESULT onTimer(const UINT& timerID);
+        LRESULT onWindowMoved();
 };
 
 #endif // __MAIN_WINDOW_VIEW_H__

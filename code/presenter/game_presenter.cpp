@@ -200,13 +200,27 @@ bool GamePresenter::validIndex(const unsigned int& index) const {
     return true;
 }
 
-bool GamePresenter::tryFlipTile(const unsigned int& index) {
-
+bool GamePresenter::bothFlipped() {
     if(tileIndex[0] != GameConstants::NO_TILE_SELECTED && tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
+        return true;
+    }
+    return false;
+}
+
+void GamePresenter::unflip() {
         gameTiles[tileIndex[0]].matched = 0;
         gameTiles[tileIndex[1]].matched = 0;
         tileIndex[0] = GameConstants::NO_TILE_SELECTED;
         tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+}
+
+bool GamePresenter::tryFlipTile(const unsigned int& index) {
+
+    if(bothFlipped()) {
+        unflip();
+    }
+
+    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED && tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
     }
 
     if(!validIndex(index) || gameTiles[index].matched) {

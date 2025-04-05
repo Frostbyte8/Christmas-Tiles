@@ -1,5 +1,6 @@
 #include "main_window_view.h"
 #include <math.h>
+#include <sstream>
 
 __forceinline HWND createGroupBox(LPCWSTR windowName, int x, int y, int height, int width, HWND parent, int ID) {
     return CreateWindowEx(0, L"Button", windowName, WS_VISIBLE | WS_CHILD | BS_GROUPBOX, x, y, width, height, parent, (HMENU)ID, GetModuleHandle(NULL), NULL);
@@ -120,24 +121,14 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         default:
             return DefWindowProc(window, msg, wParam, lParam);
 
-        case WM_EXITSIZEMOVE:
-            onWindowMoved();            
-            break;
+        case WM_LBUTTONDOWN:    return onClick(wParam, lParam);
+        case WM_PAINT:          return onPaint();
+        case WM_TIMER:          return onTimer(wParam);
+        case WM_EXITSIZEMOVE:   return onWindowMoved();            
 
-        case WM_LBUTTONDOWN:
-            onClick(wParam, lParam);
+        case WM_CLOSE: DestroyWindow(window);
             break;
-
-        case WM_PAINT:
-            onPaint();
-            break;
-
-        case WM_CLOSE:
-            DestroyWindow(window);
-            break;
-
-        case WM_DESTROY:
-            PostQuitMessage(0);
+        case WM_DESTROY: PostQuitMessage(0);
             break;
 
     }
@@ -266,7 +257,7 @@ void MainWindowView::moveControls() {
 // onPaint - Draw the Gameboard
 //-----------------------------------------------------------------------------
 
-void MainWindowView::onPaint() {
+LRESULT MainWindowView::onPaint() {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(window, &ps);
     RECT rc; 
@@ -301,26 +292,30 @@ void MainWindowView::onPaint() {
     }
 
     EndPaint(window, &ps);
+
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 // onWindowMoved - Adjust the window, if needed after is has been moved.
 //-----------------------------------------------------------------------------
 
-void MainWindowView::onWindowMoved() {
+LRESULT MainWindowView::onWindowMoved() {
     HMONITOR currentMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
 
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
         centerWindow();
     }
+
+    return 0;
 }
 
 //-----------------------------------------------------------------------------
 // onClick - Sent when the client area of the window has been clicked
 //-----------------------------------------------------------------------------
 
-void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
+LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     WORD xPos = LOWORD(lParam);
     WORD yPos = HIWORD(lParam);
@@ -328,7 +323,7 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
     // Make sure the cursor is within the bounds of the gameboard
 
     if(xPos < gameXPos || yPos < 0) {
-        return;
+        return 0;
     }
 
     // Convert x/y to Index
@@ -343,11 +338,11 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
     const uint8_t& height = gamePresenter->getHeight();
 
     if(xPos > width - 1) {
-        return;
+        return 0;
     }
 
     if(yPos > height - 1) {
-        return;
+        return 0;
     }
 
     yPos = (yPos * width) + xPos;
@@ -356,8 +351,27 @@ void MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     if(gamePresenter->tryFlipTile(yPos)) {
         InvalidateRect(window, NULL, FALSE);
+        if(gamePresenter->bothFlipped()) {
+            SetTimer(window, TimerIDs::UNFLIP_TIMER, 1000, NULL);
+        }
     }
 
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+// onTimer - Sent when a timer has elapsed its time.
+// @param UINT containing the ID of the timer
+//-----------------------------------------------------------------------------
+
+LRESULT MainWindowView::onTimer(const UINT& timerID) {
+
+    if(timerID == TimerIDs::UNFLIP_TIMER) {
+        gamePresenter->unflip();
+        KillTimer(window, timerID);
+        InvalidateRect(window, NULL, FALSE);
+    }
+    return 0;
 }
 
 //-----------------------------------------------------------------------------

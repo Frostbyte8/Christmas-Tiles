@@ -69,6 +69,8 @@ class GamePresenter {
         inline const bool isGameInited() const;
         
         
+        bool bothFlipped();
+        void unflip();
         bool tryMatch(const size_t& index1, const size_t& index2);
         bool validIndex(const unsigned int& index) const;
         bool tryFlipTile(const unsigned int& index);
