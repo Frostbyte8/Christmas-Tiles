@@ -56,10 +56,10 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
 
     gameBG = CreateSolidBrush(RGB(0, 0, 0));
 
-    window = CreateWindowEx(WS_EX_CLIENTEDGE,
+    window = CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_COMPOSITED,
         L"XmasTilesMainWindow",
         L"",
-        WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+        WS_OVERLAPPEDWINDOW,
         CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
         NULL, NULL, hInstance, this);
 
@@ -127,7 +127,6 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         case WM_PAINT:          return onPaint();
         case WM_TIMER:          return onTimer(wParam);
         case WM_EXITSIZEMOVE:   return onWindowMoved();
-        case WM_ERASEBKGND:     return 1;                                
 
         case WM_CLOSE: DestroyWindow(window);
             break;
