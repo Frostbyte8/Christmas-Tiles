@@ -17,16 +17,12 @@ const int TILE_SIZE    = 32;
 
 LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 WNDPROC oldLabelProc;
-wchar_t timeStr[32] = {0};
+//wchar_t timeStr[32] = {0};
 
 LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 
     if(msg == WM_ERASEBKGND) {
         return (LRESULT)1;
-    }
-    else if(msg == WM_SETTEXT) {
-        // TODO: Copy in new Caption
-        return 0; 
     }
     else if(msg == WM_PAINT) {
 
@@ -37,6 +33,9 @@ LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         HBITMAP hbmMem, hbmOld;
         HBRUSH hbrBkGnd;
         HFONT hfntOld = NULL;
+
+        wchar_t timeStr[32] = {0};
+        GetWindowTextW(hWnd, timeStr, 32);
 
         hdc = BeginPaint(hWnd, &ps);
 
@@ -441,9 +440,11 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
             uint16_t seconds = gamePresenter->getElapsedTime() / 1000;
             uint16_t minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
-            //wchar_t timeStr[32] = {0};
+            wchar_t timeStr[32] = {0};
             wsprintf(timeStr, L"%d:%d", minutes, seconds);
+            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETREDRAW, (WPARAM)FALSE, 0);
             SendMessage(controls[ControlIDs::LBL_TIME], WM_SETTEXT, 0, (LPARAM)timeStr);
+            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETREDRAW, (WPARAM)TRUE, 0);
             InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
         }
     }
