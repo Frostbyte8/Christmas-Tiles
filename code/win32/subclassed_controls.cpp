@@ -41,8 +41,10 @@ void doubleBufferedLabelOnPaint(HWND hWnd) {
     HBRUSH hbrBkGnd;
     HFONT hfntOld = NULL;
 
-    wchar_t timeStr[32] = {0};
-    GetWindowTextW(hWnd, timeStr, 32);
+    const int MAX_STR_SIZE = 128;
+
+    wchar_t timeStr[MAX_STR_SIZE] = {0};
+    GetWindowTextW(hWnd, timeStr, MAX_STR_SIZE);
 
     hdc = BeginPaint(hWnd, &ps);
 

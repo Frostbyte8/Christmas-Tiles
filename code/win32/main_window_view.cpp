@@ -389,8 +389,7 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
             seconds = seconds - (minutes * 60);
             wchar_t timeStr[32] = {0};
             wsprintf(timeStr, L"%d:%d", minutes, seconds);
-            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETTEXT, 0, (LPARAM)timeStr);
-            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETREDRAW, (WPARAM)TRUE, 0);
+            SetWindowTextW(controls[ControlIDs::LBL_TIME], timeStr);
             InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
         }
     }
