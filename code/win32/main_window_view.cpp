@@ -1,4 +1,5 @@
 #include "main_window_view.h"
+#include "subclassed_controls.h"
 #include <math.h>
 #include <sstream>
 
@@ -14,65 +15,6 @@ __forceinline HWND createLabel(LPCWSTR windowName, HWND parent, int ID) {
 
 // TODO: This will be obtained from the sprite sheet
 const int TILE_SIZE    = 32;
-
-LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-WNDPROC oldLabelProc;
-//wchar_t timeStr[32] = {0};
-
-LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-
-    if(msg == WM_ERASEBKGND) {
-        return (LRESULT)1;
-    }
-    else if(msg == WM_PAINT) {
-
-        RECT rc;
-        HDC hdc; // TODO: is this HDC part of the paintstuct?
-        PAINTSTRUCT ps;
-        HDC hdcMem;
-        HBITMAP hbmMem, hbmOld;
-        HBRUSH hbrBkGnd;
-        HFONT hfntOld = NULL;
-
-        wchar_t timeStr[32] = {0};
-        GetWindowTextW(hWnd, timeStr, 32);
-
-        hdc = BeginPaint(hWnd, &ps);
-
-        GetClientRect(hWnd, &rc);
-
-        hdcMem = CreateCompatibleDC(ps.hdc);
-        hbmMem = CreateCompatibleBitmap(ps.hdc, rc.right-rc.left, rc.bottom-rc.top);
-
-        hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
-        hbrBkGnd = CreateSolidBrush(GetSysColor(COLOR_3DFACE));
-        FillRect(hdcMem, &rc, hbrBkGnd);
-        DeleteObject(hbrBkGnd);
-
-        HFONT hfnt = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
-
-        if(hfnt) {
-            hfntOld = (HFONT)SelectObject(hdcMem, hfnt);
-        }
-
-        SetBkMode(hdcMem, TRANSPARENT);
-        SetTextColor(hdcMem, GetSysColor(COLOR_WINDOWTEXT));
-        DrawText(hdcMem, timeStr, -1, &rc, DT_CENTER);
-        if(hfntOld) {
-            SelectObject(hdcMem, hfntOld);
-        }
-
-        BitBlt(ps.hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
-
-        SelectObject(hdcMem, hbmOld);
-        DeleteObject(hbmMem);
-        DeleteDC(hdcMem);
-        EndPaint(hWnd, &ps);
-
-        return 0;
-    }
-    return CallWindowProc(oldLabelProc, hWnd, msg, wParam, lParam);
-}
 
 //-----------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
@@ -177,6 +119,7 @@ UINT MainWindowView::doLoop() {
 //-----------------------------------------------------------------------------
 
 LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
+    WNDPROC* oldProc = NULL;
     switch(msg)
     {
         default:
@@ -187,7 +130,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         case WM_TIMER:          return onTimer(wParam);
         case WM_EXITSIZEMOVE:   return onWindowMoved();
 
-        case WM_CLOSE: DestroyWindow(window);
+        case WM_CLOSE: 
+            oldProc = reinterpret_cast<WNDPROC *>(GetWindowLongPtr(controls[ControlIDs::LBL_TIME], GWLP_USERDATA));
+            SetWindowLongPtr(controls[ControlIDs::LBL_TIME], GWLP_WNDPROC, (LONG_PTR)oldProc);
+            DestroyWindow(window);
             break;
         case WM_DESTROY: PostQuitMessage(0);
             break;
@@ -247,7 +193,8 @@ bool MainWindowView::createControls() {
                                                      0, 0, 200, 200,
                                                      window, (HMENU)MAKE_ID(ControlIDs::BTN_PAUSE), GetModuleHandle(NULL), NULL);  
 
-    oldLabelProc = (WNDPROC)SetWindowLong(controls[ControlIDs::LBL_TIME], GWL_WNDPROC, (LPARAM)labelProc);
+    WNDPROC* oldProc = reinterpret_cast<WNDPROC*>(SetWindowLongPtr(controls[ControlIDs::LBL_TIME], GWLP_WNDPROC, (LONG_PTR)doubleBufferedLabelProc)); 
+    SetWindowLongPtr(controls[ControlIDs::LBL_TIME], GWLP_USERDATA, reinterpret_cast<LONG_PTR>(oldProc));
 
     HFONT dialogFont = wm.GetCurrentFont();
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
@@ -409,7 +356,7 @@ LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     yPos = (yPos * width) + xPos;
 
-    const GameTile* tiles = gamePresenter->getTiles();
+    //const GameTile* tiles = gamePresenter->getTiles();
 
     if(gamePresenter->tryFlipTile(yPos)) {
         InvalidateRect(window, NULL, FALSE);
@@ -437,12 +384,11 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
     }
     else if(timerID == TimerIDs::UPDATE_TIMER) {
         if(gamePresenter->getGameState() == GameState::PLAYING) {
-            uint16_t seconds = gamePresenter->getElapsedTime() / 1000;
+            uint16_t seconds = static_cast<uint16_t>(gamePresenter->getElapsedTime()) / 1000;
             uint16_t minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
             wchar_t timeStr[32] = {0};
             wsprintf(timeStr, L"%d:%d", minutes, seconds);
-            SendMessage(controls[ControlIDs::LBL_TIME], WM_SETREDRAW, (WPARAM)FALSE, 0);
             SendMessage(controls[ControlIDs::LBL_TIME], WM_SETTEXT, 0, (LPARAM)timeStr);
             SendMessage(controls[ControlIDs::LBL_TIME], WM_SETREDRAW, (WPARAM)TRUE, 0);
             InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);

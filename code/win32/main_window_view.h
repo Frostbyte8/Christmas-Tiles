@@ -48,7 +48,10 @@ class MainWindowView : public MainWindowInterface {
             return true;
         }
 
+
         WindowMetrics wm;
+
+        //WNDPROC prevLabelProcs[3];
 
         WORD gameXPos;
         HBRUSH gameBG;
