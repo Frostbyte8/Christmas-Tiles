@@ -15,6 +15,66 @@ __forceinline HWND createLabel(LPCWSTR windowName, HWND parent, int ID) {
 // TODO: This will be obtained from the sprite sheet
 const int TILE_SIZE    = 32;
 
+LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+WNDPROC oldLabelProc;
+wchar_t timeStr[32] = {0};
+
+LRESULT CALLBACK labelProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+
+    if(msg == WM_ERASEBKGND) {
+        return (LRESULT)1;
+    }
+    else if(msg == WM_SETTEXT) {
+        // TODO: Copy in new Caption
+        return 0; 
+    }
+    else if(msg == WM_PAINT) {
+
+        RECT rc;
+        HDC hdc; // TODO: is this HDC part of the paintstuct?
+        PAINTSTRUCT ps;
+        HDC hdcMem;
+        HBITMAP hbmMem, hbmOld;
+        HBRUSH hbrBkGnd;
+        HFONT hfntOld = NULL;
+
+        hdc = BeginPaint(hWnd, &ps);
+
+        GetClientRect(hWnd, &rc);
+
+        hdcMem = CreateCompatibleDC(ps.hdc);
+        hbmMem = CreateCompatibleBitmap(ps.hdc, rc.right-rc.left, rc.bottom-rc.top);
+
+        hbmOld = (HBITMAP)SelectObject(hdcMem, hbmMem);
+        hbrBkGnd = CreateSolidBrush(GetSysColor(COLOR_3DFACE));
+        FillRect(hdcMem, &rc, hbrBkGnd);
+        DeleteObject(hbrBkGnd);
+
+        HFONT hfnt = (HFONT)SendMessage(hWnd, WM_GETFONT, 0, 0);
+
+        if(hfnt) {
+            hfntOld = (HFONT)SelectObject(hdcMem, hfnt);
+        }
+
+        SetBkMode(hdcMem, TRANSPARENT);
+        SetTextColor(hdcMem, GetSysColor(COLOR_WINDOWTEXT));
+        DrawText(hdcMem, timeStr, -1, &rc, DT_CENTER);
+        if(hfntOld) {
+            SelectObject(hdcMem, hfntOld);
+        }
+
+        BitBlt(ps.hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, hdcMem, 0, 0, SRCCOPY);
+
+        SelectObject(hdcMem, hbmOld);
+        DeleteObject(hbmMem);
+        DeleteDC(hdcMem);
+        EndPaint(hWnd, &ps);
+
+        return 0;
+    }
+    return CallWindowProc(oldLabelProc, hWnd, msg, wParam, lParam);
+}
+
 //-----------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
 //-----------------------------------------------------------------------------
@@ -56,7 +116,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
 
     gameBG = CreateSolidBrush(RGB(0, 0, 0));
 
-    window = CreateWindowEx(WS_EX_CLIENTEDGE | WS_EX_COMPOSITED,
+    window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
         WS_OVERLAPPEDWINDOW,
@@ -188,8 +248,11 @@ bool MainWindowView::createControls() {
                                                      0, 0, 200, 200,
                                                      window, (HMENU)MAKE_ID(ControlIDs::BTN_PAUSE), GetModuleHandle(NULL), NULL);  
 
+    oldLabelProc = (WNDPROC)SetWindowLong(controls[ControlIDs::LBL_TIME], GWL_WNDPROC, (LPARAM)labelProc);
+
     HFONT dialogFont = wm.GetCurrentFont();
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
+
 
     return true;
 }
@@ -378,9 +441,10 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
             uint16_t seconds = gamePresenter->getElapsedTime() / 1000;
             uint16_t minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
-            wchar_t timeStr[32] = {0};
+            //wchar_t timeStr[32] = {0};
             wsprintf(timeStr, L"%d:%d", minutes, seconds);
             SendMessage(controls[ControlIDs::LBL_TIME], WM_SETTEXT, 0, (LPARAM)timeStr);
+            InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
         }
     }
     return 0;
