@@ -124,6 +124,12 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
 
 void GamePresenter::tryNewGame() {
 
+    if(gameState != GameState::FINISHED && gameState != GameState::NOT_STARTED) {
+        if(view->askQuestion("This game is still in progress. Are you sure you want to start a new game?", "Are you sure?", MessageBoxTypes::YESNOCANCEL) != MessageBoxReponses::YES) {
+            return;
+        }
+    }
+
     if(!tileCount) {
         return;
     }
@@ -138,6 +144,9 @@ void GamePresenter::tryNewGame() {
         if(!gameTiles) {
             return; // [TODO]: Handle error allocating tiles
         }
+    }
+    else {
+        memset(gameTiles, 0, sizeof(GameTile) * tileCount);
     }
 
     // If the board is not divisible by 2, set the middle tile to the free tile.
@@ -156,17 +165,15 @@ void GamePresenter::tryNewGame() {
 
         for(size_t k = 0; k < 2; ++k) {
 
-            if(k != 0) {
-                // Avoid setting tile already set.
-            }
-
             if(!gameTiles[index[k]].tileType) {
                 // Tile empty, No need to check anymore
                 gameTiles[index[k]].tileType = newType;
                 continue;
             }
 
+            // Continue on at the last empty index we are aware of.
             index[k] = lastEmptyIndex;
+
             for(;;) {
 
                 if(gameTiles[index[k]].tileType) {

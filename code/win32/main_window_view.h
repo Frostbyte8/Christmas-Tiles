@@ -36,6 +36,8 @@ class MainWindowView : public MainWindowInterface {
 
         // Interface Functions
         virtual void gameWon();
+        int askQuestion(const std::string& message, const std::string& title, const int& mbType);
+
     private:
 
         HWND window;

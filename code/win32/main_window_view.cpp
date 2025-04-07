@@ -126,6 +126,9 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             return DefWindowProc(window, msg, wParam, lParam);
 
         case WM_LBUTTONDOWN:    return onClick(wParam, lParam);
+        case WM_RBUTTONDOWN:
+            gamePresenter->tryNewGame();
+            break;
         case WM_PAINT:          return onPaint();
         case WM_TIMER:          return onTimer(wParam);
         case WM_EXITSIZEMOVE:   return onWindowMoved();
@@ -440,4 +443,9 @@ LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPA
 
 void MainWindowView::gameWon() {
     MessageBox(NULL, L"WIN", L"WIN", MB_OK);
+}
+
+int MainWindowView::askQuestion(const std::string& message, const std::string& title, const int& mbType) {
+    // TODO: UTF-8 std::string to wchar.
+    return MessageBoxA(window, message.c_str(), title.c_str(), mbType);
 }
