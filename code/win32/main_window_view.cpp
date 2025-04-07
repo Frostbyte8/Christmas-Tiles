@@ -70,9 +70,11 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     }
 
     // TODO: Bind presenter to view
+    // Some of this needs to happen after createControls()
     gamePresenter = new GamePresenter(this);
     gamePresenter->changeBoardSize(3, 3, 16);
     gamePresenter->tryNewGame();
+
 
     // Load resources
     tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
@@ -87,7 +89,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
 
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
-
+    updateLabels(); // TODO: Presenter calls this, though it has to happen 
     moveControls();
     ShowWindow(window, SW_NORMAL);
     UpdateWindow(window);
@@ -388,19 +390,28 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
     else if(timerID == TimerIDs::UPDATE_TIMER) {
 
         if(gamePresenter->getGameState() == GameState::PLAYING) {
-
-            uint32_t seconds = (gamePresenter->getElapsedTime()) / 1000;
-            uint32_t minutes = seconds / 60;
-            seconds = seconds - (minutes * 60);
-
-            wchar_t timeStr[32] = {0};
-            wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
-            SetWindowTextW(controls[ControlIDs::LBL_TIME], timeStr);
-            InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
+            updateLabels();
         }
 
     }
     return 0;
+}
+
+//-----------------------------------------------------------------------------
+// updateLabels - Updates the Score/Points/Time labels
+//-----------------------------------------------------------------------------
+
+void MainWindowView::updateLabels() {
+
+    uint32_t seconds = (gamePresenter->getElapsedTime()) / 1000;
+    uint32_t minutes = seconds / 60;
+    seconds = seconds - (minutes * 60);
+
+    wchar_t timeStr[32] = {0};
+    wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
+    SetWindowTextW(controls[ControlIDs::LBL_TIME], timeStr);
+    InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
+
 }
 
 //-----------------------------------------------------------------------------

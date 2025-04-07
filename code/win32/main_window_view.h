@@ -36,7 +36,7 @@ class MainWindowView : public MainWindowInterface {
 
         // Interface Functions
         virtual void gameWon();
-        int askQuestion(const std::string& message, const std::string& title, const int& mbType);
+        virtual int askQuestion(const std::string& message, const std::string& title, const int& mbType);
 
     private:
 
@@ -63,6 +63,7 @@ class MainWindowView : public MainWindowInterface {
         bool createControls();
         void moveControls();
         void centerWindow();
+        void updateLabels();
 
         LRESULT onClick(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT onPaint();
