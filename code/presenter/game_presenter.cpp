@@ -212,9 +212,13 @@ void GamePresenter::unflip() {
 }
 
 const uint32_t GamePresenter::getElapsedTime() {
-    uint32_t tempTick = getMSCount();
-    timeElapsed += tempTick - timeStarted;
-    timeStarted = tempTick;
+
+    if(gameState == GameState::PLAYING) {
+        uint32_t tempTick = getMSCount();
+        timeElapsed += tempTick - timeStarted;
+        timeStarted = tempTick;
+    }
+
     return timeElapsed;
 }
 
@@ -224,6 +228,9 @@ bool GamePresenter::tryFlipTile(const unsigned int& index) {
         timeStarted = getMSCount();
         timeElapsed = 0;
         gameState = GameState::PLAYING;
+    }
+    else if(gameState == GameState::FINISHED) {
+        return false;
     }
 
     if(bothFlipped()) {
@@ -248,6 +255,8 @@ bool GamePresenter::tryFlipTile(const unsigned int& index) {
 
             matchesMade++;
             if(matchesMade == matchesNeeded) {
+                getElapsedTime();
+                gameState = GameState::FINISHED;
                 view->gameWon();
             }
 

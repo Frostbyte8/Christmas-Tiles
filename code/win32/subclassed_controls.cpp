@@ -2,7 +2,6 @@
 
 //=============================================================================
 // Double Buffered Label - A label that should not flicker.
-// Remember to use WM_SETREDRAW to disable redrawing when changing the text.
 //=============================================================================
 
 void doubleBufferedLabelOnPaint(HWND hWnd);

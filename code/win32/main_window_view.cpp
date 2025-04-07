@@ -383,15 +383,19 @@ LRESULT MainWindowView::onTimer(const UINT& timerID) {
         KillTimer(window, timerID);
     }
     else if(timerID == TimerIDs::UPDATE_TIMER) {
+
         if(gamePresenter->getGameState() == GameState::PLAYING) {
-            uint16_t seconds = static_cast<uint16_t>(gamePresenter->getElapsedTime()) / 1000;
-            uint16_t minutes = seconds / 60;
+
+            uint32_t seconds = (gamePresenter->getElapsedTime()) / 1000;
+            uint32_t minutes = seconds / 60;
             seconds = seconds - (minutes * 60);
+
             wchar_t timeStr[32] = {0};
-            wsprintf(timeStr, L"%d:%d", minutes, seconds);
+            wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
             SetWindowTextW(controls[ControlIDs::LBL_TIME], timeStr);
             InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
         }
+
     }
     return 0;
 }
