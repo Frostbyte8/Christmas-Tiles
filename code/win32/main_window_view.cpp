@@ -90,6 +90,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
     updateLabels(); // TODO: Presenter calls this, though it has to happen 
+    createMenubar();
     moveControls();
     ShowWindow(window, SW_NORMAL);
     UpdateWindow(window);
@@ -128,9 +129,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             return DefWindowProc(window, msg, wParam, lParam);
 
         case WM_LBUTTONDOWN:    return onClick(wParam, lParam);
-        case WM_RBUTTONDOWN:
-            gamePresenter->tryNewGame();
+
+        case WM_COMMAND:
+            if(HIWORD(wParam) == 0) {
+                onSelectMenuItem(LOWORD(wParam));
+            }
             break;
+
         case WM_PAINT:          return onPaint();
         case WM_TIMER:          return onTimer(wParam);
         case WM_EXITSIZEMOVE:   return onWindowMoved();
@@ -412,6 +417,26 @@ void MainWindowView::updateLabels() {
     SetWindowTextW(controls[ControlIDs::LBL_TIME], timeStr);
     InvalidateRect(controls[ControlIDs::LBL_TIME], NULL, FALSE);
 
+}
+
+void MainWindowView::createMenubar() {
+    HMENU menuBar = CreateMenu();
+    HMENU fileMenu = CreateMenu();
+
+    AppendMenu(fileMenu, MF_STRING, MenuIDs::NEW_GAME, L"&New Game");
+
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, (UINT_PTR)fileMenu, L"&File");
+    AppendMenu(menuBar, MF_STRING, MenuIDs::OPTIONS, L"&Options");
+    AppendMenu(menuBar, MF_STRING, MenuIDs::HELP, L"&Help");
+
+
+    SetMenu(window, menuBar);
+}
+
+void MainWindowView::onSelectMenuItem(const WORD& itemID) {
+    if(itemID == MenuIDs::NEW_GAME) {
+        gamePresenter->tryNewGame();
+    }
 }
 
 //-----------------------------------------------------------------------------

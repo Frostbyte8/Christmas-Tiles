@@ -25,6 +25,16 @@ namespace TimerIDs {
     };
 }
 
+namespace MenuIDs {
+    enum MenuIDs {
+        FILE        = 401,
+        OPTIONS     = 402,
+        HELP        = 403,
+        // File Menu
+        NEW_GAME    = 404,
+    };
+}
+
 class MainWindowView : public MainWindowInterface {
     
     public:
@@ -60,10 +70,12 @@ class MainWindowView : public MainWindowInterface {
         HBITMAP tileset;
 
         GamePresenter* gamePresenter;
+        void createMenubar();
         bool createControls();
         void moveControls();
         void centerWindow();
         void updateLabels();
+        void onSelectMenuItem(const WORD& itemID);
 
         LRESULT onClick(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT onPaint();
