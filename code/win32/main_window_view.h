@@ -33,13 +33,13 @@ namespace MenuIDs {
         HIGHSCORES   = 403,
         EXIT         = 404,
 
+        TILESET      = 410,
         BOARD_3X3    = 411,
         BOARD_4X4    = 412,
         BOARD_5X5    = 413,
         BOARD_5X9    = 414,
         BOARD_10x10  = 415,
         BOARD_CUSTOM = 416,
-        TILESET      = 417,
 
         HELP_FILE    = 421,
         ABOUT        = 422,

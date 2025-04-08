@@ -67,8 +67,9 @@ class GamePresenter {
         // Public Functions
         const uint32_t getElapsedTime();
         void changeBoardSize(uint8_t ioNewWidth, uint8_t inNewHeight, uint8_t inNumTypes);
-        void tryNewGame();
+        bool tryNewGame(bool forceNew = false);
         inline const bool isGameInited() const;
+        inline const bool isPlaying() const;
         
         
         bool bothFlipped();

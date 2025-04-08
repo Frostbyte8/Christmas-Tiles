@@ -60,7 +60,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
-        WS_OVERLAPPEDWINDOW,
+        WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME),
         CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
         NULL, NULL, hInstance, this);
 
@@ -266,7 +266,7 @@ void MainWindowView::moveControls() {
     const DWORD exStyle = static_cast<DWORD>(GetWindowLongPtr(window, GWL_EXSTYLE));
             
     RECT rc = {0, 0, BOARD_WIDTH + widestLabel + grpXSpacing, BOARD_HEIGHT};
-    AdjustWindowRectEx(&rc, style, FALSE, exStyle);
+    AdjustWindowRectEx(&rc, style, TRUE, exStyle);
     // TODO: Get X/Y Pos
     MoveWindow(window, 0, 0, rc.right - rc.left, rc.bottom - rc.top, TRUE);
     centerWindow();
@@ -419,9 +419,15 @@ void MainWindowView::updateLabels() {
 
 }
 
+//-----------------------------------------------------------------------------
+// createMenubar - Create the Window's menubar, and populate it.
+//-----------------------------------------------------------------------------
+
 void MainWindowView::createMenubar() {
     HMENU menuBar = CreateMenu();
     HMENU fileMenu = CreateMenu();
+    HMENU optionsMenu = CreateMenu();
+    HMENU helpMenu = CreateMenu();
 
     AppendMenu(fileMenu, MF_STRING, MenuIDs::NEW_GAME, L"&New Game");
     AppendMenu(fileMenu, MF_STRING, MenuIDs::PAUSE_GAME, L"&Pause Game");
@@ -430,21 +436,41 @@ void MainWindowView::createMenubar() {
     AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
     AppendMenu(fileMenu, MF_STRING, MenuIDs::EXIT, L"E&xit");
 
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::TILESET, L"&Tileset...");
+    AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(optionsMenu, MF_STRING | MF_CHECKED, MenuIDs::BOARD_3X3, L"3x3");
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_4X4, L"4x4");
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_5X5, L"5x5");
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_5X9, L"5x9");
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_10x10, L"10x10");
+    AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_CUSTOM, L"&Custom Size...");
+
+    AppendMenu(helpMenu, MF_STRING, MenuIDs::HELP_FILE, L"&Help...");
+    AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(helpMenu, MF_STRING, MenuIDs::ABOUT, L"&About Holiday Tiles...");
+
     AppendMenu(menuBar, MF_STRING | MF_POPUP, (UINT_PTR)fileMenu, L"&File");
-    //AppendMenu(menuBar, MF_STRING, MenuIDs::OPTIONS, L"&Options");
-    //AppendMenu(menuBar, MF_STRING, MenuIDs::HELP, L"&Help");
-
-
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, (UINT_PTR)optionsMenu, L"&Options");
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, (UINT_PTR)helpMenu, L"&Help");
 
     SetMenu(window, menuBar);
 }
 
 void MainWindowView::onSelectMenuItem(const WORD& itemID) {
     if(itemID == MenuIDs::NEW_GAME) {
-        gamePresenter->tryNewGame();
+        if(gamePresenter->tryNewGame()) {
+            updateLabels();
+            InvalidateRect(window, NULL, FALSE);
+        }
     }
     else if(itemID == MenuIDs::EXIT) {
         SendMessage(window, WM_CLOSE, 0, 0);
+    }
+    else if(itemID == MenuIDs::BOARD_5X5) {
+        gamePresenter->changeBoardSize(5, 5, 16);
+        gamePresenter->tryNewGame(true);
+        updateLabels();
+        InvalidateRect(window, NULL, FALSE);
     }
 }
 

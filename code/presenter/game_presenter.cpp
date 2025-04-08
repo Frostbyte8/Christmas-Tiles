@@ -59,6 +59,13 @@ inline const bool GamePresenter::isGameInited() const {
     return gameTiles != NULL ? true : false;
 }
 
+inline const bool GamePresenter::isPlaying() const {
+    if(gameState == GameState::PLAYING || gameState == GameState::PAUSED) {
+        return true;
+    }
+    return false;
+}
+
 //-----------------------------------------------------------------------------
 // changeBoardSettings - Changes either the Width, Height, Number of Tile types,
 // or any combination of the three.
@@ -70,6 +77,7 @@ inline const bool GamePresenter::isGameInited() const {
 void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t inNumTypes) {
 
     assert(view);
+
     // TODO: Better Randomness later
     srand(static_cast<unsigned int>(time(NULL)));
 
@@ -122,27 +130,31 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
 // tryNewGame - Attempts to create a new game.
 //-----------------------------------------------------------------------------
 
-void GamePresenter::tryNewGame() {
+bool GamePresenter::tryNewGame(const bool forceNew) {
 
-    if(gameState != GameState::FINISHED && gameState != GameState::NOT_STARTED) {
-        if(view->askQuestion("This game is still in progress. Are you sure you want to start a new game?", "Are you sure?", MessageBoxTypes::YESNOCANCEL) != MessageBoxReponses::YES) {
-            return;
+    if(!forceNew) {
+        if(gameState != GameState::FINISHED && gameState != GameState::NOT_STARTED) {
+            if(view->askQuestion("This game is still in progress. Are you sure you want to start a new game?", "Are you sure?", MessageBoxTypes::YESNOCANCEL) != MessageBoxReponses::YES) {
+                return false;
+            }
         }
     }
 
+    // TODO: Need another state
+    gameState   = GameState::NOT_STARTED;
+
     if(!tileCount) {
-        return;
+        return false;
     }
 
     timeElapsed = 0;
     timeStarted = 0;
-    gameState   = GameState::NOT_STARTED;
     matchesMade = 0;
 
     if(!gameTiles) {
         gameTiles = new (std::nothrow) GameTile[tileCount];
         if(!gameTiles) {
-            return; // [TODO]: Handle error allocating tiles
+            return false; // [TODO]: Handle error allocating tiles, as well as another game state
         }
     }
     else {
@@ -193,6 +205,10 @@ void GamePresenter::tryNewGame() {
         }
 
     }
+
+    tileIndex[1] = tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+
+    return true;
 }
 
 bool GamePresenter::validIndex(const unsigned int& index) const {
