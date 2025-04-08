@@ -16,6 +16,10 @@ __forceinline uint32_t getMSCount() {
 #endif // _WIN32
 }
 
+//=============================================================================
+// Constructor
+//=============================================================================
+
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(0), height(0), gameState(GameState::NOT_STARTED),
 freeTile(0), numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
@@ -25,13 +29,16 @@ gameTiles(NULL), timeElapsed(0) {
     assert(view);
 }
 
+//=============================================================================
+// Destructor
+//=============================================================================
+
 GamePresenter::~GamePresenter() {
     if(gameTiles) {
         delete[] gameTiles;
         gameTiles = NULL;
     }
 }
-
 
 //=============================================================================
 // Accessors
@@ -46,21 +53,35 @@ const GameTile* GamePresenter::getTiles() const {
     return gameTiles;
 }
 
+//-----------------------------------------------------------------------------
+// getElapsedTime - get up to date information about how long the game has been
+// played for. It will update the time before returning it so it is accurate.
+// @return uint32_t containing the number of milliseconds elapsed.
+//-----------------------------------------------------------------------------
+
+const uint32_t GamePresenter::getElapsedTime() {
+
+    if(gameState == GameState::PLAYING) {
+        uint32_t tempTick = getMSCount();
+        timeElapsed += tempTick - timeStarted;
+        timeStarted = tempTick;
+    }
+
+    return timeElapsed;
+}
+
 //=============================================================================
 // Public Functions
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// isGameInited - Checks to see if the game has been initialized.
-// @return true if it has, false if it has not
+// bothFlipped - Test if two tiles have been flipped.
+// @return true if they have, false if they have not
 //-----------------------------------------------------------------------------
 
-inline const bool GamePresenter::isGameInited() const {
-    return gameTiles != NULL ? true : false;
-}
-
-inline const bool GamePresenter::isPlaying() const {
-    if(gameState == GameState::PLAYING || gameState == GameState::PAUSED) {
+bool GamePresenter::bothFlipped() const {
+    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED &&
+       tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
         return true;
     }
     return false;
@@ -110,13 +131,15 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
     if(inNumTypes > GameConstants::MAX_TYPES) {
         inNumTypes = GameConstants::MAX_TYPES;
     }
+
     // TODO: Minimum types.
-
     // If the user tries to have more than 100 types, tile 101 will be the free tile and the rest will be ignored.
-
     if(numTileTypes != inNumTypes) {
     }
-    numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? GameConstants::MAX_TYPES : inNumTypes;
+
+    numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? 
+                                GameConstants::MAX_TYPES :
+                                inNumTypes;
 
     // Avoid unnecessary delete
     if(tileArrayInvalid && gameTiles) {
@@ -124,6 +147,87 @@ void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t i
         gameTiles = NULL;
     }
 
+}
+
+//-----------------------------------------------------------------------------
+// isGameInited - Checks to see if the game has been initialized.
+// @return true if it has, false if it has not
+//-----------------------------------------------------------------------------
+
+inline const bool GamePresenter::isGameInited() const {
+    return gameTiles != NULL ? true : false;
+}
+
+//-----------------------------------------------------------------------------
+// isPlaying - Checks if the game is currently being played
+// @return true if it is, false if it is nto.
+//-----------------------------------------------------------------------------
+
+inline const bool GamePresenter::isPlaying() const {
+    if(gameState == GameState::PLAYING || gameState == GameState::PAUSED) {
+        return true;
+    }
+    return false;
+}
+
+//-----------------------------------------------------------------------------
+// tryFlipTile - Attempts to flip the tile at the index given.
+// @param unsigned int containing the tile index to try flipping
+// @return true if the tile was flipped, false if it could not be flipped
+//-----------------------------------------------------------------------------
+
+bool GamePresenter::tryFlipTile(const unsigned int& index) {
+
+    if(!isGameInited()) {
+        return false;
+    }
+    else if(gameState == GameState::NOT_STARTED) {
+        timeStarted = getMSCount();
+        timeElapsed = 0;
+        gameState = GameState::PLAYING;
+    }
+    else if(gameState == GameState::FINISHED) {
+        return false;
+    }
+
+    if(bothFlipped()) {
+        unflip();
+    }
+
+    if(!validIndex(index) || gameTiles[index].matched) {
+        return false;
+    }
+    
+    gameTiles[index].matched = 1;
+
+    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED) {
+
+        if(gameTiles[index].tileType == gameTiles[tileIndex[0]].tileType) {
+
+            gameTiles[tileIndex[0]].matched = 2;
+            gameTiles[index].matched = 2;
+
+            tileIndex[0] = GameConstants::NO_TILE_SELECTED;
+            tileIndex[1] = GameConstants::NO_TILE_SELECTED;
+
+            matchesMade++;
+            if(matchesMade == matchesNeeded) {
+                getElapsedTime();
+                gameState = GameState::FINISHED;
+                view->gameWon();
+            }
+
+        }
+        else {
+            tileIndex[1] = index;
+        }
+
+    }
+    else {
+        tileIndex[0] = index;
+    }
+
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -211,21 +315,9 @@ bool GamePresenter::tryNewGame(const bool forceNew) {
     return true;
 }
 
-bool GamePresenter::validIndex(const unsigned int& index) const {
-
-    if(index >= tileCount || gameTiles[index].tileType == FREE_TILE) {
-        return false;
-    }
-
-    return true;
-}
-
-bool GamePresenter::bothFlipped() {
-    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED && tileIndex[1] != GameConstants::NO_TILE_SELECTED) {
-        return true;
-    }
-    return false;
-}
+//-----------------------------------------------------------------------------
+// unflip - Unflips tiles
+//-----------------------------------------------------------------------------
 
 void GamePresenter::unflip() {
     gameTiles[tileIndex[0]].matched = 0;
@@ -234,63 +326,20 @@ void GamePresenter::unflip() {
     tileIndex[1] = GameConstants::NO_TILE_SELECTED;
 }
 
-const uint32_t GamePresenter::getElapsedTime() {
+//=============================================================================
+// Private Functions
+//=============================================================================
 
-    if(gameState == GameState::PLAYING) {
-        uint32_t tempTick = getMSCount();
-        timeElapsed += tempTick - timeStarted;
-        timeStarted = tempTick;
-    }
+//-----------------------------------------------------------------------------
+// validIndex - Checks to see if the given index is valid tile index.
+// @param an unsigned int containing the index of the tile to test
+// @return true if it is, false if it isn't.
+//-----------------------------------------------------------------------------
 
-    return timeElapsed;
-}
+bool GamePresenter::validIndex(const unsigned int& index) const {
 
-bool GamePresenter::tryFlipTile(const unsigned int& index) {
-
-    if(gameState == GameState::NOT_STARTED) {
-        timeStarted = getMSCount();
-        timeElapsed = 0;
-        gameState = GameState::PLAYING;
-    }
-    else if(gameState == GameState::FINISHED) {
+    if(index >= tileCount || gameTiles[index].tileType == FREE_TILE) {
         return false;
-    }
-
-    if(bothFlipped()) {
-        unflip();
-    }
-
-    if(!validIndex(index) || gameTiles[index].matched) {
-        return false;
-    }
-    
-    gameTiles[index].matched = 1;
-
-    if(tileIndex[0] != GameConstants::NO_TILE_SELECTED) {
-
-        if(gameTiles[index].tileType == gameTiles[tileIndex[0]].tileType) {
-
-            gameTiles[tileIndex[0]].matched = 2;
-            gameTiles[index].matched = 2;
-
-            tileIndex[0] = GameConstants::NO_TILE_SELECTED;
-            tileIndex[1] = GameConstants::NO_TILE_SELECTED;
-
-            matchesMade++;
-            if(matchesMade == matchesNeeded) {
-                getElapsedTime();
-                gameState = GameState::FINISHED;
-                view->gameWon();
-            }
-
-        }
-        else {
-            tileIndex[1] = index;
-        }
-
-    }
-    else {
-        tileIndex[0] = index;
     }
 
     return true;

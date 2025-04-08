@@ -67,38 +67,36 @@ class GamePresenter {
         // Public Functions
         const uint32_t getElapsedTime();
         void changeBoardSize(uint8_t ioNewWidth, uint8_t inNewHeight, uint8_t inNumTypes);
-        bool tryNewGame(bool forceNew = false);
+        bool tryNewGame(const bool forceNew = false);
         inline const bool isGameInited() const;
         inline const bool isPlaying() const;
         
         
-        bool bothFlipped();
+        bool bothFlipped() const;
         void unflip();
-        bool validIndex(const unsigned int& index) const;
         bool tryFlipTile(const unsigned int& index);
 
 
     private:
 
+        bool validIndex(const unsigned int& index) const;
 
-        // [TODO]: This will eventually go into a model
+        // [TODO]: Some of this information will go into a model
         uint8_t width;
         uint8_t height;
         uint8_t numTileTypes;
-        uint16_t freeTile;
-
         uint8_t gameState;
 
+        uint16_t freeTile;
         uint16_t tileCount;
         uint16_t matchesNeeded;
         uint16_t matchesMade;
         uint32_t timeElapsed;
         uint32_t timeStarted;
+
         int tileIndex[2];
         
         GameTile* gameTiles;
-
-
         MainWindowInterface* view;
 };
 
