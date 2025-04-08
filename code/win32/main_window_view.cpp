@@ -424,10 +424,16 @@ void MainWindowView::createMenubar() {
     HMENU fileMenu = CreateMenu();
 
     AppendMenu(fileMenu, MF_STRING, MenuIDs::NEW_GAME, L"&New Game");
+    AppendMenu(fileMenu, MF_STRING, MenuIDs::PAUSE_GAME, L"&Pause Game");
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuIDs::HIGHSCORES, L"&Highscores");
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuIDs::EXIT, L"E&xit");
 
     AppendMenu(menuBar, MF_STRING | MF_POPUP, (UINT_PTR)fileMenu, L"&File");
-    AppendMenu(menuBar, MF_STRING, MenuIDs::OPTIONS, L"&Options");
-    AppendMenu(menuBar, MF_STRING, MenuIDs::HELP, L"&Help");
+    //AppendMenu(menuBar, MF_STRING, MenuIDs::OPTIONS, L"&Options");
+    //AppendMenu(menuBar, MF_STRING, MenuIDs::HELP, L"&Help");
+
 
 
     SetMenu(window, menuBar);
@@ -436,6 +442,9 @@ void MainWindowView::createMenubar() {
 void MainWindowView::onSelectMenuItem(const WORD& itemID) {
     if(itemID == MenuIDs::NEW_GAME) {
         gamePresenter->tryNewGame();
+    }
+    else if(itemID == MenuIDs::EXIT) {
+        SendMessage(window, WM_CLOSE, 0, 0);
     }
 }
 

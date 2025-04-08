@@ -27,11 +27,22 @@ namespace TimerIDs {
 
 namespace MenuIDs {
     enum MenuIDs {
-        FILE        = 401,
-        OPTIONS     = 402,
-        HELP        = 403,
-        // File Menu
-        NEW_GAME    = 404,
+
+        NEW_GAME     = 401,
+        PAUSE_GAME   = 402,
+        HIGHSCORES   = 403,
+        EXIT         = 404,
+
+        BOARD_3X3    = 411,
+        BOARD_4X4    = 412,
+        BOARD_5X5    = 413,
+        BOARD_5X9    = 414,
+        BOARD_10x10  = 415,
+        BOARD_CUSTOM = 416,
+        TILESET      = 417,
+
+        HELP_FILE    = 421,
+        ABOUT        = 422,
     };
 }
 
