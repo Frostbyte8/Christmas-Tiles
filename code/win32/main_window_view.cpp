@@ -42,6 +42,8 @@ bool MainWindowView::registerSelf(HINSTANCE hInstance) {
         return false;
     }
 
+
+
     return true;
 }
 
@@ -192,6 +194,7 @@ bool MainWindowView::createControls() {
     wchar_t* captions[NUM_STRS] = { L"Score", L"Points", L"Time" };
 
 
+
     for(size_t i = 0; i < NUM_STRS; ++i) {
         const int CTRLID = ControlIDs::GRP_SCORE + i; 
         const int LBLID = ControlIDs::LBL_SCORE + i;
@@ -208,6 +211,11 @@ bool MainWindowView::createControls() {
 
     HFONT dialogFont = wm.GetCurrentFont();
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
+
+    boardView.registerSelf(GetModuleHandle(NULL));
+    CreateWindowEx(0, GameBoardView::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
+                   0, 0, 32, 32,
+                   window, (HMENU)9999, GetModuleHandle(NULL), &boardView);
 
 
     return true;
@@ -525,4 +533,73 @@ void MainWindowView::gameWon() {
 int MainWindowView::askQuestion(const std::string& message, const std::string& title, const int& mbType) {
     // TODO: UTF-8 std::string to wchar.
     return MessageBoxA(window, message.c_str(), title.c_str(), mbType);
+}
+
+//
+//
+//
+
+bool GameBoardView::registerSelf(HINSTANCE hInstance) {
+
+    WNDCLASSEX boardClass = {0};
+
+    boardClass.cbSize        = sizeof(WNDCLASSEX);
+    boardClass.style         = 0;
+    boardClass.lpfnWndProc   = GameBoardView::WndProc;
+    boardClass.cbClsExtra    = 0;
+    boardClass.cbWndExtra    = 0;
+    boardClass.hInstance     = hInstance;
+    boardClass.hIcon         = 0;
+    boardClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    boardClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
+    boardClass.lpszMenuName  = NULL;
+    boardClass.lpszClassName = GameBoardView::getWndClassName();
+    boardClass.hIconSm       = 0;
+
+    if(!RegisterClassEx(&boardClass)) {
+        MessageBox(NULL, L"Error registering Game Board class.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
+}
+
+LRESULT GameBoardView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
+
+    if(msg == WM_LBUTTONDOWN) {
+        MessageBox(window, L"Works.", L"K", MB_OK);
+        return 0;
+    }
+    return DefWindowProc(window, msg, wParam, lParam);
+}
+
+LRESULT CALLBACK GameBoardView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+
+    GameBoardView* self;
+
+    // TODO: Look into options to avoid duplicating this code.
+
+    if(msg == WM_NCCREATE) {
+        // Store a copy of an instance of this window in the USERDATA section
+        self = static_cast<GameBoardView*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
+        self->window = hWnd;
+
+        SetLastError(0);
+
+        if (!SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self))) {
+            const DWORD ERR = GetLastError();
+            if(ERR != 0) {
+                return FALSE;
+            }
+        }
+    }
+    else {
+        self = reinterpret_cast<GameBoardView*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    }
+
+    if(self) {
+        return self->windowProc(msg, wParam, lParam);
+    }
+
+    return DefWindowProc(hWnd, msg, wParam, lParam);
 }

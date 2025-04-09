@@ -46,6 +46,17 @@ namespace MenuIDs {
     };
 }
 
+class GameBoardView {
+
+    public:
+        bool registerSelf(HINSTANCE hInstance);
+        static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+        LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
+        HWND window;
+        static wchar_t* getWndClassName() { return L"GameBoardClass"; }
+
+};
+
 class MainWindowView : public MainWindowInterface {
     
     public:
@@ -79,6 +90,7 @@ class MainWindowView : public MainWindowInterface {
         WORD gameXPos;
         HBRUSH gameBG;
         HBITMAP tileset;
+        GameBoardView boardView;
 
         GamePresenter* gamePresenter;
         void createMenubar();
@@ -94,6 +106,7 @@ class MainWindowView : public MainWindowInterface {
         LRESULT onWindowMoved();
 
 };
+
 
 #endif // __MAIN_WINDOW_VIEW_H__
 
