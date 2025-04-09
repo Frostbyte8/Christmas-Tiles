@@ -14,6 +14,7 @@ namespace ControlIDs {
         LBL_SCORE,
         LBL_POINTS,
         LBL_TIME,
+        VIEW_GAMEBOARD,
         COUNT,
     };
 }
@@ -53,14 +54,17 @@ class GameBoardView {
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         HWND window;
+        HBITMAP tileset;
+        LRESULT onPaint();
         static wchar_t* getWndClassName() { return L"GameBoardClass"; }
+        GamePresenter* gamePresenter;
 
 };
 
 class MainWindowView : public MainWindowInterface {
     
     public:
-        MainWindowView() : window(NULL), tileset(NULL), gamePresenter(NULL) {}
+        MainWindowView() : window(NULL), gamePresenter(NULL) {}
         bool registerSelf(HINSTANCE hInstance);
         bool createWindow(HINSTANCE hInstance);
         UINT doLoop();
@@ -87,9 +91,7 @@ class MainWindowView : public MainWindowInterface {
 
         //WNDPROC prevLabelProcs[3];
 
-        WORD gameXPos;
         HBRUSH gameBG;
-        HBITMAP tileset;
         GameBoardView boardView;
 
         GamePresenter* gamePresenter;

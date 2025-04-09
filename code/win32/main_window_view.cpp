@@ -78,16 +78,18 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     gamePresenter->tryNewGame();
 
 
-    // Load resources
-    tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
-
+    /*
     if(!tileset) {
         MessageBox(NULL, L"Could not load gfx.bmp", L"Error!", MB_ICONEXCLAMATION | MB_OK);
         return false;
     }
+    */
 
     createControls();
 
+    // Load resources
+    boardView.tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
+    boardView.gamePresenter = gamePresenter;
 
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
@@ -138,7 +140,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             }
             break;
 
-        case WM_PAINT:          return onPaint();
+        //case WM_PAINT:          return onPaint();
         case WM_TIMER:          return onTimer(wParam);
         case WM_EXITSIZEMOVE:   return onWindowMoved();
 
@@ -213,9 +215,10 @@ bool MainWindowView::createControls() {
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
 
     boardView.registerSelf(GetModuleHandle(NULL));
-    CreateWindowEx(0, GameBoardView::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
-                   0, 0, 32, 32,
-                   window, (HMENU)9999, GetModuleHandle(NULL), &boardView);
+    controls[ControlIDs::VIEW_GAMEBOARD] = CreateWindowEx(0, GameBoardView::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
+                                                          0, 0, 32, 32,
+                                                          window, (HMENU)MAKE_ID(ControlIDs::VIEW_GAMEBOARD), GetModuleHandle(NULL), &boardView);
+
 
 
     return true;
@@ -295,7 +298,9 @@ void MainWindowView::moveControls() {
 
     const int BOARD_WIDTH   = GameConstants::DEF_WIDTH * TILE_SIZE;
 
-    gameXPos = static_cast<WORD>(widestLabel + grpXSpacing);
+    const WORD gameXPos = static_cast<WORD>(widestLabel + grpXSpacing);
+
+    MoveWindow(controls[ControlIDs::VIEW_GAMEBOARD], gameXPos, 0, BOARD_WIDTH, BOARD_HEIGHT, TRUE);
 
     for(int i = 0; i < 3; ++i) {
         const int CTRLID = ControlIDs::GRP_SCORE + i;
@@ -317,49 +322,6 @@ void MainWindowView::moveControls() {
     centerWindow();
 
     return;
-}
-
-//-----------------------------------------------------------------------------
-// onPaint - Draw the Gameboard
-//-----------------------------------------------------------------------------
-
-LRESULT MainWindowView::onPaint() {
-    PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(window, &ps);
-    RECT rc; 
-
-    GetClientRect(window, &rc);
-    rc.left = gameXPos;
-
-    FillRect(hdc, &rc, gameBG);
-
-    if(tileset && gamePresenter) {
-
-        const uint8_t& width = gamePresenter->getWidth();
-        const uint8_t& height = gamePresenter->getHeight();
-        const GameTile* gameTiles = gamePresenter->getTiles();
-
-        HDC hdcSrc = CreateCompatibleDC(hdc);
-        HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
-
-        for(int k = 0; k < height; ++k) {
-            for(int i = 0; i < width; ++i) {
-
-                if(gameTiles[(k * width) + i].matched == 0) {
-                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
-                }
-                else {
-                    BitBlt(hdc, gameXPos + (i * 32), k * 32, 32, 32, hdcSrc, 32 * (gameTiles[(k * width) + i].tileType - 1), 0, SRCCOPY);
-                }
-            }
-        }
-
-        SelectObject(hdcSrc, oldBMP);
-    }
-
-    EndPaint(window, &ps);
-
-    return 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -388,13 +350,13 @@ LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
 
     // Make sure the cursor is within the bounds of the gameboard
 
-    if(xPos < gameXPos || yPos < 0) {
+    if(xPos < 0 || yPos < 0) {
         return 0;
     }
 
     // Convert x/y to Index
 
-    xPos = (xPos - gameXPos) / TILE_SIZE;
+    xPos = xPos / TILE_SIZE;
     yPos /= TILE_SIZE;
 
     // DEBUG: For test
@@ -566,8 +528,8 @@ bool GameBoardView::registerSelf(HINSTANCE hInstance) {
 
 LRESULT GameBoardView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
-    if(msg == WM_LBUTTONDOWN) {
-        MessageBox(window, L"Works.", L"K", MB_OK);
+    if(msg == WM_PAINT) {
+        onPaint();
         return 0;
     }
     return DefWindowProc(window, msg, wParam, lParam);
@@ -602,4 +564,42 @@ LRESULT CALLBACK GameBoardView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPAR
     }
 
     return DefWindowProc(hWnd, msg, wParam, lParam);
+}
+
+LRESULT GameBoardView::onPaint() {
+    PAINTSTRUCT ps;
+    HDC hdc = BeginPaint(window, &ps);
+    RECT rc; 
+
+    GetClientRect(window, &rc);
+    rc.left = 0;
+
+    //FillRect(hdc, &rc, gameBG);
+
+    if(tileset && gamePresenter) {
+
+        const uint8_t& width = gamePresenter->getWidth();
+        const uint8_t& height = gamePresenter->getHeight();
+        const GameTile* gameTiles = gamePresenter->getTiles();
+
+        HDC hdcSrc = CreateCompatibleDC(hdc);
+        HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
+
+        for(int k = 0; k < height; ++k) {
+            for(int i = 0; i < width; ++i) {
+
+                if(gameTiles[(k * width) + i].matched == 0) {
+                    BitBlt(hdc, i * 32, k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
+                }
+                else {
+                    BitBlt(hdc, i * 32, k * 32, 32, 32, hdcSrc, 32 * (gameTiles[(k * width) + i].tileType - 1), 0, SRCCOPY);
+                }
+            }
+        }
+
+        SelectObject(hdcSrc, oldBMP);
+    }
+
+    EndPaint(window, &ps);
+    return 0;
 }
