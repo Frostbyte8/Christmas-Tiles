@@ -5,17 +5,30 @@
 #include "subclassed_controls.h"
 #include "../presenter/game_presenter.h"
 
-class GameBoardPanel : public WndAsClass <GameBoardPanel> {
+#define BP_CLICKED  WM_APP+1
 
+class GameBoardPanel : public WndAsClass <GameBoardPanel> {
+    friend WndAsClass;
     public:
+
+        static wchar_t* getWndClassName();
+        void setTileset(HBITMAP newTileset);
+
         bool registerSelf(HINSTANCE hInstance);
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
-        HWND window;
-        HBITMAP tileset;
-        LRESULT onPaint();
-        static wchar_t* getWndClassName() { return L"GameBoardClass"; }
+
+
         GamePresenter* gamePresenter;
 
+    private:
+
+        HWND    window;
+        HWND    parent;
+        HBITMAP tileset;
+        HBRUSH  gameBG;
+
+        LRESULT onCreate(const CREATESTRUCT* const cs);
+        LRESULT onPaint();
 };
 
 #endif // __GAMEBOARD_PANEL_H__

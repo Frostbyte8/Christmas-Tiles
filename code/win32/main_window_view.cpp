@@ -57,8 +57,6 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
         return true; // Already created.
     }
 
-    gameBG = CreateSolidBrush(RGB(0, 0, 0));
-
     window = CreateWindowEx(WS_EX_CLIENTEDGE,
         L"XmasTilesMainWindow",
         L"",
@@ -77,19 +75,16 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     gamePresenter->changeBoardSize(3, 3, 16);
     gamePresenter->tryNewGame();
 
-
-    /*
+    tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
     if(!tileset) {
         MessageBox(NULL, L"Could not load gfx.bmp", L"Error!", MB_ICONEXCLAMATION | MB_OK);
         return false;
     }
-    */
 
     createControls();
 
-    // Load resources
-    boardView.tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
-    boardView.gamePresenter = gamePresenter;
+    gameBoardPanel.setTileset(tileset);
+    gameBoardPanel.gamePresenter = gamePresenter;
 
     // Get Monitor Info
     prevMonitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
@@ -132,7 +127,8 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         default:
             return DefWindowProc(window, msg, wParam, lParam);
 
-        case WM_LBUTTONDOWN:    return onClick(wParam, lParam);
+        case BP_CLICKED:
+            return onClick(wParam, lParam);
 
         case WM_COMMAND:
             if(HIWORD(wParam) == 0) {
@@ -214,10 +210,10 @@ bool MainWindowView::createControls() {
     HFONT dialogFont = wm.GetCurrentFont();
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
 
-    boardView.registerSelf(GetModuleHandle(NULL));
+    gameBoardPanel.registerSelf(GetModuleHandle(NULL));
     controls[ControlIDs::VIEW_GAMEBOARD] = CreateWindowEx(0, GameBoardPanel::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
                                                           0, 0, 32, 32,
-                                                          window, (HMENU)MAKE_ID(ControlIDs::VIEW_GAMEBOARD), GetModuleHandle(NULL), &boardView);
+                                                          window, (HMENU)MAKE_ID(ControlIDs::VIEW_GAMEBOARD), GetModuleHandle(NULL), &gameBoardPanel);
 
 
 
@@ -343,10 +339,10 @@ LRESULT MainWindowView::onWindowMoved() {
 // onClick - Sent when the client area of the window has been clicked
 //-----------------------------------------------------------------------------
 
-LRESULT MainWindowView::onClick(const WPARAM&, const LPARAM& lParam) {
+LRESULT MainWindowView::onClick(const WPARAM& wParam, const LPARAM& lParam) {
 
-    WORD xPos = LOWORD(lParam);
-    WORD yPos = HIWORD(lParam);
+    WORD xPos = wParam;
+    WORD yPos = lParam;
 
     // Make sure the cursor is within the bounds of the gameboard
 

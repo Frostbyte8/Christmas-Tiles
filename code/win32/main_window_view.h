@@ -77,9 +77,10 @@ class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
         WindowMetrics wm;
 
         //WNDPROC prevLabelProcs[3];
+        //HBRUSH gameBG;
 
-        HBRUSH gameBG;
-        GameBoardPanel boardView;
+        HBITMAP tileset;
+        GameBoardPanel gameBoardPanel;
 
         GamePresenter* gamePresenter;
         void createMenubar();

@@ -1,6 +1,30 @@
 #include "gameboard_panel.h"
 
 //=============================================================================
+// Accessors
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// getWndClassName - Get the class name associated with this window
+//-----------------------------------------------------------------------------
+
+wchar_t* GameBoardPanel::getWndClassName() {
+    return L"GameBoardClass";
+}
+
+//=============================================================================
+// Mutators
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// setTileset - Change the handle of the tileset image
+//-----------------------------------------------------------------------------
+
+void GameBoardPanel::setTileset(const HBITMAP newTileset) {
+    tileset = newTileset;
+}
+
+//=============================================================================
 // Public Functions
 //=============================================================================
 
@@ -34,7 +58,11 @@ bool GameBoardPanel::registerSelf(HINSTANCE hInstance) {
 LRESULT GameBoardPanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
     switch(msg) {
-        case WM_PAINT: return onPaint();
+        case WM_LBUTTONDOWN:
+            PostMessage(parent, BP_CLICKED, LOWORD(lParam), HIWORD(lParam));
+            return 0;
+        case WM_CREATE: return onCreate(reinterpret_cast<CREATESTRUCT*>(lParam));
+        case WM_PAINT:  return onPaint();
     }
 
     return DefWindowProc(window, msg, wParam, lParam);
@@ -44,6 +72,20 @@ LRESULT GameBoardPanel::windowProc(const UINT& msg, const WPARAM wParam, const L
 // Private Functions
 //=============================================================================
 
+//-----------------------------------------------------------------------------
+// onCreate - Processes the WM_CREATE event. We create the sources we need here
+//-----------------------------------------------------------------------------
+
+LRESULT GameBoardPanel::onCreate(const CREATESTRUCT* const cs) {
+    gameBG = CreateSolidBrush(RGB(0, 0, 0));
+    parent = cs->hwndParent;
+    return 0;
+}
+
+//-----------------------------------------------------------------------------
+// onPaint - Processes the WM_PAINT window message by painting the game board
+//-----------------------------------------------------------------------------
+
 LRESULT GameBoardPanel::onPaint() {
     PAINTSTRUCT ps;
     HDC hdc = BeginPaint(window, &ps);
@@ -52,7 +94,7 @@ LRESULT GameBoardPanel::onPaint() {
     GetClientRect(window, &rc);
     rc.left = 0;
 
-    //FillRect(hdc, &rc, gameBG);
+    FillRect(hdc, &rc, gameBG);
 
     if(tileset && gamePresenter) {
 
