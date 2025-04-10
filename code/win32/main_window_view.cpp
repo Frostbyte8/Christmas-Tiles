@@ -215,7 +215,7 @@ bool MainWindowView::createControls() {
     EnumChildWindows(window, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
 
     boardView.registerSelf(GetModuleHandle(NULL));
-    controls[ControlIDs::VIEW_GAMEBOARD] = CreateWindowEx(0, GameBoardView::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
+    controls[ControlIDs::VIEW_GAMEBOARD] = CreateWindowEx(0, GameBoardPanel::getWndClassName(), L"", WS_CHILD | WS_VISIBLE,
                                                           0, 0, 32, 32,
                                                           window, (HMENU)MAKE_ID(ControlIDs::VIEW_GAMEBOARD), GetModuleHandle(NULL), &boardView);
 
@@ -450,40 +450,6 @@ void MainWindowView::updateLabels() {
 
 }
 
-//-----------------------------------------------------------------------------
-// WndProc - A static function of a window proc that allows us to keep data
-// for the window encapsulated.
-//-----------------------------------------------------------------------------
-
-LRESULT CALLBACK MainWindowView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-    MainWindowView* self;
-
-    if(msg == WM_NCCREATE) {
-        // Store a copy of an instance of this window in the USERDATA section
-        self = static_cast<MainWindowView*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
-        self->window = hWnd;
-
-        SetLastError(0);
-
-        if (!SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self))) {
-            const DWORD ERR = GetLastError();
-            if(ERR != 0) {
-                return FALSE;
-            }
-        }
-    }
-    else {
-        self = reinterpret_cast<MainWindowView*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-    }
-
-    if(self) {
-        return self->windowProc(msg, wParam, lParam);
-    }
-
-    return DefWindowProc(hWnd, msg, wParam, lParam);
-
-}
-
 //=============================================================================
 // Public Interface Functions
 //=============================================================================
@@ -495,111 +461,4 @@ void MainWindowView::gameWon() {
 int MainWindowView::askQuestion(const std::string& message, const std::string& title, const int& mbType) {
     // TODO: UTF-8 std::string to wchar.
     return MessageBoxA(window, message.c_str(), title.c_str(), mbType);
-}
-
-//
-//
-//
-
-bool GameBoardView::registerSelf(HINSTANCE hInstance) {
-
-    WNDCLASSEX boardClass = {0};
-
-    boardClass.cbSize        = sizeof(WNDCLASSEX);
-    boardClass.style         = 0;
-    boardClass.lpfnWndProc   = GameBoardView::WndProc;
-    boardClass.cbClsExtra    = 0;
-    boardClass.cbWndExtra    = 0;
-    boardClass.hInstance     = hInstance;
-    boardClass.hIcon         = 0;
-    boardClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    boardClass.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
-    boardClass.lpszMenuName  = NULL;
-    boardClass.lpszClassName = GameBoardView::getWndClassName();
-    boardClass.hIconSm       = 0;
-
-    if(!RegisterClassEx(&boardClass)) {
-        MessageBox(NULL, L"Error registering Game Board class.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
-
-    return true;
-}
-
-LRESULT GameBoardView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-
-    if(msg == WM_PAINT) {
-        onPaint();
-        return 0;
-    }
-    return DefWindowProc(window, msg, wParam, lParam);
-}
-
-LRESULT CALLBACK GameBoardView::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-
-    GameBoardView* self;
-
-    // TODO: Look into options to avoid duplicating this code.
-
-    if(msg == WM_NCCREATE) {
-        // Store a copy of an instance of this window in the USERDATA section
-        self = static_cast<GameBoardView*>(reinterpret_cast<CREATESTRUCT*>(lParam)->lpCreateParams);
-        self->window = hWnd;
-
-        SetLastError(0);
-
-        if (!SetWindowLongPtr(hWnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(self))) {
-            const DWORD ERR = GetLastError();
-            if(ERR != 0) {
-                return FALSE;
-            }
-        }
-    }
-    else {
-        self = reinterpret_cast<GameBoardView*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-    }
-
-    if(self) {
-        return self->windowProc(msg, wParam, lParam);
-    }
-
-    return DefWindowProc(hWnd, msg, wParam, lParam);
-}
-
-LRESULT GameBoardView::onPaint() {
-    PAINTSTRUCT ps;
-    HDC hdc = BeginPaint(window, &ps);
-    RECT rc; 
-
-    GetClientRect(window, &rc);
-    rc.left = 0;
-
-    //FillRect(hdc, &rc, gameBG);
-
-    if(tileset && gamePresenter) {
-
-        const uint8_t& width = gamePresenter->getWidth();
-        const uint8_t& height = gamePresenter->getHeight();
-        const GameTile* gameTiles = gamePresenter->getTiles();
-
-        HDC hdcSrc = CreateCompatibleDC(hdc);
-        HBITMAP oldBMP = (HBITMAP)SelectObject(hdcSrc, tileset);
-
-        for(int k = 0; k < height; ++k) {
-            for(int i = 0; i < width; ++i) {
-
-                if(gameTiles[(k * width) + i].matched == 0) {
-                    BitBlt(hdc, i * 32, k * 32, 32, 32, hdcSrc, 512, 0, SRCCOPY);
-                }
-                else {
-                    BitBlt(hdc, i * 32, k * 32, 32, 32, hdcSrc, 32 * (gameTiles[(k * width) + i].tileType - 1), 0, SRCCOPY);
-                }
-            }
-        }
-
-        SelectObject(hdcSrc, oldBMP);
-    }
-
-    EndPaint(window, &ps);
-    return 0;
 }

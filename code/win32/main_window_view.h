@@ -4,6 +4,7 @@
 #include <windows.h>
 #include "window_metrics.h"
 #include "..\presenter\game_presenter.h"
+#include "gameboard_panel.h"
 
 namespace ControlIDs {
     enum ControlIDs {
@@ -47,28 +48,15 @@ namespace MenuIDs {
     };
 }
 
-class GameBoardView {
+class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
+    friend WndAsClass; 
 
-    public:
-        bool registerSelf(HINSTANCE hInstance);
-        static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-        LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
-        HWND window;
-        HBITMAP tileset;
-        LRESULT onPaint();
-        static wchar_t* getWndClassName() { return L"GameBoardClass"; }
-        GamePresenter* gamePresenter;
-
-};
-
-class MainWindowView : public MainWindowInterface {
-    
     public:
         MainWindowView() : window(NULL), gamePresenter(NULL) {}
         bool registerSelf(HINSTANCE hInstance);
         bool createWindow(HINSTANCE hInstance);
         UINT doLoop();
-        static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+        //static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
         // Interface Functions
         virtual void gameWon();
@@ -76,7 +64,6 @@ class MainWindowView : public MainWindowInterface {
 
     private:
 
-        HWND window;
         HWND controls[ControlIDs::COUNT];
         HMONITOR prevMonitor;
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
@@ -86,13 +73,13 @@ class MainWindowView : public MainWindowInterface {
             return true;
         }
 
-
+        HWND window;
         WindowMetrics wm;
 
         //WNDPROC prevLabelProcs[3];
 
         HBRUSH gameBG;
-        GameBoardView boardView;
+        GameBoardPanel boardView;
 
         GamePresenter* gamePresenter;
         void createMenubar();
