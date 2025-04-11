@@ -128,7 +128,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             return DefWindowProc(window, msg, wParam, lParam);
 
         case BP_CLICKED:
-            return onClick(wParam, lParam);
+            return onGameBoardClick(wParam, lParam);
 
         case WM_COMMAND:
             if(HIWORD(wParam) == 0) {
@@ -336,13 +336,13 @@ LRESULT MainWindowView::onWindowMoved() {
 }
 
 //-----------------------------------------------------------------------------
-// onClick - Sent when the client area of the window has been clicked
+// onGameBoardClick - sent when the GameBoard has been clicked
 //-----------------------------------------------------------------------------
 
-LRESULT MainWindowView::onClick(const WPARAM& wParam, const LPARAM& lParam) {
+LRESULT MainWindowView::onGameBoardClick(const WPARAM& wParam, const LPARAM& lParam) {
 
-    WORD xPos = wParam;
-    WORD yPos = lParam;
+    WORD xPos = static_cast<WORD>(wParam);
+    WORD yPos = static_cast<WORD>(lParam);
 
     // Make sure the cursor is within the bounds of the gameboard
 

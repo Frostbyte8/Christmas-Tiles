@@ -5,7 +5,9 @@
 #include "subclassed_controls.h"
 #include "../presenter/game_presenter.h"
 
-#define BP_CLICKED  WM_APP+1
+enum CustomWindowMessages {
+    BP_CLICKED = WM_APP+1, // wParam = xPos, lParam = yPos
+};
 
 class GameBoardPanel : public WndAsClass <GameBoardPanel> {
     friend WndAsClass;
