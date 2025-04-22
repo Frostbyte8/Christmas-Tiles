@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdexcept>
 #include <cassert>
+#include "..\compat\omnifix.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -22,7 +23,7 @@ __forceinline uint32_t getMSCount() {
 
 GamePresenter::GamePresenter(MainWindowInterface* inView) : view(inView),
 width(0), height(0), gameState(GameState::NOT_STARTED),
-freeTile(0), numTileTypes(0), tileCount(0), matchesNeeded(0), matchesMade(0),
+freeTile(0), numTileTypes(16), tileCount(0), matchesNeeded(0), matchesMade(0),
 gameTiles(NULL), timeElapsed(0) {
     tileIndex[0] = GameConstants::NO_TILE_SELECTED;
     tileIndex[1] = GameConstants::NO_TILE_SELECTED;
@@ -88,68 +89,6 @@ bool GamePresenter::bothFlipped() const {
 }
 
 //-----------------------------------------------------------------------------
-// changeBoardSettings - Changes either the Width, Height, Number of Tile types,
-// or any combination of the three.
-// @param uint8_t containing the new width, and also returns the width chosen by the game.
-// @param uint8_t containing the new height, and also returns the height chosen by the game
-// @param uint8_t containing the number of tile types.
-//-----------------------------------------------------------------------------
-
-void GamePresenter::changeBoardSize(uint8_t ioWidth, uint8_t ioHeight, uint8_t inNumTypes) {
-
-    assert(view);
-
-    // TODO: Better Randomness later
-    srand(static_cast<unsigned int>(time(NULL)));
-
-    bool tileArrayInvalid = false;
-
-    // Clamp Values
-    if(ioWidth > GameConstants::MAX_WIDTH) {
-        ioWidth = GameConstants::MAX_WIDTH;
-    }
-    else if(ioWidth < GameConstants::MIN_WIDTH) {
-        ioWidth = GameConstants::MIN_WIDTH;
-    }
-
-    if(ioHeight > GameConstants::MAX_HEIGHT) {
-        ioHeight = GameConstants::MAX_HEIGHT;
-    }
-    else if(ioHeight < GameConstants::MIN_HEIGHT) {
-        ioHeight = GameConstants::MIN_HEIGHT;
-    }
-
-    if(width != ioWidth || height != ioHeight) {
-        tileArrayInvalid = true;
-        width = ioWidth;
-        height = ioHeight;
-        tileCount = width * height;
-        matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
-        //freeTile = matchesNeeded * 2 == tileCount ? 0 : matchesNeeded;
-    }
-    
-    if(inNumTypes > GameConstants::MAX_TYPES) {
-        inNumTypes = GameConstants::MAX_TYPES;
-    }
-
-    // TODO: Minimum types.
-    // If the user tries to have more than 100 types, tile 101 will be the free tile and the rest will be ignored.
-    if(numTileTypes != inNumTypes) {
-    }
-
-    numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? 
-                                GameConstants::MAX_TYPES :
-                                inNumTypes;
-
-    // Avoid unnecessary delete
-    if(tileArrayInvalid && gameTiles) {
-        delete[] gameTiles;
-        gameTiles = NULL;
-    }
-
-}
-
-//-----------------------------------------------------------------------------
 // isGameInited - Checks to see if the game has been initialized.
 // @return true if it has, false if it has not
 //-----------------------------------------------------------------------------
@@ -168,6 +107,26 @@ inline const bool GamePresenter::isPlaying() const {
         return true;
     }
     return false;
+}
+
+//-----------------------------------------------------------------------------
+// tryChangeBoardSize - Attempts to change the size of the gameboard
+// @param a uint8_t specifying the desired width of the board
+// @param a uint8_t specifying the desired height of the board
+// @return true if the board size was changed, false if it was not
+//-----------------------------------------------------------------------------
+
+bool GamePresenter::tryChangeBoardSize(uint8_t newWidth, uint8_t newHeight) {
+    
+    if(isPlaying()) {
+        const int response = view->askQuestion("This will forfeit the current game. Do you still want to change the board size?", "Are you sure?", MessageBoxTypes::YESNOCANCEL);
+        if(response != MessageBoxReponses::YES) {
+            return false;
+        }
+    }
+
+    changeBoardSize(newWidth, newHeight, numTileTypes);
+    return true;
 }
 
 //-----------------------------------------------------------------------------
@@ -329,6 +288,68 @@ void GamePresenter::unflip() {
 //=============================================================================
 // Private Functions
 //=============================================================================
+
+//-----------------------------------------------------------------------------
+// changeBoardSettings - Changes either the Width, Height, Number of Tile types,
+// or any combination of the three.
+// @param uint8_t containing the new width.
+// @param uint8_t containing the new height.
+// @param uint8_t containing the number of tile types.
+//-----------------------------------------------------------------------------
+
+void GamePresenter::changeBoardSize(uint8_t& newWidth, uint8_t& newHeight, uint8_t& inNumTypes) {
+
+    assert(view);
+
+    // TODO: Better Randomness later
+    srand(static_cast<unsigned int>(time(NULL)));
+
+    bool tileArrayInvalid = false;
+
+    // Clamp Values
+    if(newWidth > GameConstants::MAX_WIDTH) {
+        newWidth = GameConstants::MAX_WIDTH;
+    }
+    else if(newWidth < GameConstants::MIN_WIDTH) {
+        newWidth = GameConstants::MIN_WIDTH;
+    }
+
+    if(newHeight > GameConstants::MAX_HEIGHT) {
+        newHeight = GameConstants::MAX_HEIGHT;
+    }
+    else if(newHeight < GameConstants::MIN_HEIGHT) {
+        newHeight = GameConstants::MIN_HEIGHT;
+    }
+
+    if(width != newWidth || height != newHeight) {
+        tileArrayInvalid = true;
+        width = newWidth;
+        height = newHeight;
+        tileCount = width * height;
+        matchesNeeded = static_cast<uint16_t>(floor(tileCount / 2.f));
+        //freeTile = matchesNeeded * 2 == tileCount ? 0 : matchesNeeded;
+    }
+    
+    if(inNumTypes > GameConstants::MAX_TYPES) {
+        inNumTypes = GameConstants::MAX_TYPES;
+    }
+
+    // TODO: Minimum types.
+    // If the user tries to have more than 100 types, tile 101 will be the free tile and the rest will be ignored.
+    if(numTileTypes != inNumTypes) {
+    }
+
+    numTileTypes = inNumTypes > GameConstants::MAX_TYPES ? 
+                                GameConstants::MAX_TYPES :
+                                inNumTypes;
+
+    // Avoid unnecessary delete
+    if(tileArrayInvalid && gameTiles) {
+        delete[] gameTiles;
+        gameTiles = NULL;
+    }
+
+}
 
 //-----------------------------------------------------------------------------
 // validIndex - Checks to see if the given index is valid tile index.

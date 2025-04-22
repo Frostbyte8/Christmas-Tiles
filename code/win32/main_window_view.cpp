@@ -70,7 +70,7 @@ bool MainWindowView::createWindow(HINSTANCE hInstance) {
     // TODO: Bind presenter to view
     // Some of this needs to happen after createControls()
     gamePresenter = new GamePresenter(this);
-    gamePresenter->changeBoardSize(3, 3, 16);
+    gamePresenter->tryChangeBoardSize(3, 3);
     gamePresenter->tryNewGame();
 
     tileset = (HBITMAP)LoadImage(NULL, L"gfx.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);  
@@ -406,10 +406,11 @@ void MainWindowView::onSelectMenuItem(const WORD& itemID) {
         case MenuIDs::BOARD_10x10:
             indexOffset = itemID - MenuIDs::BOARD_3X3;
             // TODO: Changing the board size should automatically start a new game.
-            gamePresenter->changeBoardSize(boardSizes[indexOffset][0], boardSizes[indexOffset][1], 16);
-            gamePresenter->tryNewGame(true);
-            updateLabels();
-            InvalidateRect(window, NULL, FALSE);
+            if(gamePresenter->tryChangeBoardSize(boardSizes[indexOffset][0], boardSizes[indexOffset][1])) {
+                gamePresenter->tryNewGame(true);
+                updateLabels();
+                InvalidateRect(window, NULL, FALSE);
+            }
             break;
     }
 

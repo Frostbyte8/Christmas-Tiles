@@ -66,7 +66,6 @@ class GamePresenter {
 
         // Public Functions
         const uint32_t getElapsedTime();
-        void changeBoardSize(uint8_t ioNewWidth, uint8_t inNewHeight, uint8_t inNumTypes);
         bool tryNewGame(const bool forceNew = false);
         inline const bool isGameInited() const;
         inline const bool isPlaying() const;
@@ -75,10 +74,13 @@ class GamePresenter {
         bool bothFlipped() const;
         void unflip();
         bool tryFlipTile(const unsigned int& index);
+        bool tryChangeBoardSize(uint8_t newWidth, uint8_t newHeight);
 
 
     private:
 
+
+        void changeBoardSize(uint8_t& newWidth, uint8_t& newHeight, uint8_t& inNumTypes);
         bool validIndex(const unsigned int& index) const;
 
         // [TODO]: Some of this information will go into a model
