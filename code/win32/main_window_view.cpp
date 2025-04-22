@@ -42,8 +42,6 @@ bool MainWindowView::registerSelf(HINSTANCE hInstance) {
         return false;
     }
 
-
-
     return true;
 }
 
@@ -388,21 +386,33 @@ LRESULT MainWindowView::onGameBoardClick(const WPARAM& wParam, const LPARAM& lPa
 //-----------------------------------------------------------------------------
 
 void MainWindowView::onSelectMenuItem(const WORD& itemID) {
-    if(itemID == MenuIDs::NEW_GAME) {
-        if(gamePresenter->tryNewGame()) {
+
+    const uint8_t boardSizes[][2] = {{3, 3}, {4, 4}, {5, 5}, {5, 9}, {10, 10}};
+    WORD indexOffset;
+
+    switch(itemID) {
+        // File Menu
+        case MenuIDs::NEW_GAME:
+            if(gamePresenter->tryNewGame()) {
+                updateLabels();
+                InvalidateRect(window, NULL, FALSE);
+            }
+            break;
+        // Options Menu
+        case MenuIDs::BOARD_3X3:
+        case MenuIDs::BOARD_4X4:
+        case MenuIDs::BOARD_5X5:
+        case MenuIDs::BOARD_5X9:
+        case MenuIDs::BOARD_10x10:
+            indexOffset = itemID - MenuIDs::BOARD_3X3;
+            // TODO: Changing the board size should automatically start a new game.
+            gamePresenter->changeBoardSize(boardSizes[indexOffset][0], boardSizes[indexOffset][1], 16);
+            gamePresenter->tryNewGame(true);
             updateLabels();
             InvalidateRect(window, NULL, FALSE);
-        }
+            break;
     }
-    else if(itemID == MenuIDs::EXIT) {
-        SendMessage(window, WM_CLOSE, 0, 0);
-    }
-    else if(itemID == MenuIDs::BOARD_5X5) {
-        gamePresenter->changeBoardSize(5, 5, 16);
-        gamePresenter->tryNewGame(true);
-        updateLabels();
-        InvalidateRect(window, NULL, FALSE);
-    }
+
 }
 
 //-----------------------------------------------------------------------------

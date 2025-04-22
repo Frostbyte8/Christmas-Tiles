@@ -89,6 +89,7 @@ class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
         void centerWindow();
         void updateLabels();
         void onSelectMenuItem(const WORD& itemID);
+        void newGame(const bool forceNew);
 
         LRESULT onGameBoardClick(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT onPaint();
