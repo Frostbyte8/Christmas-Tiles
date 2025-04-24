@@ -17,6 +17,11 @@ __forceinline uint32_t getMSCount() {
 #endif // _WIN32
 }
 
+__forceinline void GamePresenter::unpauseGame() {
+    timeStarted = getMSCount();
+    gameState = GameState::PLAYING;
+}
+
 //=============================================================================
 // Constructor
 //=============================================================================
@@ -140,6 +145,9 @@ bool GamePresenter::tryFlipTile(const unsigned int& index) {
     if(!isGameInited()) {
         return false;
     }
+    else if(gameState == GameState::PAUSED) {
+        unpauseGame();
+    }
     else if(gameState == GameState::NOT_STARTED) {
         timeStarted = getMSCount();
         timeElapsed = 0;
@@ -187,6 +195,25 @@ bool GamePresenter::tryFlipTile(const unsigned int& index) {
     }
 
     return true;
+}
+
+//-----------------------------------------------------------------------------
+// tryTogglePause - Attempts to Pause/Unpause the game
+//-----------------------------------------------------------------------------
+
+int GamePresenter::tryTogglePause() {
+
+    if(gameState == GameState::PLAYING) {
+        getElapsedTime(); // Update elapsed time
+        gameState = GameState::PAUSED;
+        return PauseResults::PAUSED_SUCCESS;
+    }
+    else if(gameState == GameState::PAUSED) {
+        unpauseGame();
+        return PauseResults::UNPAUSED_SUCCESS;
+    }
+
+    return PauseResults::NO_CHANGE;
 }
 
 //-----------------------------------------------------------------------------

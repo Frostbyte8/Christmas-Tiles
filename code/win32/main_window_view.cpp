@@ -129,8 +129,15 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             return onGameBoardClick(wParam, lParam);
 
         case WM_COMMAND:
-            if(HIWORD(wParam) == 0) {
-                onSelectMenuItem(LOWORD(wParam));
+            if(lParam == NULL) {
+                if(HIWORD(wParam) == 0) {
+                    onSelectMenuItem(LOWORD(wParam));
+                }
+            }
+            else {
+                if(LOWORD(wParam) == MAKE_ID(ControlIDs::BTN_PAUSE)) {
+                    onTogglePause();
+                } 
             }
             break;
 
@@ -387,6 +394,17 @@ LRESULT MainWindowView::onGameBoardClick(const WPARAM& wParam, const LPARAM& lPa
     }
 
     return 0;
+}
+
+//-----------------------------------------------------------------------------
+// onTogglePause - Called when the player wants to pause the game 
+//-----------------------------------------------------------------------------
+
+void MainWindowView::onTogglePause() {
+    const int retVal = gamePresenter->tryTogglePause();
+
+    if(retVal == PauseResults::PAUSED_SUCCESS) {
+    }
 }
 
 //-----------------------------------------------------------------------------
