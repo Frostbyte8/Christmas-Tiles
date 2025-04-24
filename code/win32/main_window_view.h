@@ -76,6 +76,11 @@ class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
         HWND window;
         WindowMetrics wm;
 
+        HMENU menuBar;
+        HMENU fileMenu;
+        HMENU optionsMenu;
+        HMENU helpMenu;
+
         //WNDPROC prevLabelProcs[3];
         //HBRUSH gameBG;
 

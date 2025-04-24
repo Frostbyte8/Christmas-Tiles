@@ -223,10 +223,10 @@ bool MainWindowView::createControls() {
 //-----------------------------------------------------------------------------
 
 void MainWindowView::createMenubar() {
-    HMENU menuBar = CreateMenu();
-    HMENU fileMenu = CreateMenu();
-    HMENU optionsMenu = CreateMenu();
-    HMENU helpMenu = CreateMenu();
+    menuBar = CreateMenu();
+    fileMenu = CreateMenu();
+    optionsMenu = CreateMenu();
+    helpMenu = CreateMenu();
 
     AppendMenu(fileMenu, MF_STRING, MenuIDs::NEW_GAME, L"&New Game");
     AppendMenu(fileMenu, MF_STRING, MenuIDs::PAUSE_GAME, L"&Pause Game");
@@ -243,6 +243,16 @@ void MainWindowView::createMenubar() {
     AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_5X9, L"5x9");
     AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_10x10, L"10x10");
     AppendMenu(optionsMenu, MF_STRING, MenuIDs::BOARD_CUSTOM, L"&Custom Size...");
+
+    MENUITEMINFO mii = {0};
+    mii.cbSize = sizeof(MENUITEMINFO);
+    mii.fMask = MIIM_FTYPE;
+    mii.fType = MFT_RADIOCHECK;
+
+    for(int i = MenuIDs::BOARD_3X3; i < MenuIDs::BOARD_CUSTOM; ++i) {
+        mii.wID = i;
+        SetMenuItemInfo(optionsMenu, i, FALSE, &mii);
+    }
 
     AppendMenu(helpMenu, MF_STRING, MenuIDs::HELP_FILE, L"&Help...");
     AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
@@ -410,6 +420,17 @@ void MainWindowView::onSelectMenuItem(const WORD& itemID) {
                 gamePresenter->tryNewGame(true);
                 updateLabels();
                 InvalidateRect(window, NULL, FALSE);
+
+                MENUITEMINFO mii = {0};
+                mii.cbSize = sizeof(MENUITEMINFO);
+                mii.fMask = MIIM_STATE;
+
+                for(int i = MenuIDs::BOARD_3X3; i < MenuIDs::BOARD_CUSTOM; ++i) {
+                    mii.wID = i;
+                    mii.fState = (i == itemID) ? MFS_CHECKED : MFS_UNCHECKED;
+                    SetMenuItemInfo(optionsMenu, i, FALSE, &mii);
+                }
+
             }
             break;
     }
