@@ -136,7 +136,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             }
             else {
                 if(LOWORD(wParam) == MAKE_ID(ControlIDs::BTN_PAUSE)) {
-                    onTogglePause();
+                    gamePresenter->tryTogglePause();
                 } 
             }
             break;
@@ -277,7 +277,6 @@ void MainWindowView::createMenubar() {
 //-----------------------------------------------------------------------------
 
 void MainWindowView::moveControls() {
-    
 
     // find the widest Label. Likely, that will be score/time/points label.
 
@@ -397,17 +396,6 @@ LRESULT MainWindowView::onGameBoardClick(const WPARAM& wParam, const LPARAM& lPa
 }
 
 //-----------------------------------------------------------------------------
-// onTogglePause - Called when the player wants to pause the game 
-//-----------------------------------------------------------------------------
-
-void MainWindowView::onTogglePause() {
-    const int retVal = gamePresenter->tryTogglePause();
-
-    if(retVal == PauseResults::PAUSED_SUCCESS) {
-    }
-}
-
-//-----------------------------------------------------------------------------
 // onSelectMenuItem - Process when a menu item is selected, with one exception,
 // the Pause Button is also processed here.
 // @param WORD containing the ID of the menu item selected.
@@ -425,6 +413,9 @@ void MainWindowView::onSelectMenuItem(const WORD& itemID) {
                 updateLabels();
                 InvalidateRect(window, NULL, FALSE);
             }
+            break;
+        case MenuIDs::PAUSE_GAME:
+            gamePresenter->tryTogglePause();
             break;
         // Options Menu
         case MenuIDs::BOARD_3X3:
@@ -507,4 +498,15 @@ void MainWindowView::gameWon() {
 int MainWindowView::askQuestion(const std::string& message, const std::string& title, const int& mbType) {
     // TODO: UTF-8 std::string to wchar.
     return MessageBoxA(window, message.c_str(), title.c_str(), mbType);
+}
+
+void MainWindowView::gamePauseToggle(const bool unpause) {
+    if(unpause) {
+        SetWindowTextW(controls[ControlIDs::BTN_PAUSE], L"Pause");
+        ModifyMenuW(fileMenu, MenuIDs::PAUSE_GAME, MF_BYCOMMAND | MF_STRING, MenuIDs::PAUSE_GAME, L"Pause");
+    }
+    else {
+        SetWindowTextW(controls[ControlIDs::BTN_PAUSE], L"Unpause");
+        ModifyMenuW(fileMenu, MenuIDs::PAUSE_GAME, MF_BYCOMMAND | MF_STRING, MenuIDs::PAUSE_GAME, L"Unpause");
+    }
 }

@@ -61,6 +61,7 @@ class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
         // Interface Functions
         virtual void gameWon();
         virtual int askQuestion(const std::string& message, const std::string& title, const int& mbType);
+        virtual void gamePauseToggle(const bool unpause);
 
     private:
 
@@ -95,7 +96,6 @@ class MainWindowView : public MainWindowInterface, WndAsClass<MainWindowView> {
         void updateLabels();
         void onSelectMenuItem(const WORD& itemID);
         void newGame(const bool forceNew);
-        void onTogglePause();
 
         LRESULT onGameBoardClick(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT onPaint();

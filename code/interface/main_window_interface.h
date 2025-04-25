@@ -26,6 +26,7 @@ class MainWindowInterface {
     public:
         //virtual void displayMessageBox(const uint32_t& langID) = 0;
         virtual int askQuestion(const std::string& message, const std::string& title, const int& mbType) = 0;
+        virtual void gamePauseToggle(const bool unpaused) = 0;
         virtual void gameWon() = 0;
 };
 

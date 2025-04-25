@@ -40,14 +40,6 @@ namespace GameState {
     };
 }
 
-namespace PauseResults {
-    enum {
-        UNPAUSED_SUCCESS = -1,
-        NO_CHANGE = 0,
-        PAUSED_SUCCESS = 1,
-    };
-}
-
 struct GameTile {
     GameTile() : matched(GameConstants::TILE_UNMATCHED), tileType(GameConstants::UNSET_TILE) {}
     int8_t tileType;
@@ -83,12 +75,11 @@ class GamePresenter {
         void unflip();
         bool tryFlipTile(const unsigned int& index);
         bool tryChangeBoardSize(uint8_t newWidth, uint8_t newHeight);
-        int tryTogglePause();
+        void tryTogglePause();
 
 
     private:
 
-        void unpauseGame();
         void changeBoardSize(uint8_t& newWidth, uint8_t& newHeight, uint8_t& inNumTypes);
         bool validIndex(const unsigned int& index) const;
 
