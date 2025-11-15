@@ -1,0 +1,30 @@
+#pragma once
+
+//------------------------------------------------------------------------------
+// createBackBuffer - Creates a back buffer for the context given. You must call
+// destroyBackBuffer when you are done with the back buffer
+// @param HDC to create the back buffer for
+// @param HDC of the back buffer
+// @param HBITMAP to be used for the back buffer
+// @param HBITMAP to be used to hold the previous HBITMAP contained by the back buffer
+// @param RECT dimensions of the back buffer
+//------------------------------------------------------------------------------
+
+__forceinline void createBackBuffer(const HDC& primaryContext, HDC& backBuffer, HBITMAP& backBitmap, HBITMAP& prevBitmap, const RECT& rc) {
+    backBuffer      = CreateCompatibleDC(primaryContext);
+    backBitmap      = CreateCompatibleBitmap(primaryContext, rc.right-rc.left, rc.bottom-rc.top);
+    prevBitmap      = (HBITMAP)SelectObject(backBuffer, backBitmap);
+}
+
+//------------------------------------------------------------------------------
+// destroyBackBuffer - Destroys a previously created back buffer.
+// @param HDC of the back buffer
+// @param HBITMAP used by the back buffer
+// @param HBITMAP that the back buffer had when it was created
+//------------------------------------------------------------------------------
+
+__forceinline void destroyBackBuffer(HDC& backBuffer, HBITMAP& backBitmap, HBITMAP& prevBitmap) {
+    SelectObject(backBuffer, prevBitmap);
+    DeleteObject(backBitmap);
+    DeleteDC(backBuffer);
+}
