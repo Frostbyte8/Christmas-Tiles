@@ -284,8 +284,8 @@ void MainWindowView::onTileSelected(const WORD& tileIndex) {
 //------------------------------------------------------------------------------
 
 void MainWindowView::onTimer() {
-    DWORD timeNow = GetTickCount();
-    elapsedTime = timeNow - startTime;
+    
+    elapsedTime = gamePanel.windowPresenter.getElapsedTime();
 
     DWORD seconds = elapsedTime / 1000;
     DWORD minutes = seconds / 60;

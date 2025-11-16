@@ -18,6 +18,10 @@ class GamePanel : public WndAsClass<GamePanel> {
 
         inline const HWND getHandle() const { return hWnd; }
 
+        // TODO: this belongs Privately in MainWindow, but it's here to make the
+        // transition easier while I work on it.
+        MainWindowPresenter windowPresenter;
+
     private:
         void onClick(WORD xPos, WORD yPos);
         void onPaint();
@@ -25,7 +29,7 @@ class GamePanel : public WndAsClass<GamePanel> {
 
         HWND hWnd;
         static bool isRegistered;
-        MainWindowPresenter windowPresenter;
+        
         HBITMAP tilesetBMP;
         bool shouldUnflip;
 };

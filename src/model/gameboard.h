@@ -24,6 +24,7 @@ namespace GameBoardFlipErrors {
 class GameBoard {
 
     public:
+
         GameBoard() : width(5), height(8) {
             // 10x10 Grid. Even if we don't use 10x10 tiles, the struct is is small,
             // and we might as well take advantage of that.
@@ -32,6 +33,7 @@ class GameBoard {
 
         // Accessors
 
+        inline const uint8_t& getMatchesNeeded() const { return matchesNeeded; }
         inline const uint8_t& getWidth() const { return width; }
         inline const uint8_t& getHeight() const { return height; }
         inline const std::vector<TileData>& getTiles() const { return tiles; }
@@ -55,8 +57,6 @@ class GameBoard {
          // Public Functions
 
         bool tryNewGame(const uint8_t& numTileTypes);
-        
-
         
     private:
 
