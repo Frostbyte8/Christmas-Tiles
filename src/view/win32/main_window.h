@@ -14,7 +14,9 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
     public:
 
         // TODO: These should not be public :/
-        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false) {}
+        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false) {
+            windowPresenter.setMainWindow(reinterpret_cast<MainWindowInterface*>(this));
+        }
         bool registerSelf();
         bool createWindow();
         bool onCreate();

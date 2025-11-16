@@ -2,6 +2,7 @@
 
 #include "../model/gameboard.h"
 #include "../stdint_compat.h"
+#include "../interface/main_window_interface.h"
 
 class MainWindowPresenter {
 
@@ -24,7 +25,17 @@ class MainWindowPresenter {
         bool tryPause();
         bool tryUnpause();
 
+        void setMainWindow(MainWindowInterface* mwi) {
+            mainWindow = mwi;
+        }
+
+        void test() {
+            mainWindow->implDisplayTestMessage();
+        }
+
     private:
+
+        MainWindowInterface *mainWindow;
 
         void        updateElapsedTime();
 
