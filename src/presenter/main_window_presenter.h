@@ -9,7 +9,7 @@ class MainWindowPresenter {
 
         MainWindowPresenter() : selectedIndex1(GameBoardConstants::NO_SELECTED_INDEX), selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX) {
             // This is for debug
-            gameBoard.tryNewGame();
+            gameBoard.tryNewGame(16);
         }
 
         int tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex);

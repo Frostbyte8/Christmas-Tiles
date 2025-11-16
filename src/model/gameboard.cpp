@@ -11,7 +11,7 @@
 // tryNewGame - Attempts to start a new game
 //------------------------------------------------------------------------------
 
-bool GameBoard::tryNewGame() {
+bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
     
     // Get the number of tiles this board has
     numTiles = (width * height);
@@ -29,9 +29,11 @@ bool GameBoard::tryNewGame() {
     uint8_t firstUnfilledIndex = 0;
     uint8_t matchesMade = 0;
 
-        srand(static_cast<unsigned int>(time(NULL)));
+    srand(static_cast<unsigned int>(time(NULL)));
 
     for(unsigned int i = 0 ;; ++i) {
+
+        const uint8_t TILE_ID = (rand() % numTileTypes) + 2;
 
         // Seek the first tile that does not have data set
         if(tiles[firstUnfilledIndex].ID) {
@@ -40,13 +42,15 @@ bool GameBoard::tryNewGame() {
         }
 
         // Fill the tile, and move the next unfilled index to the next index.
-        tiles[firstUnfilledIndex].ID = (matchesMade + 2); // DEBUG: Just so I can see this memory wise.
+        // DEBUG: Just so I can see this memory wise.
+        // numTileTypes needs to be used for the ID
+        //tiles[firstUnfilledIndex].ID = (matchesMade + 2);
+        tiles[firstUnfilledIndex].ID = TILE_ID;
         firstUnfilledIndex++;
 
         // Select Random Tile for matching tile
 
         uint8_t matchIndex = (firstUnfilledIndex) + (rand() % (numTiles - firstUnfilledIndex)) - 1;
-
 
         // Now search for the first empty tile, which may even be the one we just
         // generated.
@@ -61,7 +65,10 @@ bool GameBoard::tryNewGame() {
             }
             else {
 
-                tiles[matchIndex].ID = (matchesMade + 2); // DEBUG: Just so I can see this memory wise.
+                // DEBUG: Just so I can see this memory wise.
+                // numTileTypes needs to be used for the ID
+                //tiles[matchIndex].ID = (matchesMade + 2);
+                tiles[matchIndex].ID = TILE_ID;
 
                 // If we wrapped around, we'll update the unfilled index too.
                 if(shouldUpdateUnfilled) {
@@ -117,103 +124,3 @@ bool GameBoard::tryNewGame() {
     return true;
 
 }
-
-/*
-
-void GameBoard::unflipTiles() {
-
-    if(selectedIndex != GameBoardConstants::NO_SELECTED_INDEX) {
-        tiles[selectedIndex].flags = TileFlags::UNFLIPPED;
-        selectedIndex = GameBoardConstants::NO_SELECTED_INDEX;
-    }
-
-    if(selectedIndex2 != GameBoardConstants::NO_SELECTED_INDEX) {
-        tiles[selectedIndex2].flags = TileFlags::UNFLIPPED;
-        selectedIndex2 = GameBoardConstants::NO_SELECTED_INDEX;
-    }
-
-}
-
-//------------------------------------------------------------------------------
-// checkAndUnflip - Checks to see if two tiles are flipped over, and should be
-// reset. It assumes that if selectedIndex2 is set, that two tiles a flipped.
-//------------------------------------------------------------------------------
-
-inline void GameBoard::checkAndUnflip() {
-
-    if(selectedIndex2 != GameBoardConstants::NO_SELECTED_INDEX) {
-        tiles[selectedIndex].flags = TileFlags::UNFLIPPED;
-        tiles[selectedIndex2].flags = TileFlags::UNFLIPPED;
-
-        selectedIndex = GameBoardConstants::NO_SELECTED_INDEX;
-        selectedIndex2 = GameBoardConstants::NO_SELECTED_INDEX;
-    }
-}
-
-//------------------------------------------------------------------------------
-// tryFlipTileAtCoodinates - With the Coordinates and Tile Dimensions given,
-// attempt to flip the tile there if it exists.
-//------------------------------------------------------------------------------
-
-
-int GameBoard::tryFlipTileAtCoodinates(uint16_t& xPos, uint16_t& yPos, const uint16_t& tileWidth, const uint16_t& tileHeight) {
-
-    // Check to see if we have to unflip anything
-    checkAndUnflip();
-
-    // Now convert the coordinates to an index
-
-    const uint16_t MAX_X = (width * tileWidth) - 1;
-    const uint16_t MAX_Y = (height * tileHeight) - 1;
-
-    // Make sure the tile is within range
-
-    if(xPos > MAX_X || yPos > MAX_Y) {
-        return GameBoardFlipErrors::OutOfBounds;
-    }
-
-    // Convert Coordinates to Index
-
-    xPos = xPos / tileWidth;
-    yPos = ((yPos / 32) * width) + xPos;
-
-    // Make sure the index is within range, and that the tile has not yet
-    // be flipped.
-
-    if(yPos > numTiles-1) {
-        return GameBoardFlipErrors::OutOfBounds;
-    }
-
-    // Check if the tile has not been flipped already, and if it has not,
-    // attempt to flip it
-
-    if(tiles[yPos].flags) {
-        return GameBoardFlipErrors::AlreadyFlipped;
-    }   
-
-    tiles[yPos].flags = TileFlags::FLIPPED;
-
-    if(selectedIndex == GameBoardConstants::NO_SELECTED_INDEX) {
-        selectedIndex = static_cast<uint8_t>(yPos);
-    }
-    else {
-
-        // Do these tiles match?
-
-        if(tiles[selectedIndex].ID == tiles[yPos].ID) {
-            tiles[selectedIndex].flags = TileFlags::MATCHED;
-            tiles[yPos].flags = TileFlags::MATCHED;
-            selectedIndex = GameBoardConstants::NO_SELECTED_INDEX;
-            return GameBoardFlipErrors::TilesMatched;
-        }
-
-        // Tiles do not match.
-        selectedIndex2 = yPos;
-
-        return GameBoardFlipErrors::TilesNotMatched;
-    }
-
-
-    return GameBoardFlipErrors::TileFlipped;
-}
-*/

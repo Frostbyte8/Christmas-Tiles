@@ -64,6 +64,8 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 
 inline void MainWindowPresenter::unflipTiles() {
     if(selectedIndex2 != GameBoardConstants::NO_SELECTED_INDEX) {
-        gameBoard.unfilpTiles(selectedIndex1, selectedIndex2);
+        gameBoard.setTilesUnflipped(selectedIndex1, selectedIndex2);
+        selectedIndex1 = GameBoardConstants::NO_SELECTED_INDEX;
+        selectedIndex2 = GameBoardConstants::NO_SELECTED_INDEX;
     }
 }

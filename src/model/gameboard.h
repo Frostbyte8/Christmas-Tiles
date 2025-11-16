@@ -24,11 +24,19 @@ namespace GameBoardFlipErrors {
 class GameBoard {
 
     public:
-        GameBoard() : width(5), height(8), selectedIndex(GameBoardConstants::NO_SELECTED_INDEX), selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX) {
+        GameBoard() : width(5), height(8) {
             // 10x10 Grid. Even if we don't use 10x10 tiles, the struct is is small,
             // and we might as well take advantage of that.
             tiles.resize(width * height);
         }
+
+        // Accessors
+
+        inline const uint8_t& getWidth() const { return width; }
+        inline const uint8_t& getHeight() const { return height; }
+        inline const std::vector<TileData>& getTiles() const { return tiles; }
+
+        // Mutators
 
         void setTileFlipped(const uint8_t& index) {
             tiles[index].flags = TileFlags::FLIPPED;
@@ -37,36 +45,25 @@ class GameBoard {
         void setTilesMatched(const uint8_t& index1, const uint8_t& index2) {
             tiles[index1].flags = TileFlags::MATCHED;
             tiles[index2].flags = TileFlags::MATCHED;
-        }
+        }      
 
-        void unfilpTiles(const uint8_t& index1, const uint8_t& index2) {
+        void setTilesUnflipped(const uint8_t& index1, const uint8_t& index2) {
             tiles[index1].flags = TileFlags::UNFLIPPED;
             tiles[index2].flags = TileFlags::UNFLIPPED;
         }
 
+         // Public Functions
+
+        bool tryNewGame(const uint8_t& numTileTypes);
         
-        bool hasFreeTile() const;
-        bool isTileFlipped();
-        bool tryNewGame();
-        int tryFlipTileAtCoodinates(uint16_t& xPos, uint16_t& yPos, const uint16_t& tileWidth, const uint16_t& tileHeight);
-        
-        inline const uint8_t& getWidth() const { return width; }
-        inline const uint8_t& getHeight() const { return height; }
-        inline const std::vector<TileData>& getTiles() const { return tiles; }
+
         
     private:
 
-        inline void checkAndUnflip();
-
         uint8_t width;
         uint8_t height;
-        //uint8_t freeTileIndex;
         uint8_t numTiles;
         uint8_t matchesNeeded;
-        uint8_t matchesDone;
-        uint8_t selectedIndex;
-        uint8_t selectedIndex2;
-        uint8_t numTileTypes;
 
         std::vector<TileData> tiles;
 
