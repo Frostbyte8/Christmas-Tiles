@@ -68,6 +68,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
             
             matchesMade++;
 
+            score += points;
+            points = 50;
+
             return GameBoardFlipErrors::TilesMatched;
 
         }
@@ -179,5 +182,19 @@ void MainWindowPresenter::updateElapsedTime() {
     const uint32_t timeNow = GET_MILLI_COUNT();
     milliElapsedTime += (timeNow - milliStartTime);
     milliStartTime = timeNow;
+
+    if(milliElapsedTime > milliPointDelta + 999) {
+        
+        uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
+        
+        if(points < seconds) {
+            points = 0;
+        }
+        else {
+            points -= static_cast<uint8_t>(seconds);
+        }
+
+        milliPointDelta += (seconds * 1000);
+    }
 
 }

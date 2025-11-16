@@ -10,12 +10,14 @@ class MainWindowPresenter {
 
         MainWindowPresenter() : selectedIndex1(GameBoardConstants::NO_SELECTED_INDEX), 
             selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX), matchesMade(0),
-            milliStartTime(0), milliElapsedTime(0), isPaused(true) {
+            milliStartTime(0), milliElapsedTime(0), score(0), points(50), isPaused(true), milliPointDelta(0) {
             // This is for debug
             gameBoard.tryNewGame(16);
         }
 
         const uint32_t& getElapsedTime();
+        const uint32_t& getScore() const { return score; }
+        const uint8_t& getPoints() const { return points; }
 
         int tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex);
         inline void unflipTiles();
@@ -45,6 +47,10 @@ class MainWindowPresenter {
         uint8_t     matchesMade;
         uint32_t    milliStartTime;
         uint32_t    milliElapsedTime;
+        uint32_t    milliPointDelta;
+
+        uint8_t     points;
+        uint32_t    score;
 
         GameBoard gameBoard;
 };

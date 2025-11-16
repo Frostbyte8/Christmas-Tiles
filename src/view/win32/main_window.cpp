@@ -40,6 +40,12 @@ __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
+__forceinline void updatePoints(const HWND& ctrl, const uint8_t& points) {
+    wchar_t pointsStr[4] = {0};
+    wsprintf(pointsStr, L"%d", points);
+    SetWindowText(ctrl, pointsStr);
+}
+
 //==============================================================================
 // Public Functions
 //==============================================================================
@@ -61,7 +67,7 @@ bool MainWindowView::onCreate() {
     groupStats[2] = createGroupBox(L"Time", hWnd, CtrlID::GROUP_TIME, hInstance);
 
     scoreLabel.createWindow(hInstance, L"000000000", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_SCORE));
-    pointsLabel.createWindow(hInstance, L"0", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_POINTS));
+    pointsLabel.createWindow(hInstance, L"50", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_POINTS));
     timeLabel.createWindow(hInstance, L"00:00", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_TIME));
 
     buttonPause = createButton(L"Pause", hWnd, CtrlID::BUTTON_PAUSE, hInstance);
@@ -297,6 +303,13 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
             // Set/Reset timer
             SetTimer(hWnd, MainWindowViewConstants::FLIP_TIMER_ID, 1000, NULL);
             shouldUnflip = true;
+
+        }
+        else if(retVal == GameBoardFlipErrors::TilesMatched) {
+            wchar_t scoreStr[10] = {0};
+            wsprintf(scoreStr, L"%09d", windowPresenter.getScore());
+            SetWindowText(scoreLabel.getHandle(), scoreStr);
+            updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
         }
 
     }
@@ -322,6 +335,7 @@ void MainWindowView::onTimer() {
     wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
     SetWindowText(timeLabel.getHandle(), timeStr);
 
+    updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
 
 }
 
