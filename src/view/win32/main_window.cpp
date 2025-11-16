@@ -4,6 +4,11 @@
 static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
 static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW;
 
+namespace MainWindowViewConstants {
+    static const int ELAPSED_TIMER_ID   = 1;
+    static const int FLIP_TIMER_ID      = 2;
+}
+
 //==============================================================================
 // Namespaces / Enums
 //==============================================================================
@@ -62,6 +67,7 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(L"Pause", hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
+    gamePanel.setWindowPresenter(&windowPresenter);
     metrics.initWindowMetrics();
 
     HFONT dialogFont = metrics.GetCurrentFont();
@@ -218,7 +224,6 @@ bool MainWindowView::createWindow() {
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
 
-    startTime = GetTickCount();
     SetTimer(hWnd, 1, 100, 0);
 
     return true;
@@ -269,14 +274,35 @@ bool MainWindowView::registerSelf() {
     return true;
 }
 
+void MainWindowView::implDisplayTestMessage() {
+    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
+}
+
 //------------------------------------------------------------------------------
 // onTileSelected - Called when a tile was selected.
 //------------------------------------------------------------------------------
 
-void MainWindowView::onTileSelected(const WORD& tileIndex) {
-    wchar_t outStr[256] = {0};
-    wsprintf(outStr, L"%d\n", tileIndex);
-    OutputDebugString(outStr);
+void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
+    
+    uint8_t xPos = static_cast<uint8_t>(wParam / 32);
+    uint8_t yPos = static_cast<uint8_t>(lParam / 32);
+
+    const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
+
+    if(retVal > GameBoardFlipErrors::WasSuccessful) {
+        OutputDebugStr(L"FLIPPED!\n");
+        InvalidateRect(gamePanel.getHandle(), NULL, TRUE);
+
+        if(retVal == GameBoardFlipErrors::TilesNotMatched) {
+            // Set/Reset timer
+            SetTimer(hWnd, MainWindowViewConstants::FLIP_TIMER_ID, 1000, NULL);
+            shouldUnflip = true;
+        }
+
+    }
+    else {
+        OutputDebugStr(L"Hmm. Stuck!\n");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -285,7 +311,8 @@ void MainWindowView::onTileSelected(const WORD& tileIndex) {
 
 void MainWindowView::onTimer() {
     
-    elapsedTime = gamePanel.windowPresenter.getElapsedTime();
+    // TODO: tidy this up
+    DWORD elapsedTime = windowPresenter.getElapsedTime();
 
     DWORD seconds = elapsedTime / 1000;
     DWORD minutes = seconds / 60;
@@ -309,7 +336,16 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             return DefWindowProc(hWnd, msg, wParam, lParam);
 
         case WM_TIMER:
-            onTimer();
+            if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
+                onTimer();
+            }
+            else if(wParam == MainWindowViewConstants::FLIP_TIMER_ID) {
+                if(shouldUnflip) {
+                    windowPresenter.unflipTiles();
+                    shouldUnflip = false;
+                    InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
+                }
+            }
             break;
 
         case WM_CREATE:
@@ -317,7 +353,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_TILE_SELECTED:
-            onTileSelected(static_cast<WORD>(wParam));
+            onTileSelected(wParam, lParam);
             break;
 
         case WM_CLOSE:

@@ -244,6 +244,18 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="interface"
+			>
+			<File
+				RelativePath="..\..\..\src\interface\main_window_interface.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\interface\main_window_interface.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\..\src\main.cpp"
 			>

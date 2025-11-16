@@ -4,8 +4,15 @@
 #include <assert.h>
 
 #ifdef _WIN32
+
 #include <windows.h>
+
+// GET_MILLI_COUNT - Must return the number of seconds elapsed since the system
+// was started. On Win32 this just calls GetTickCount
+
 #define GET_MILLI_COUNT GetTickCount
+
+
 #endif // _WIN32
 
 //==============================================================================
@@ -14,6 +21,7 @@
 
 //------------------------------------------------------------------------------
 // onClickTile - Call when the tile is clicked
+// Note that yIndex is over written.
 //------------------------------------------------------------------------------
 
 int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex) {
@@ -75,26 +83,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 }
 
 //------------------------------------------------------------------------------
-// tryUnpause - Attempts to unpause the game and resume the timer
+// tryPause - Attempt to pause the game. If it does, it will also update how
+// much time the game has been played elapsed before the game was paused.
 //------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryUnpause() {
-
-    if(!isPaused) {
-        return false;
-    }
-
-    assert(matchesMade <= gameBoard.getMatchesNeeded());
-
-    if(matchesMade == gameBoard.getMatchesNeeded()) {
-        return false;
-    }
-    
-    milliStartTime = GET_MILLI_COUNT();
-    isPaused = false;
-
-    return true;
-}
 
 bool MainWindowPresenter::tryPause() {
 
@@ -102,6 +93,7 @@ bool MainWindowPresenter::tryPause() {
         return false;
     }
 
+    // Matches should never be able to go above the total needed
     assert(matchesMade <= gameBoard.getMatchesNeeded());
 
     if(matchesMade == gameBoard.getMatchesNeeded()) {
@@ -115,6 +107,35 @@ bool MainWindowPresenter::tryPause() {
 
 }
 
+//------------------------------------------------------------------------------
+// tryUnpause - Attempts to un pause the game and resume the how much time the
+// game has been played.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryUnpause() {
+
+    if(!isPaused) {
+        return false;
+    }
+
+    // Matches should never be able to go above the total needed
+    assert(matchesMade <= gameBoard.getMatchesNeeded());
+
+    if(matchesMade == gameBoard.getMatchesNeeded()) {
+        return false;
+    }
+    
+    milliStartTime = GET_MILLI_COUNT();
+    isPaused = false;
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// getElapsedTime - Get how much time has elapsed. This function will also
+// attempt to update how much time has elapsed.
+//------------------------------------------------------------------------------
+
 const uint32_t& MainWindowPresenter::getElapsedTime() {
 
     if(!isPaused) {
@@ -124,19 +145,8 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
     return milliElapsedTime;
 }
 
-
-void MainWindowPresenter::updateElapsedTime() {
-
-    assert(isPaused == false);
-
-    const uint32_t timeNow = GET_MILLI_COUNT();
-    milliElapsedTime += (timeNow - milliStartTime);
-    milliStartTime = timeNow;
-
-}
-
 //------------------------------------------------------------------------------
-// unflipTiles - Unflips tiles is necessary
+// unflipTiles - Unflips tiles if necessary
 //------------------------------------------------------------------------------
 
 inline void MainWindowPresenter::unflipTiles() {
@@ -150,5 +160,24 @@ inline void MainWindowPresenter::unflipTiles() {
         selectedIndex2 = GameBoardConstants::NO_SELECTED_INDEX;
 
     }
+
+}
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// updateElapsedTime - Updates how long the game has been played. You must
+// ensure that the game is not paused before calling this function.
+//------------------------------------------------------------------------------
+
+void MainWindowPresenter::updateElapsedTime() {
+
+    assert(isPaused == false);
+
+    const uint32_t timeNow = GET_MILLI_COUNT();
+    milliElapsedTime += (timeNow - milliStartTime);
+    milliStartTime = timeNow;
 
 }

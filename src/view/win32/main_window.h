@@ -5,14 +5,16 @@
 #include "game_panel.h"
 #include "dynamic_label.h"
 #include "window_meterics.h"
+#include "../../presenter//main_window_presenter.h"
+#include "../../interface/main_window_interface.h"
 
-class MainWindowView : public WndAsClass<MainWindowView> {
+class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
 
     public:
 
         // TODO: These should not be public :/
-        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn) {}
+        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false) {}
         bool registerSelf();
         bool createWindow();
         bool onCreate();
@@ -20,9 +22,13 @@ class MainWindowView : public WndAsClass<MainWindowView> {
         void onSize(const WORD& width, const WORD& height);
         void onTimer();
 
+        // Interface Functions
+        void implDisplayTestMessage();
+
+
     private:
 
-        void onTileSelected(const WORD& tileIndex);
+        void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
         void centerWindow();
         void moveControls();
 
@@ -41,6 +47,9 @@ class MainWindowView : public WndAsClass<MainWindowView> {
         // Disable copy constructor
         MainWindowView &operator=(const MainWindowView&);
 
+        MainWindowPresenter windowPresenter;
+        bool shouldUnflip;
+
         HWND hWnd;
         HMONITOR prevMonitor;
 
@@ -51,9 +60,10 @@ class MainWindowView : public WndAsClass<MainWindowView> {
         DynamicLabel pointsLabel;
         DynamicLabel timeLabel;
 
-        GamePanel gamePanel;
+        GamePanel       gamePanel;
         const HINSTANCE hInstance;
-        WindowMetrics metrics;
-        DWORD startTime;
-        DWORD elapsedTime;
+        WindowMetrics   metrics;
+
+
+
 };

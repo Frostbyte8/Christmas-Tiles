@@ -2,10 +2,6 @@
 #include "subclassed_controls.h"
 #include "shared_functions.h"
 
-namespace GamePanelConstants {
-    static const UINT FLIP_TIMER_ID = 101;
-}
-
 bool GamePanel::isRegistered = false;
 
 //-----------------------------------------------------------------------------
@@ -85,45 +81,12 @@ LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_LBUTTONDOWN: onClick(LOWORD(lParam), HIWORD(lParam)); break; //SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam), 0);  break;
+        case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam), HIWORD(lParam)); break;
         case WM_PAINT:      onPaint(); break;
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
-        case WM_TIMER:
-            if(shouldUnflip) {
-                windowPresenter.unflipTiles();
-                shouldUnflip = false;
-                InvalidateRect(hWnd, NULL, TRUE);
-            }
-        break;
         case WM_CLOSE:      DestroyWindow(hWnd); break;
     }
     return 0;
-}
-
-void GamePanel::onClick(WORD xPos, WORD yPos) {
-    
-    shouldUnflip = false; // Kill timer does not remove the message.
-
-    uint8_t xIndex = static_cast<uint8_t>(xPos / 32);
-    uint8_t yIndex = static_cast<uint8_t>(yPos / 32);
-
-    int retVal = windowPresenter.tryFlipTileAtCoodinates(xIndex, yIndex);
-
-    if(retVal > GameBoardFlipErrors::WasSuccessful) {
-        OutputDebugStr(L"FLIPPED!\n");
-        InvalidateRect(hWnd, NULL, TRUE);
-
-        if(retVal == GameBoardFlipErrors::TilesNotMatched) {
-            // Set/Reset timer
-            SetTimer(hWnd, GamePanelConstants::FLIP_TIMER_ID, 1000, NULL);
-            shouldUnflip = true;
-        }
-
-    }
-    else {
-        OutputDebugStr(L"Hmm. Stuck!\n");
-    }
-
 }
 
 //-----------------------------------------------------------------------------
@@ -160,7 +123,7 @@ void GamePanel::onPaint() {
 
     // TODO: This is obviously not complete
 
-    const GameBoard& gameBoard = windowPresenter.getGameBoard();
+    const GameBoard& gameBoard = windowPresenter->getGameBoard();
 
     const uint8_t& boardWidth = gameBoard.getWidth();
     const uint8_t& boardHeight = gameBoard.getHeight();
