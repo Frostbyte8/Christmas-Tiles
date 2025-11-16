@@ -232,6 +232,18 @@
 				</File>
 			</Filter>
 		</Filter>
+		<Filter
+			Name="presenter"
+			>
+			<File
+				RelativePath="..\..\..\src\presenter\main_window_presenter.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\presenter\main_window_presenter.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath="..\..\..\src\main.cpp"
 			>

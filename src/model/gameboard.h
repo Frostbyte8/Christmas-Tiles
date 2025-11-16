@@ -29,16 +29,30 @@ class GameBoard {
             // and we might as well take advantage of that.
             tiles.resize(width * height);
         }
+
+        void setTileFlipped(const uint8_t& index) {
+            tiles[index].flags = TileFlags::FLIPPED;
+        }
+
+        void setTilesMatched(const uint8_t& index1, const uint8_t& index2) {
+            tiles[index1].flags = TileFlags::MATCHED;
+            tiles[index2].flags = TileFlags::MATCHED;
+        }
+
+        void unfilpTiles(const uint8_t& index1, const uint8_t& index2) {
+            tiles[index1].flags = TileFlags::UNFLIPPED;
+            tiles[index2].flags = TileFlags::UNFLIPPED;
+        }
+
         
         bool hasFreeTile() const;
         bool isTileFlipped();
         bool tryNewGame();
         int tryFlipTileAtCoodinates(uint16_t& xPos, uint16_t& yPos, const uint16_t& tileWidth, const uint16_t& tileHeight);
-
-        const std::vector<TileData>& getTiles() const  { return tiles; }
-        const uint8_t& getWidth() const { return width; }
-        const uint8_t& getHeight() const { return height; }
-        void unflipTiles();
+        
+        inline const uint8_t& getWidth() const { return width; }
+        inline const uint8_t& getHeight() const { return height; }
+        inline const std::vector<TileData>& getTiles() const { return tiles; }
         
     private:
 
@@ -53,6 +67,7 @@ class GameBoard {
         uint8_t selectedIndex;
         uint8_t selectedIndex2;
         uint8_t numTileTypes;
+
         std::vector<TileData> tiles;
 
 };

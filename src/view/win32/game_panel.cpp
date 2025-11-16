@@ -68,7 +68,7 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
 
     tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
 
-    gameBoard.tryNewGame();
+    // TODO: MainWindowPresenter stuff?
 
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
@@ -90,7 +90,7 @@ LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
         case WM_TIMER:
             if(shouldUnflip) {
-                gameBoard.unflipTiles();
+                windowPresenter.unflipTiles();
                 shouldUnflip = false;
                 InvalidateRect(hWnd, NULL, TRUE);
             }
@@ -104,7 +104,10 @@ void GamePanel::onClick(WORD xPos, WORD yPos) {
     
     shouldUnflip = false; // Kill timer does not remove the message.
 
-    int retVal = gameBoard.tryFlipTileAtCoodinates(xPos, yPos, 32, 32);
+    uint8_t xIndex = static_cast<uint8_t>(xPos / 32);
+    uint8_t yIndex = static_cast<uint8_t>(yPos / 32);
+
+    int retVal = windowPresenter.tryFlipTileAtCoodinates(xIndex, yIndex);
 
     if(retVal > GameBoardFlipErrors::WasSuccessful) {
         OutputDebugStr(L"FLIPPED!\n");
@@ -156,6 +159,8 @@ void GamePanel::onPaint() {
     HBITMAP tempBMP = (HBITMAP)SelectObject(tilesetHDC, tilesetBMP);
 
     // TODO: This is obviously not complete
+
+    const GameBoard& gameBoard = windowPresenter.getGameBoard();
 
     const uint8_t& boardWidth = gameBoard.getWidth();
     const uint8_t& boardHeight = gameBoard.getHeight();

@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "subclassed_controls.h"
 #include "../../model/gameboard.h"
+#include "../../presenter/main_window_presenter.h"
 
 // TODO: MainWindowInterface
 
@@ -24,7 +25,7 @@ class GamePanel : public WndAsClass<GamePanel> {
 
         HWND hWnd;
         static bool isRegistered;
-        GameBoard gameBoard;
+        MainWindowPresenter windowPresenter;
         HBITMAP tilesetBMP;
         bool shouldUnflip;
 };

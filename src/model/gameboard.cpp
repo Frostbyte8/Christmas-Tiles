@@ -118,10 +118,7 @@ bool GameBoard::tryNewGame() {
 
 }
 
-//------------------------------------------------------------------------------
-// unflipTiles - Checks to see if the tile selected is flipped, and then unflips
-// them.
-//------------------------------------------------------------------------------
+/*
 
 void GameBoard::unflipTiles() {
 
@@ -157,6 +154,7 @@ inline void GameBoard::checkAndUnflip() {
 // tryFlipTileAtCoodinates - With the Coordinates and Tile Dimensions given,
 // attempt to flip the tile there if it exists.
 //------------------------------------------------------------------------------
+
 
 int GameBoard::tryFlipTileAtCoodinates(uint16_t& xPos, uint16_t& yPos, const uint16_t& tileWidth, const uint16_t& tileHeight) {
 
@@ -218,3 +216,4 @@ int GameBoard::tryFlipTileAtCoodinates(uint16_t& xPos, uint16_t& yPos, const uin
 
     return GameBoardFlipErrors::TileFlipped;
 }
+*/
