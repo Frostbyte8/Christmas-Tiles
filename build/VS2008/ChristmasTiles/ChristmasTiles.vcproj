@@ -257,6 +257,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\..\src\language_table.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\src\main.cpp"
 			>
 		</File>
