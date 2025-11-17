@@ -50,6 +50,81 @@ __forceinline void updatePoints(const HWND& ctrl, const uint8_t& points) {
 // Public Functions
 //==============================================================================
 
+//------------------------------------------------------------------------------
+// createWindow - Creates the main Window.
+//------------------------------------------------------------------------------
+
+bool MainWindowView::createWindow() {
+
+    if(hWnd) {
+        return true; // Already created.
+    }
+
+    // TODO: This may need WS_CLIPCHILDREN?
+
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", L"",
+        WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
+        NULL, NULL, hInstance, this);
+
+    if(hWnd == NULL) {
+        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+        return false;
+    }
+
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
+
+    // TODO: This should be set for the first time when the game starts.
+    SetTimer(hWnd, MainWindowViewConstants::ELAPSED_TIMER_ID, 100, 0);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// doLoop - Standard run of the mill message loop
+//------------------------------------------------------------------------------
+
+UINT MainWindowView::doLoop() {
+    
+    MSG msg;
+    
+    while(GetMessage(&msg, NULL, 0, 0) > 0) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return msg.wParam;
+}
+
+//------------------------------------------------------------------------------
+// registerSelf - Registers the Window class.
+//------------------------------------------------------------------------------
+
+bool MainWindowView::registerSelf() {
+    
+    WNDCLASSEX wc;
+
+    wc.cbSize        = sizeof(WNDCLASSEX);
+    wc.style         = 0;
+    wc.lpfnWndProc   = MainWindowView::WndProc;
+    wc.cbClsExtra    = 0;
+    wc.cbWndExtra    = 0;
+    wc.hInstance     = hInstance;
+    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
+    wc.lpszMenuName  = NULL;
+    wc.lpszClassName = L"XmasTilesMainWindow";
+    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+
+    if(!RegisterClassEx(&wc)) {
+        MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
+}
+
 //==============================================================================
 // Win32 Messages
 //==============================================================================
@@ -71,9 +146,13 @@ bool MainWindowView::onCreate() {
     timeLabel.createWindow(hInstance, L"00:00", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_TIME));
 
     buttonPause = createButton(L"Pause", hWnd, CtrlID::BUTTON_PAUSE, hInstance);
-    
+    EnableWindow(buttonPause, FALSE);
+
+    // TODO: gamePanel should get the presenter via it's constructor
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
+    windowPresenter.tryNewGame( static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) );
     gamePanel.setWindowPresenter(&windowPresenter);
+
     metrics.initWindowMetrics();
 
     HFONT dialogFont = metrics.GetCurrentFont();
@@ -83,6 +162,36 @@ bool MainWindowView::onCreate() {
 
     moveControls();
     return true;
+
+}
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//-----------------------------------------------------------------------------
+// centerWindow - Centers the window on the monitor it was said to have last
+// been on.
+//-----------------------------------------------------------------------------
+
+void MainWindowView::centerWindow() {
+
+    MONITORINFO monitorInfo = {0};
+    monitorInfo.cbSize = sizeof(monitorInfo);
+    GetMonitorInfoW(prevMonitor, &monitorInfo);
+
+    RECT windowRC;
+    GetWindowRect(hWnd, &windowRC);
+
+    const int winWidth  = windowRC.right - windowRC.left; 
+    const int winHeight = windowRC.bottom - windowRC.top;
+    const int workXCenter = abs(monitorInfo.rcWork.left - monitorInfo.rcWork.right) / 2;
+    const int workYCenter = abs(monitorInfo.rcWork.top - monitorInfo.rcWork.bottom) / 2;
+
+    SetWindowPos(hWnd, NULL,
+                 monitorInfo.rcWork.right - (workXCenter + (winWidth / 2)), 
+                 monitorInfo.rcWork.bottom - (workYCenter + (winHeight / 2)),
+                 winWidth, winHeight, SWP_NOREDRAW);
 
 }
 
@@ -144,12 +253,12 @@ void MainWindowView::moveControls() {
     const LONG widestGroupBox = getWidestGroupBox();
 
     // TODO: This may not need to actually be here
-    // TODO: Min Height = the Height of Standard Tile at current dpi * 9 (32 * 9 for 96, 48 * 9 for 144, etc)
+    // TODO: Min Height = the Height of Standard Tile. So that is gamePanel.getTilesetHeight() * 9
 
     // Resize Window
     // TODO: Get Monitor Window is on?
 
-    RECT rc = {0, 0, (32 * 5) + widestGroupBox, tallestPoint};
+    RECT rc = {0, 0, (gamePanel.getTilesetHeight() * 5) + widestGroupBox, tallestPoint};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
     MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, FALSE);
 
@@ -176,127 +285,19 @@ void MainWindowView::moveControls() {
     
 }
 
-//==============================================================================
-// Private Functions
-//==============================================================================
-
-//-----------------------------------------------------------------------------
-// centerWindow - Centers the window on the monitor it was said to have last
-// been on.
-//-----------------------------------------------------------------------------
-
-void MainWindowView::centerWindow() {
-
-    MONITORINFO monitorInfo = {0};
-    monitorInfo.cbSize = sizeof(monitorInfo);
-    GetMonitorInfoW(prevMonitor, &monitorInfo);
-
-    RECT windowRC;
-    GetWindowRect(hWnd, &windowRC);
-
-    const int winWidth  = windowRC.right - windowRC.left; 
-    const int winHeight = windowRC.bottom - windowRC.top;
-    const int workXCenter = abs(monitorInfo.rcWork.left - monitorInfo.rcWork.right) / 2;
-    const int workYCenter = abs(monitorInfo.rcWork.top - monitorInfo.rcWork.bottom) / 2;
-
-    SetWindowPos(hWnd, NULL,
-                 monitorInfo.rcWork.right - (workXCenter + (winWidth / 2)), 
-                 monitorInfo.rcWork.bottom - (workYCenter + (winHeight / 2)),
-                 winWidth, winHeight, SWP_NOREDRAW);
-
-}
-
 //------------------------------------------------------------------------------
-// createWindow - Creates the main Window.
-//------------------------------------------------------------------------------
-
-bool MainWindowView::createWindow() {
-
-    if(hWnd) {
-        return true; // Already created.
-    }
-
-    // TODO: This may need WS_CLIPCHILDREN?
-
-    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", L"",
-        WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
-        NULL, NULL, hInstance, this);
-
-    if(hWnd == NULL) {
-        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
-        return false;
-    }
-
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
-
-    SetTimer(hWnd, 1, 100, 0);
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// doLoop - Standard run of the mill message loop
-//------------------------------------------------------------------------------
-
-UINT MainWindowView::doLoop() {
-    
-    MSG msg;
-    
-    while(GetMessage(&msg, NULL, 0, 0) > 0) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-    }
-
-    return msg.wParam;
-}
-
-//------------------------------------------------------------------------------
-// registerSelf - Registers the Window class.
-//------------------------------------------------------------------------------
-
-bool MainWindowView::registerSelf() {
-    
-    WNDCLASSEX wc;
-
-    wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = 0;
-    wc.lpfnWndProc   = MainWindowView::WndProc;
-    wc.cbClsExtra    = 0;
-    wc.cbWndExtra    = 0;
-    wc.hInstance     = hInstance;
-    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
-    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
-    wc.lpszMenuName  = NULL;
-    wc.lpszClassName = L"XmasTilesMainWindow";
-    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
-
-    if(!RegisterClassEx(&wc)) {
-        MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);
-        return false;
-    }
-
-    return true;
-}
-
-void MainWindowView::implDisplayTestMessage() {
-    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
-}
-
-//------------------------------------------------------------------------------
-// onTileSelected - Called when a tile was selected.
+// onTileSelected - Processes the UWM_TILE_SELECTED message
 //------------------------------------------------------------------------------
 
 void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
     
-    uint8_t xPos = static_cast<uint8_t>(wParam / 32);
-    uint8_t yPos = static_cast<uint8_t>(lParam / 32);
+    uint8_t xPos = static_cast<uint8_t>(wParam / gamePanel.getTilesetHeight());
+    uint8_t yPos = static_cast<uint8_t>(lParam / gamePanel.getTilesetHeight());
 
     const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
 
     if(retVal > GameBoardFlipErrors::WasSuccessful) {
-        OutputDebugStr(L"FLIPPED!\n");
+        
         InvalidateRect(gamePanel.getHandle(), NULL, TRUE);
 
         if(retVal == GameBoardFlipErrors::TilesNotMatched) {
@@ -313,16 +314,14 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
         }
 
     }
-    else {
-        OutputDebugStr(L"Hmm. Stuck!\n");
-    }
 }
 
 //------------------------------------------------------------------------------
-// OnTimer - Processes the WM_TIMER Event
+// onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
+// ID.
 //------------------------------------------------------------------------------
 
-void MainWindowView::onTimer() {
+void MainWindowView::onElapsedTimeTimer() {
     
     // TODO: tidy this up
     DWORD elapsedTime = windowPresenter.getElapsedTime();
@@ -339,6 +338,10 @@ void MainWindowView::onTimer() {
 
 }
 
+void MainWindowView::implDisplayTestMessage() {
+    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
+}
+
 //------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //------------------------------------------------------------------------------
@@ -351,7 +354,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
         case WM_TIMER:
             if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
-                onTimer();
+                onElapsedTimeTimer();
             }
             else if(wParam == MainWindowViewConstants::FLIP_TIMER_ID) {
                 if(shouldUnflip) {
@@ -366,10 +369,6 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             onCreate();
             break;
 
-        case WM_KEYUP:
-            windowPresenter.test();
-            break;
-
         case UWM_TILE_SELECTED:
             onTileSelected(wParam, lParam);
             break;
@@ -378,10 +377,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             KillTimer(hWnd, 1);
             DestroyWindow(hWnd); 
             break;
+
         case WM_DESTROY: 
             PostQuitMessage(0);
             break;
+
     }
     return 0;
 }
-

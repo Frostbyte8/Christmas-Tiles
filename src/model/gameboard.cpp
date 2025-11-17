@@ -24,6 +24,7 @@ bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
     // Determine if this board has a free tile, and if so, set it.
     if(numTiles % 2) {
         tiles[(numTiles-1) / 2].ID = 1; // Free Tile
+        tiles[(numTiles-1) / 2].flags = TileFlags::MATCHED;
     }
 
     uint8_t firstUnfilledIndex = 0;
@@ -121,6 +122,6 @@ bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
 
 #endif // _DEBUG
 
-    return true;
+    return true; // TODO: probably do not need this.
 
 }

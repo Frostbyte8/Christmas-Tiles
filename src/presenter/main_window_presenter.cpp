@@ -19,6 +19,11 @@
 // Public Functions
 //==============================================================================
 
+bool MainWindowPresenter::tryNewGame(const uint8_t& numTileTypes) {
+    gameBoard.tryNewGame(numTileTypes);
+    return true;
+}
+
 //------------------------------------------------------------------------------
 // onClickTile - Call when the tile is clicked
 // Note that yIndex is over written.

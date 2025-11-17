@@ -25,7 +25,7 @@ class GameBoard {
 
     public:
 
-        GameBoard() : width(5), height(8) {
+        GameBoard() : width(5), height(9) {
             // 10x10 Grid. Even if we don't use 10x10 tiles, the struct is is small,
             // and we might as well take advantage of that.
             tiles.resize(width * height);

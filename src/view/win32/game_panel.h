@@ -21,7 +21,8 @@ class GamePanel : public WndAsClass<GamePanel> {
             windowPresenter = mwp;
         }
 
-        
+        inline const LONG& getTilesetWidth() const { return bmpWidth; }
+        inline const LONG& getTilesetHeight() const { return bmpHeight; }
 
     private:
         void onClick(WORD xPos, WORD yPos);
@@ -34,4 +35,6 @@ class GamePanel : public WndAsClass<GamePanel> {
         static bool isRegistered;
         
         HBITMAP tilesetBMP;
+        LONG bmpWidth;
+        LONG bmpHeight;
 };

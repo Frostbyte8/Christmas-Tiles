@@ -17,26 +17,25 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false) {
             windowPresenter.setMainWindow(reinterpret_cast<MainWindowInterface*>(this));
         }
-        bool registerSelf();
-        bool createWindow();
-        bool onCreate();
-        UINT doLoop();
-        void onSize(const WORD& width, const WORD& height);
-        void onTimer();
 
+        bool createWindow();
+        UINT doLoop();
+        bool registerSelf();
+
+        bool onCreate();
         // Interface Functions
         void implDisplayTestMessage();
 
 
     private:
 
-        void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
         void centerWindow();
-        void moveControls();
-
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
-
+        void moveControls();
+        void onTimer();
+        void onElapsedTimeTimer();
+        void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
         // This is a helpful function that will set the font on all the controls
@@ -65,7 +64,5 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         GamePanel       gamePanel;
         const HINSTANCE hInstance;
         WindowMetrics   metrics;
-
-
 
 };

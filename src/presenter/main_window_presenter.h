@@ -12,7 +12,7 @@ class MainWindowPresenter {
             selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX), matchesMade(0),
             milliStartTime(0), milliElapsedTime(0), score(0), points(50), isPaused(true), milliPointDelta(0) {
             // This is for debug
-            gameBoard.tryNewGame(16);
+            //gameBoard.tryNewGame(16);
         }
 
         const uint32_t& getElapsedTime();
@@ -26,14 +26,17 @@ class MainWindowPresenter {
 
         bool tryPause();
         bool tryUnpause();
+        bool tryNewGame(const uint8_t& numTileTypes);
 
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }
 
+        /*
         void test() {
             mainWindow->implDisplayTestMessage();
         }
+        */
 
     private:
 

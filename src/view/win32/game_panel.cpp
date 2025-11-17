@@ -5,6 +5,43 @@
 bool GamePanel::isRegistered = false;
 
 //-----------------------------------------------------------------------------
+// createWindow - Creates the main Window.
+//-----------------------------------------------------------------------------
+
+// TODO: X,Y,W,H, Style Flags
+
+bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
+
+    if(hWnd) {
+        return true; // Already created.
+    }
+
+    hWnd = CreateWindowEx(0, L"GamePanel", L"",
+        WS_CHILD | WS_VISIBLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, 192, 320,
+        parent, ID, hInst, this);
+
+    if(hWnd == NULL) {
+        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+        return false;
+    }
+
+    // TODO: This should be a function
+    tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    BITMAP bmInfo = {0};
+    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
+    bmpWidth    = bmInfo.bmWidth;
+    bmpHeight   = bmInfo.bmHeight;
+
+    // TODO: MainWindowPresenter stuff?
+
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
 //-----------------------------------------------------------------------------
 
@@ -40,37 +77,7 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
     return true;
 }
 
-//-----------------------------------------------------------------------------
-// createWindow - Creates the main Window.
-//-----------------------------------------------------------------------------
 
-// TODO: X,Y,W,H, Style Flags
-
-bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
-
-    if(hWnd) {
-        return true; // Already created.
-    }
-
-    hWnd = CreateWindowEx(0, L"GamePanel", L"",
-        WS_CHILD | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 192, 320,
-        parent, ID, hInst, this);
-
-    if(hWnd == NULL) {
-        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
-        return false;
-    }
-
-    tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
-
-    // TODO: MainWindowPresenter stuff?
-
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
-
-    return true;
-}
 
 //-----------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
@@ -131,14 +138,13 @@ void GamePanel::onPaint() {
 
     const std::vector<TileData>& tiles = gameBoard.getTiles();
 
-
     for(uint8_t k = 0; k < boardHeight; ++k) {
         for(uint8_t i = 0; i < boardWidth; ++i) {
             if(!tiles[DX2_TO_DX1(i, k, boardWidth)].flags) {
-                BitBlt(backBuffer, i * 32, k * 32, 32, 32, tilesetHDC, 0, 0, SRCCOPY);
+                BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, 0, 0, SRCCOPY);
             }
             else {
-                BitBlt(backBuffer, i * 32, k * 32, 32, 32, tilesetHDC, 32 * tiles[DX2_TO_DX1(i, k, boardWidth)].ID, 0, SRCCOPY);
+                BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, bmpHeight * tiles[DX2_TO_DX1(i, k, boardWidth)].ID, 0, SRCCOPY);
             }
         }
     }
