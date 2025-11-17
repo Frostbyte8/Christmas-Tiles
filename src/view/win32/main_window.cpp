@@ -169,10 +169,10 @@ bool MainWindowView::onCreate() {
 // Private Functions
 //==============================================================================
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // centerWindow - Centers the window on the monitor it was said to have last
 // been on.
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void MainWindowView::centerWindow() {
 
@@ -338,10 +338,6 @@ void MainWindowView::onElapsedTimeTimer() {
 
 }
 
-void MainWindowView::implDisplayTestMessage() {
-    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
-}
-
 //------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //------------------------------------------------------------------------------
@@ -384,4 +380,32 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
     }
     return 0;
+}
+
+//==============================================================================
+// Interface Functions
+//==============================================================================
+
+//-----------------------------------------------------------------------------
+// implGameStateChanged - Game state was changed
+//-----------------------------------------------------------------------------
+
+void MainWindowView::implGameStateChanged(const int& newState) {
+    if(newState == GameState::STATE_PLAYING) {
+        EnableWindow(buttonPause, TRUE);
+        SetWindowTextW(buttonPause, L"Pause");
+    }
+    else if(newState == GameState::STATE_PLAYING) {
+        EnableWindow(buttonPause, FALSE);
+    }
+    else if(newState == GameState::STATE_PAUSED) {
+        SetWindowTextW(buttonPause, L"Unpause");
+    }
+    else if(newState == GameState::STATE_GAMEWON) {
+        EnableWindow(buttonPause, FALSE);
+    }
+}
+
+void MainWindowView::implDisplayTestMessage() {
+    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
 }

@@ -25,6 +25,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         bool onCreate();
         // Interface Functions
         void implDisplayTestMessage();
+        void implGameStateChanged(const int& gameState);
 
 
     private:

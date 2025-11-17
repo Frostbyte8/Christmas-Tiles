@@ -31,8 +31,12 @@ bool MainWindowPresenter::tryNewGame(const uint8_t& numTileTypes) {
 
 int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex) {
 
-    if(isPaused) {
-        if(!tryUnpause()) {
+    if(gameState != GameState::STATE_PLAYING) {
+        
+        if(gameState == GameState::STATE_GAMEWON) {
+            return GameBoardFlipErrors::AlreadyFlipped; // TODO: New error for game won
+        }
+        else if(!tryUnpause()) {
             return GameBoardFlipErrors::AlreadyFlipped; // TODO: New error for pausing
         }
     }
@@ -97,19 +101,22 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 
 bool MainWindowPresenter::tryPause() {
 
-    if(isPaused) {
+    if(gameState != GameState::STATE_PLAYING) {
+        // You can only pause games that are being played.
         return false;
     }
 
     // Matches should never be able to go above the total needed
+    /*
     assert(matchesMade <= gameBoard.getMatchesNeeded());
 
     if(matchesMade == gameBoard.getMatchesNeeded()) {
         return false;
     }
+    */
 
     updateElapsedTime();
-    isPaused = true;
+    gameState = GameState::STATE_PLAYING;
 
     return true;
 
@@ -122,19 +129,24 @@ bool MainWindowPresenter::tryPause() {
 
 bool MainWindowPresenter::tryUnpause() {
 
-    if(!isPaused) {
+    if(gameState > GameState::STATE_PAUSED) {
+        // Cannot Unpause if game is playing or won.
         return false;
     }
 
+
+    /*
     // Matches should never be able to go above the total needed
     assert(matchesMade <= gameBoard.getMatchesNeeded());
 
     if(matchesMade == gameBoard.getMatchesNeeded()) {
         return false;
     }
+    */
     
     milliStartTime = GET_MILLI_COUNT();
-    isPaused = false;
+    gameState = GameState::STATE_PLAYING;
+    mainWindow->implGameStateChanged(gameState);
 
     return true;
 }
@@ -146,7 +158,7 @@ bool MainWindowPresenter::tryUnpause() {
 
 const uint32_t& MainWindowPresenter::getElapsedTime() {
 
-    if(!isPaused) {
+    if(gameState == GameState::STATE_PLAYING) {
         updateElapsedTime();
     }
 
@@ -182,7 +194,7 @@ inline void MainWindowPresenter::unflipTiles() {
 
 void MainWindowPresenter::updateElapsedTime() {
 
-    assert(isPaused == false);
+    assert(gameState == GameState::STATE_PLAYING);
 
     const uint32_t timeNow = GET_MILLI_COUNT();
     milliElapsedTime += (timeNow - milliStartTime);

@@ -4,13 +4,23 @@
 #include "../stdint_compat.h"
 #include "../interface/main_window_interface.h"
 
+namespace GameState {
+    enum GameState {
+        STATE_NOT_STARTED       = -1,
+        STATE_PAUSED            = 0,
+        STATE_GAMEWON           = 1,
+        STATE_PLAYING           = 2,
+        
+    };
+}
+
 class MainWindowPresenter {
 
     public:
 
         MainWindowPresenter() : selectedIndex1(GameBoardConstants::NO_SELECTED_INDEX), 
             selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX), matchesMade(0),
-            milliStartTime(0), milliElapsedTime(0), score(0), points(50), isPaused(true), milliPointDelta(0) {
+            milliStartTime(0), milliElapsedTime(0), score(0), points(50), gameState(GameState::STATE_NOT_STARTED), milliPointDelta(0) {
             // This is for debug
             //gameBoard.tryNewGame(16);
         }
@@ -44,7 +54,7 @@ class MainWindowPresenter {
 
         void        updateElapsedTime();
 
-        bool        isPaused;
+        int         gameState;
         uint8_t     selectedIndex1;
         uint8_t     selectedIndex2;
         uint8_t     matchesMade;
