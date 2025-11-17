@@ -34,8 +34,7 @@ class MainWindowPresenter {
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }
 
-        bool tryPause();
-        bool tryUnpause();
+        bool tryTogglePause();
         bool tryNewGame(const uint8_t& numTileTypes);
 
         void setMainWindow(MainWindowInterface* mwi) {
@@ -52,6 +51,8 @@ class MainWindowPresenter {
 
         MainWindowInterface *mainWindow;
 
+        bool tryPause();
+        bool tryUnpause();
         void        updateElapsedTime();
 
         int         gameState;

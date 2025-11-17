@@ -365,6 +365,12 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             onCreate();
             break;
 
+        case WM_COMMAND:
+            if(wParam == CtrlID::BUTTON_PAUSE) {
+                 windowPresenter.tryTogglePause();
+            }
+            break;
+
         case UWM_TILE_SELECTED:
             onTileSelected(wParam, lParam);
             break;

@@ -95,60 +95,20 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 }
 
 //------------------------------------------------------------------------------
-// tryPause - Attempt to pause the game. If it does, it will also update how
-// much time the game has been played elapsed before the game was paused.
+// tryTogglePause - Attempt to Pause/Unpause the game
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryPause() {
+bool MainWindowPresenter::tryTogglePause() {
 
-    if(gameState != GameState::STATE_PLAYING) {
-        // You can only pause games that are being played.
-        return false;
+    if(gameState == GameState::STATE_PLAYING) {
+        return tryPause();
+    }
+    else if(gameState == GameState::STATE_PAUSED) {
+        return tryUnpause();
     }
 
-    // Matches should never be able to go above the total needed
-    /*
-    assert(matchesMade <= gameBoard.getMatchesNeeded());
+    return false;
 
-    if(matchesMade == gameBoard.getMatchesNeeded()) {
-        return false;
-    }
-    */
-
-    updateElapsedTime();
-    gameState = GameState::STATE_PLAYING;
-
-    return true;
-
-}
-
-//------------------------------------------------------------------------------
-// tryUnpause - Attempts to un pause the game and resume the how much time the
-// game has been played.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryUnpause() {
-
-    if(gameState > GameState::STATE_PAUSED) {
-        // Cannot Unpause if game is playing or won.
-        return false;
-    }
-
-
-    /*
-    // Matches should never be able to go above the total needed
-    assert(matchesMade <= gameBoard.getMatchesNeeded());
-
-    if(matchesMade == gameBoard.getMatchesNeeded()) {
-        return false;
-    }
-    */
-    
-    milliStartTime = GET_MILLI_COUNT();
-    gameState = GameState::STATE_PLAYING;
-    mainWindow->implGameStateChanged(gameState);
-
-    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -186,6 +146,64 @@ inline void MainWindowPresenter::unflipTiles() {
 //==============================================================================
 // Private Functions
 //==============================================================================
+
+//------------------------------------------------------------------------------
+// tryPause - Attempt to pause the game. If it does, it will also update how
+// much time the game has been played elapsed before the game was paused.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryPause() {
+
+    if(gameState != GameState::STATE_PLAYING) {
+        // You can only pause games that are being played.
+        return false;
+    }
+
+    // Matches should never be able to go above the total needed
+    /*
+    assert(matchesMade <= gameBoard.getMatchesNeeded());
+
+    if(matchesMade == gameBoard.getMatchesNeeded()) {
+        return false;
+    }
+    */
+
+    updateElapsedTime();
+    gameState = GameState::STATE_PAUSED;
+    mainWindow->implGameStateChanged(gameState);
+
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// tryUnpause - Attempts to un pause the game and resume the how much time the
+// game has been played.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryUnpause() {
+
+    if(gameState > GameState::STATE_PAUSED) {
+        // Cannot Unpause if game is playing or won.
+        return false;
+    }
+
+
+    /*
+    // Matches should never be able to go above the total needed
+    assert(matchesMade <= gameBoard.getMatchesNeeded());
+
+    if(matchesMade == gameBoard.getMatchesNeeded()) {
+        return false;
+    }
+    */
+    
+    milliStartTime = GET_MILLI_COUNT();
+    gameState = GameState::STATE_PLAYING;
+    mainWindow->implGameStateChanged(gameState);
+
+    return true;
+}
 
 //------------------------------------------------------------------------------
 // updateElapsedTime - Updates how long the game has been played. You must
