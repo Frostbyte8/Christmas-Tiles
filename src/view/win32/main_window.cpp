@@ -401,14 +401,11 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         EnableWindow(buttonPause, TRUE);
         SetWindowTextW(buttonPause, L"Pause");
     }
-    else if(newState == GameState::STATE_PLAYING) {
+    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, L"Unpause");
-    }
-    else if(newState == GameState::STATE_GAMEWON) {
-        EnableWindow(buttonPause, FALSE);
     }
 }
 

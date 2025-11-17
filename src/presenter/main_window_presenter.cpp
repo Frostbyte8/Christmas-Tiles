@@ -80,6 +80,12 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
             score += points;
             points = 50;
 
+            if(matchesMade == gameBoard.getMatchesNeeded()) {
+                updateElapsedTime();
+                gameState = GameState::STATE_GAMEWON;
+                mainWindow->implGameStateChanged(gameState);
+            }
+
             return GameBoardFlipErrors::TilesMatched;
 
         }
