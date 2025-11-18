@@ -18,9 +18,33 @@
 //==============================================================================
 // Public Functions
 //==============================================================================
-
+    
 bool MainWindowPresenter::tryNewGame(const uint8_t& numTileTypes) {
+
+    if(gameState != GameState::STATE_GAMEWON) {
+        wchar_t message[] = L"Game in progress.";
+        wchar_t title[] = L"Are you sure?";
+        const int retVal = mainWindow->implAskYesNoQuestion(message, title);
+
+        if(retVal != 6) {
+            return false;
+        }
+
+    }
+    
+    // TODO: Function to reset this stuff
+
+    selectedIndex1 = 0;
+    selectedIndex2 = 0;
+    matchesMade = 0;
+    milliElapsedTime= 0;
+    milliPointDelta = 0;
+    points = 50;
+    score = 0;
     gameBoard.tryNewGame(numTileTypes);
+    gameState = GameState::STATE_NOT_STARTED;
+    mainWindow->implGameStateChanged(gameState);
+    
     return true;
 }
 

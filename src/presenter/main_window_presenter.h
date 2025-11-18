@@ -20,7 +20,7 @@ class MainWindowPresenter {
 
         MainWindowPresenter() : selectedIndex1(GameBoardConstants::NO_SELECTED_INDEX), 
             selectedIndex2(GameBoardConstants::NO_SELECTED_INDEX), matchesMade(0),
-            milliStartTime(0), milliElapsedTime(0), score(0), points(50), gameState(GameState::STATE_NOT_STARTED), milliPointDelta(0) {
+            milliStartTime(0), milliElapsedTime(0), score(0), points(50), gameState(GameState::STATE_GAMEWON), milliPointDelta(0) {
             // This is for debug
             //gameBoard.tryNewGame(16);
         }
@@ -37,6 +37,7 @@ class MainWindowPresenter {
         bool tryTogglePause();
         bool tryNewGame(const uint8_t& numTileTypes);
 
+        // TODO: The constructor is the only thing that needs this.
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }

@@ -47,6 +47,7 @@ bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
         // numTileTypes needs to be used for the ID
         //tiles[firstUnfilledIndex].ID = (matchesMade + 2);
         tiles[firstUnfilledIndex].ID = TILE_ID;
+        tiles[firstUnfilledIndex].flags = TileFlags::UNFLIPPED;
         firstUnfilledIndex++;
 
         // Select Random Tile for matching tile
@@ -70,6 +71,7 @@ bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
                 // numTileTypes needs to be used for the ID
                 //tiles[matchIndex].ID = (matchesMade + 2);
                 tiles[matchIndex].ID = TILE_ID;
+                tiles[matchIndex].flags = TileFlags::UNFLIPPED;
 
                 // If we wrapped around, we'll update the unfilled index too.
                 if(shouldUpdateUnfilled) {

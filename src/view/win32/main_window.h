@@ -5,7 +5,7 @@
 #include "game_panel.h"
 #include "dynamic_label.h"
 #include "window_meterics.h"
-#include "../../presenter//main_window_presenter.h"
+#include "../../presenter/main_window_presenter.h"
 #include "../../interface/main_window_interface.h"
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
@@ -25,6 +25,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
 
         bool onCreate();
         // Interface Functions
+        int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title);
         void implDisplayTestMessage();
         void implGameStateChanged(const int& gameState);
 

@@ -34,6 +34,7 @@ namespace MenuID {
         HIGHSCORES,
         EXIT,
         TILESET,
+        CHANGE_LANGUAGE,
         BOARD_3x3,
         BOARD_4x4,
         BOARD_5x5,
@@ -166,6 +167,7 @@ __forceinline void MainWindowView::createMenuBar() {
     // Options Menu
     // TODO: MenuItemInfo may be necessary for radio buttons
     AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, L"&Change Tileset...");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, L"&Change Language...");
     AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
     AppendMenu(optionsMenu, MF_STRING | MF_CHECKED, MenuID::BOARD_3x3, L"3x3");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
@@ -428,9 +430,21 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case WM_COMMAND:
-            if(wParam == CtrlID::BUTTON_PAUSE) {
-                 windowPresenter.tryTogglePause();
+
+            switch (wParam) {
+
+                case MenuID::NEW_GAME:
+                    windowPresenter.tryNewGame(16); // TODO: Real new game routine.
+                    break;
+
+                case CtrlID::BUTTON_PAUSE: 
+                case MenuID::PAUSE_GAME:
+                    windowPresenter.tryTogglePause(); 
+                    break;
+
+                
             }
+
             break;
 
         case UWM_TILE_SELECTED:
@@ -455,6 +469,14 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 //==============================================================================
 
 //-----------------------------------------------------------------------------
+// implAskYesNoQuestion - Ask the user for a yes, or a no
+//-----------------------------------------------------------------------------
+
+int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* title) {
+    return MessageBox(hWnd, message, title, MB_YESNOCANCEL | MB_ICONQUESTION);
+}
+
+//-----------------------------------------------------------------------------
 // implGameStateChanged - Game state was changed
 //-----------------------------------------------------------------------------
 
@@ -465,6 +487,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
     }
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
+        InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, L"Unpause");
