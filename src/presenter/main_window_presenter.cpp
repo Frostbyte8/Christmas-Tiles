@@ -12,8 +12,27 @@
 
 #define GET_MILLI_COUNT GetTickCount
 
-
 #endif // _WIN32
+
+//==============================================================================
+// Constructors
+//==============================================================================
+
+MainWindowPresenter::MainWindowPresenter() {
+    reset(); // Just to reduce code reuse.
+}
+
+__forceinline void MainWindowPresenter::reset() {
+    selectedIndex1      = 0;
+    selectedIndex2      = 0;
+    points              = 50;
+    score               = 0;
+    matchesMade         = 0;
+    milliStartTime      = 0;
+    milliElapsedTime    = 0;
+    milliPointDelta     = 0;
+    gameState           = GameState::STATE_GAMEWON;
+}
 
 //==============================================================================
 // Public Functions
@@ -31,17 +50,10 @@ bool MainWindowPresenter::tryNewGame(const uint8_t& numTileTypes) {
         }
 
     }
-    
-    // TODO: Function to reset this stuff
 
-    selectedIndex1 = 0;
-    selectedIndex2 = 0;
-    matchesMade = 0;
-    milliElapsedTime= 0;
-    milliPointDelta = 0;
-    points = 50;
-    score = 0;
+    reset();
     gameBoard.tryNewGame(numTileTypes);
+
     gameState = GameState::STATE_NOT_STARTED;
     mainWindow->implGameStateChanged(gameState);
     
