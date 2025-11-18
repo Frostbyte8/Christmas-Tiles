@@ -18,6 +18,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
             windowPresenter.setMainWindow(reinterpret_cast<MainWindowInterface*>(this));
         }
 
+        __forceinline void createMenuBar();
         bool createWindow();
         UINT doLoop();
         bool registerSelf();
@@ -53,6 +54,12 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         bool shouldUnflip;
 
         HWND hWnd;
+        
+        HMENU menuBar;
+        HMENU fileMenu;
+        HMENU optionsMenu;
+        HMENU helpMenu;
+
         HMONITOR prevMonitor;
 
         HWND groupStats[3];

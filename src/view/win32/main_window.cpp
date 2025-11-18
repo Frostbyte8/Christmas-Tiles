@@ -1,5 +1,6 @@
 #include "main_window.h"
 #include "subclassed_controls.h"
+#include "../../language_table.h"
 
 static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
 static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW;
@@ -23,6 +24,24 @@ namespace CtrlID {
         LABEL_TIME,
         BUTTON_PAUSE,
         PANEL_GAMEBOARD,
+    };
+}
+
+namespace MenuID {
+    enum MenuID {
+        NEW_GAME     = 201,
+        PAUSE_GAME,
+        HIGHSCORES,
+        EXIT,
+        TILESET,
+        BOARD_3x3,
+        BOARD_4x4,
+        BOARD_5x5,
+        BOARD_5x9,
+        BOARD_10x10,
+        BOARD_CUSTOM,
+        HELP_FILE,
+        ABOUT,
     };
 }
 
@@ -62,7 +81,7 @@ bool MainWindowView::createWindow() {
 
     // TODO: This may need WS_CLIPCHILDREN?
 
-    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", L"",
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", languageTable.getStrings()[LangID::APP_TITLE],
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
         NULL, NULL, hInstance, this);
 
@@ -129,11 +148,53 @@ bool MainWindowView::registerSelf() {
 // Win32 Messages
 //==============================================================================
 
+__forceinline void MainWindowView::createMenuBar() {
+    menuBar     = CreateMenu();
+    fileMenu    = CreateMenu();
+    optionsMenu = CreateMenu();
+    helpMenu    = CreateMenu();
+
+    // File Menu
+
+    AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, L"&New Game");
+    AppendMenu(fileMenu, MF_STRING, MenuID::PAUSE_GAME, L"&Pause Game");
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, L"&Highscores");
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, L"&Exit");
+
+    // Options Menu
+    // TODO: MenuItemInfo may be necessary for radio buttons
+    AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, L"&Change Tileset...");
+    AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(optionsMenu, MF_STRING | MF_CHECKED, MenuID::BOARD_3x3, L"3x3");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x5, L"5x5");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x9, L"5x9");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_10x10, L"10x10");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, L"&Custom Size...");
+
+    // Help Menu
+    AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, L"&Help...");
+    AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, L"&About Christmas Tiles...");
+
+    // Now attach each menu to the menu bar
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(fileMenu), L"&File");
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(optionsMenu), L"&Options");
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(helpMenu), L"&Help");
+
+    SetMenu(hWnd, menuBar);
+}
+
+
 //------------------------------------------------------------------------------
 // onCreate - Processes the WM_CREATE message
 //------------------------------------------------------------------------------
 
 bool MainWindowView::onCreate() {
+
+    createMenuBar();
 
     static const DWORD DEF_STYLE_FLAGS = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
     
@@ -159,6 +220,7 @@ bool MainWindowView::onCreate() {
     EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
 
     moveControls();
     return true;
@@ -259,7 +321,7 @@ void MainWindowView::moveControls() {
     // TODO: Get Monitor Window is on?
 
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * 5) + widestGroupBox, tallestPoint};
-    AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
+    AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
     MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, FALSE);
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;

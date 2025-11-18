@@ -4,10 +4,12 @@
 #include <crtdbg.h>
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 
+#include "language_table.h"
+
 
 #include "view/win32/main_window.h"
 #include "interface/main_window_interface.h"
-#include "language_table.h"
+
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     
@@ -16,7 +18,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 
-    LanguageTable lt;
     MainWindowView mainWindowView(hInstance);
     
     if(!mainWindowView.registerSelf()) {
@@ -45,8 +46,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // In a release mode we don't need to release a bunch of this as the OS
     // cleans it up for us. For debug however, we'll make sure there are no
     // legitimate leaks.
-    lt.freeStrings();
-    lt.~LanguageTable(); // TODO: Why is this being detected as a leak without this?
+    languageTable.freeStrings();
 
     _CrtDumpMemoryLeaks();
     return retVal;

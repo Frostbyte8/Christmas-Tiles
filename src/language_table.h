@@ -36,12 +36,13 @@ class LanguageTable {
         const size_t stringLength = wcslen(PROGRAM_TITLE);
         str = (wchar_t*)malloc(sizeof(wchar_t) * (stringLength+1));       
 
+        wcsncpy_s(str, stringLength+1, PROGRAM_TITLE, stringLength);
         str[stringLength] = 0;
-        wcsncpy(str, PROGRAM_TITLE, stringLength);
-
 
         languageStrings[LangID::APP_TITLE] = str;
     }
+
+    //void loadStrings();
 
     void freeStrings() {
         for(size_t i = 0; i < languageStrings.size(); ++i) {
@@ -58,5 +59,7 @@ class LanguageTable {
         std::vector<wchar_t*> languageStrings;
 
 };
+
+extern LanguageTable languageTable;
 
 #undef PROGRAM_TITLE
