@@ -1,8 +1,13 @@
 #pragma once
 
-class MainWindowInterface {
+namespace MainWindowInterfaceResponses {
+    static const int YES    = 6;
+    static const int NO     = 7;
+    static const int CANCEL = 2;
+}
+
+__interface MainWindowInterface {
     public:
-        virtual void implDisplayTestMessage() = 0;
         virtual void implGameStateChanged(const int& gameState) = 0;
         virtual int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title) = 0;
 };

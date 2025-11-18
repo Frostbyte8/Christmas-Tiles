@@ -30,19 +30,13 @@ class MainWindowPresenter {
         inline const GameBoard& getGameBoard() const { return gameBoard; }
 
         bool tryTogglePause();
-        bool tryNewGame(const uint8_t& numTileTypes);
+        bool tryNewGame();
+        bool updateTileTypes(const uint8_t& tileTypes);
 
         // TODO: The constructor is the only thing that needs this?
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }
-
-        /*
-        void test() {
-            mainWindow->implDisplayTestMessage();
-        }
-        */
-
     private:
 
         __forceinline void reset();
@@ -51,18 +45,20 @@ class MainWindowPresenter {
 
         bool tryPause();
         bool tryUnpause();
-        void        updateElapsedTime();
+        void updateElapsedTime();
 
-        int         gameState;
+
+        uint8_t     points;
         uint8_t     selectedIndex1;
         uint8_t     selectedIndex2;
         uint8_t     matchesMade;
+        
         uint32_t    milliStartTime;
         uint32_t    milliElapsedTime;
         uint32_t    milliPointDelta;
-
-        uint8_t     points;
         uint32_t    score;
 
-        GameBoard gameBoard;
+        int         gameState;
+
+        GameBoard   gameBoard;
 };

@@ -12,6 +12,8 @@ namespace GameBoardConstants {
     static const uint8_t NO_SELECTED_INDEX = 255;
 }
 
+// TODO: None of these should be here
+
 namespace GameBoardFlipErrors {
     static const int AlreadyFlipped = -2;
     static const int OutOfBounds    = -1;
@@ -25,7 +27,7 @@ class GameBoard {
 
     public:
 
-        GameBoard() : width(3), height(3) {
+        GameBoard(const uint8_t& inTileTypes) : width(3), height(3), numTileTypes(inTileTypes), matchesNeeded(0) {
             // 10x10 Grid. Even if we don't use 10x10 tiles, the struct is is small,
             // and we might as well take advantage of that.
             tiles.resize(width * height);
@@ -37,6 +39,7 @@ class GameBoard {
         inline const uint8_t& getWidth() const { return width; }
         inline const uint8_t& getHeight() const { return height; }
         inline const std::vector<TileData>& getTiles() const { return tiles; }
+        inline const uint8_t& getNumTileTypes() const { return numTileTypes; }
 
         // Mutators
 
@@ -54,15 +57,19 @@ class GameBoard {
             tiles[index2].flags = TileFlags::UNFLIPPED;
         }
 
+        void setNumTileTypes(const uint8_t& inNumTypes) {
+            numTileTypes = inNumTypes;
+        }
+
          // Public Functions
 
-        bool tryNewGame(const uint8_t& numTileTypes);
+        bool tryNewGame();
         
     private:
 
         uint8_t width;
         uint8_t height;
-        uint8_t numTiles;
+        uint8_t numTileTypes;
         uint8_t matchesNeeded;
 
         std::vector<TileData> tiles;

@@ -11,10 +11,14 @@
 // tryNewGame - Attempts to start a new game
 //------------------------------------------------------------------------------
 
-bool GameBoard::tryNewGame(const uint8_t& numTileTypes) {
+bool GameBoard::tryNewGame() {
+
+    if(numTileTypes == 0) {
+        return false;
+    }
     
     // Get the number of tiles this board has
-    numTiles = (width * height);
+    uint8_t numTiles = (width * height);
     matchesNeeded = numTiles / 2;
 
     for(unsigned int i = 0; i < numTiles; ++i) {

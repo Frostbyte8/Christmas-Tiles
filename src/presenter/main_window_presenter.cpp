@@ -15,10 +15,16 @@
 #endif // _WIN32
 
 //==============================================================================
+// Namespaces / Enums / Constants
+//==============================================================================
+
+static const uint32_t MAX_SCORE = 999999999;
+
+//==============================================================================
 // Constructors
 //==============================================================================
 
-MainWindowPresenter::MainWindowPresenter() {
+MainWindowPresenter::MainWindowPresenter() : gameBoard(0) {
     reset(); // Just to reduce code reuse.
 }
 
@@ -38,21 +44,21 @@ __forceinline void MainWindowPresenter::reset() {
 // Public Functions
 //==============================================================================
     
-bool MainWindowPresenter::tryNewGame(const uint8_t& numTileTypes) {
+bool MainWindowPresenter::tryNewGame() {
 
     if(gameState != GameState::STATE_GAMEWON) {
         wchar_t message[] = L"Game in progress.";
         wchar_t title[] = L"Are you sure?";
         const int retVal = mainWindow->implAskYesNoQuestion(message, title);
 
-        if(retVal != 6) {
+        if(retVal != MainWindowInterfaceResponses::YES) {
             return false;
         }
 
     }
 
     reset();
-    gameBoard.tryNewGame(numTileTypes);
+    gameBoard.tryNewGame();
 
     gameState = GameState::STATE_NOT_STARTED;
     mainWindow->implGameStateChanged(gameState);
@@ -114,6 +120,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
             matchesMade++;
 
             score += points;
+            if(score > MAX_SCORE) {
+                score = MAX_SCORE;
+            }
             points = 50;
 
             if(matchesMade == gameBoard.getMatchesNeeded()) {
@@ -165,6 +174,13 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
     }
 
     return milliElapsedTime;
+}
+
+bool MainWindowPresenter::updateTileTypes(const uint8_t& tileTypes) {
+    gameBoard.setNumTileTypes(tileTypes);
+    // TODO: might need to do something about a new game
+    tryNewGame();
+    return true;
 }
 
 //------------------------------------------------------------------------------

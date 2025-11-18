@@ -2,6 +2,10 @@
 #include "subclassed_controls.h"
 #include "../../language_table.h"
 
+//==============================================================================
+// Namespaces / Enums / Constants
+//==============================================================================
+
 static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
 static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW;
 
@@ -11,10 +15,6 @@ namespace MainWindowViewConstants {
     static const UINT MENU_ENABLED_FLAGS = MF_BYCOMMAND | MF_ENABLED | MF_STRING;
     static const UINT MENU_DISABLED_FLAGS = MF_BYCOMMAND | MF_DISABLED | MF_GRAYED | MF_STRING;
 }
-
-//==============================================================================
-// Namespaces / Enums
-//==============================================================================
 
 namespace CtrlID {
     enum CtrlID {
@@ -66,6 +66,12 @@ __forceinline void updatePoints(const HWND& ctrl, const uint8_t& points) {
     wchar_t pointsStr[4] = {0};
     wsprintf(pointsStr, L"%d", points);
     SetWindowText(ctrl, pointsStr);
+}
+
+__forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
+    wchar_t scoreStr[16] = {0};
+    wsprintf(scoreStr, L"%09d", score);
+    SetWindowText(ctrl, scoreStr);
 }
 
 //==============================================================================
@@ -215,7 +221,8 @@ bool MainWindowView::onCreate() {
 
     // TODO: gamePanel should get the presenter via it's constructor
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
-    windowPresenter.tryNewGame( static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) );
+
+    windowPresenter.updateTileTypes(static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
     gamePanel.setWindowPresenter(&windowPresenter);
 
     metrics.initWindowMetrics();
@@ -373,10 +380,10 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
 
         }
         else if(retVal == GameBoardFlipErrors::TilesMatched) {
-            wchar_t scoreStr[10] = {0};
-            wsprintf(scoreStr, L"%09d", windowPresenter.getScore());
-            SetWindowText(scoreLabel.getHandle(), scoreStr);
+
+            updateScore(scoreLabel.getHandle(), windowPresenter.getScore());
             updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
+
         }
 
     }
@@ -436,7 +443,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             switch (wParam) {
 
                 case MenuID::NEW_GAME:
-                    windowPresenter.tryNewGame(16); // TODO: Real new game routine.
+                    if(windowPresenter.tryNewGame()) {
+                        onElapsedTimeTimer(); // TODO: Might be beneficial to inline this
+                        updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
+                        updateScore(scoreLabel.getHandle(), windowPresenter.getScore());
+                    }
                     break;
 
                 case CtrlID::BUTTON_PAUSE: 
@@ -497,8 +508,4 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         SetWindowTextW(buttonPause, L"Unpause");
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"Un&pause");
     }
-}
-
-void MainWindowView::implDisplayTestMessage() {
-    MessageBox(hWnd, L"Message Displayed", L"Hello", MB_OK);
 }

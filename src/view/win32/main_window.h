@@ -26,7 +26,6 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         bool onCreate();
         // Interface Functions
         int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title);
-        void implDisplayTestMessage();
         void implGameStateChanged(const int& gameState);
 
 
