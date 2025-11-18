@@ -8,6 +8,8 @@ static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW;
 namespace MainWindowViewConstants {
     static const int ELAPSED_TIMER_ID   = 1;
     static const int FLIP_TIMER_ID      = 2;
+    static const UINT MENU_ENABLED_FLAGS = MF_BYCOMMAND | MF_ENABLED | MF_STRING;
+    static const UINT MENU_DISABLED_FLAGS = MF_BYCOMMAND | MF_DISABLED | MF_GRAYED | MF_STRING;
 }
 
 //==============================================================================
@@ -158,7 +160,7 @@ __forceinline void MainWindowView::createMenuBar() {
     // File Menu
 
     AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, L"&New Game");
-    AppendMenu(fileMenu, MF_STRING, MenuID::PAUSE_GAME, L"&Pause Game");
+    AppendMenu(fileMenu, MF_STRING | MF_DISABLED | MF_GRAYED, MenuID::PAUSE_GAME, L"&Pause");
     AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
     AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, L"&Highscores");
     AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
@@ -483,14 +485,17 @@ int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* 
 void MainWindowView::implGameStateChanged(const int& newState) {
     if(newState == GameState::STATE_PLAYING) {
         EnableWindow(buttonPause, TRUE);
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
         SetWindowTextW(buttonPause, L"Pause");
     }
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, L"Unpause");
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"Un&pause");
     }
 }
 
