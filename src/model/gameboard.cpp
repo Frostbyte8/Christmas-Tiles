@@ -7,13 +7,23 @@
 #include <windows.h>
 #endif // _DEBUG
 
+GameBoard::GameBoard(const uint8_t& newWidth, const uint8_t& newHeight, 
+const uint8_t& newTileTypes) : matchesNeeded(0) {
+
+    width = newWidth < GameBoardConstants::MAX_WIDTH ? newWidth : GameBoardConstants::MAX_WIDTH;
+    height = newHeight < GameBoardConstants::MAX_HEIGHT ? newHeight : GameBoardConstants::MAX_HEIGHT;
+    numTileTypes = newTileTypes < GameBoardConstants::MAX_TILE_TYPES ? newTileTypes : GameBoardConstants::MAX_TILE_TYPES;
+
+    tiles.resize(width * height);
+}
+
 //------------------------------------------------------------------------------
 // tryNewGame - Attempts to start a new game
 //------------------------------------------------------------------------------
 
 bool GameBoard::tryNewGame() {
 
-    if(numTileTypes == 0) {
+    if(numTileTypes == 0 || width < 2 || height < 2) {
         return false;
     }
     

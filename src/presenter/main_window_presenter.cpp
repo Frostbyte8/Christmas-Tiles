@@ -24,7 +24,7 @@ static const uint32_t MAX_SCORE = 999999999;
 // Constructors
 //==============================================================================
 
-MainWindowPresenter::MainWindowPresenter() : gameBoard(0) {
+MainWindowPresenter::MainWindowPresenter() : gameBoard(5, 9, 16) {
     reset(); // Just to reduce code reuse.
 }
 
@@ -46,6 +46,7 @@ __forceinline void MainWindowPresenter::reset() {
     
 bool MainWindowPresenter::tryNewGame() {
 
+    // TODO: This should be it's own function.
     if(gameState != GameState::STATE_GAMEWON) {
         wchar_t message[] = L"Game in progress.";
         wchar_t title[] = L"Are you sure?";
@@ -176,9 +177,53 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
     return milliElapsedTime;
 }
 
+//------------------------------------------------------------------------------
+// updateBoardSize - Updates how wide/tall the board is
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::updateBoardSize(const uint8_t& newWidth, const uint8_t& newHeight, const int defaultSize) {
+    
+    switch(defaultSize) {
+        case 1:
+            gameBoard = GameBoard(3, 3, gameBoard.getNumTileTypes());
+            break;
+
+        case 2:
+            gameBoard = GameBoard(4, 4, gameBoard.getNumTileTypes());
+            break;
+
+        case 3:
+            gameBoard = GameBoard(5, 5, gameBoard.getNumTileTypes());
+            break;
+
+        case 4:
+            gameBoard = GameBoard(5, 9, gameBoard.getNumTileTypes());
+            break;
+
+        case 5:
+            gameBoard = GameBoard(10, 10, gameBoard.getNumTileTypes());
+            break;
+
+        default:
+            gameBoard = GameBoard(newWidth, newHeight, gameBoard.getNumTileTypes());
+            break;
+    }
+    
+    // TODO: might need to do something about a new game
+    gameState = GameState::STATE_GAMEWON;
+    tryNewGame();
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// updateTileTypes - Updates how many tile types are on the current tileset
+//------------------------------------------------------------------------------
+
 bool MainWindowPresenter::updateTileTypes(const uint8_t& tileTypes) {
     gameBoard.setNumTileTypes(tileTypes);
+    
     // TODO: might need to do something about a new game
+    gameState = GameState::STATE_GAMEWON;
     tryNewGame();
     return true;
 }

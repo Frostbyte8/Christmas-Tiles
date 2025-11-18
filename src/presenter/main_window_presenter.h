@@ -32,6 +32,7 @@ class MainWindowPresenter {
         bool tryTogglePause();
         bool tryNewGame();
         bool updateTileTypes(const uint8_t& tileTypes);
+        bool updateBoardSize(const uint8_t& newWidth, const uint8_t& newHeight, const int defaultSize = 0);
 
         // TODO: The constructor is the only thing that needs this?
         void setMainWindow(MainWindowInterface* mwi) {

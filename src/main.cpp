@@ -14,7 +14,7 @@
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     
 #if defined(_MSC_VER) && defined(_DEBUG)
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 
@@ -40,7 +40,9 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
         return 0;
     }
 
+
 #if defined(_MSC_VER) && defined(_DEBUG)
+    
     UINT retVal = mainWindowView.doLoop();
 
     // In a release mode we don't need to release a bunch of this as the OS
@@ -48,9 +50,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // legitimate leaks.
     languageTable.freeStrings();
 
-    _CrtDumpMemoryLeaks();
     return retVal;
-
 #else
     return mainWindowView.doLoop();
 #endif // defined(_MSC_VER) && defined(_DEBUG)

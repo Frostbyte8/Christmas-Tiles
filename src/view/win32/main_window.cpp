@@ -455,6 +455,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                     windowPresenter.tryTogglePause(); 
                     break;
 
+                case MenuID::BOARD_3x3:
+                case MenuID::BOARD_4x4:
+                case MenuID::BOARD_5x5:
+                case MenuID::BOARD_5x9:
+                case MenuID::BOARD_10x10:
+                    windowPresenter.updateBoardSize(0, 0, (wParam - MenuID::BOARD_3x3) + 1);
+                    break;
                 
             }
 
