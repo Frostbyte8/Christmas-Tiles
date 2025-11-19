@@ -62,6 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
+				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				TargetMachine="1"
@@ -71,6 +72,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="$(InputDir)..\..\..\src\resources\application.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -136,6 +138,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
+				GenerateManifest="true"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -147,6 +150,7 @@
 			/>
 			<Tool
 				Name="VCManifestTool"
+				AdditionalManifestFiles="$(InputDir)..\..\..\src\resources\application.manifest"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -190,6 +194,14 @@
 			<Filter
 				Name="win32"
 				>
+				<File
+					RelativePath="..\..\..\src\view\win32\about_window.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\view\win32\about_window.h"
+					>
+				</File>
 				<File
 					RelativePath="..\..\..\src\view\win32\dynamic_label.cpp"
 					>
@@ -253,6 +265,22 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\interface\main_window_interface.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="resources"
+			>
+			<File
+				RelativePath="..\..\..\src\resources\application.manifest"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\resources\resource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\resources\resource.rc"
 				>
 			</File>
 		</Filter>

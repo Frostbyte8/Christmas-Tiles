@@ -7,6 +7,7 @@
 #include "window_meterics.h"
 #include "../../presenter/main_window_presenter.h"
 #include "../../interface/main_window_interface.h"
+#include "about_window.h"
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
@@ -54,6 +55,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         bool shouldUnflip;
 
         HWND hWnd;
+        AboutWindow aboutWindow;
         
         HMENU menuBar;
         HMENU fileMenu;

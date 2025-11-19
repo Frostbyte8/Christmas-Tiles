@@ -8,6 +8,7 @@
 
 
 #include "view/win32/main_window.h"
+#include "view/win32/about_window.h"
 #include "interface/main_window_interface.h"
 
 
@@ -31,6 +32,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     if(!DynamicLabel::registerSelf(hInstance)) {
+        return 0;
+    }
+
+    if(!AboutWindow::registerSelf(hInstance)) {
         return 0;
     }
 

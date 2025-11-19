@@ -21,6 +21,8 @@ First go to Project > Properties. Change configuration to All Configurations.
 -- Warning Level to "Level 4 (/W4)"
 -  Under Linker > Input, change:
 -- Additional Dependencies to "comctl32.lib"
+-  Manifest Tool > Input and Output, change:
+-- Additional Manifest Files to "$(InputDir)..\..\..\src\resources\application.manifest"
 
 Next, Change configuration to Release.
 - Under C/C++ > Optimization, Change:

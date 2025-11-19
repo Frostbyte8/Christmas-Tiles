@@ -1,13 +1,14 @@
 #include "main_window.h"
 #include "subclassed_controls.h"
 #include "../../language_table.h"
+#include "../../resources/resource.h"
 
 //==============================================================================
 // Namespaces / Enums / Constants
 //==============================================================================
 
 static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
-static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW;
+static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW | WS_EX_CONTROLPARENT;
 
 namespace MainWindowViewConstants {
     static const int ELAPSED_TIMER_ID   = 1;
@@ -58,7 +59,7 @@ __forceinline HWND createGroupBox(const wchar_t* title, const HWND& parent, cons
 }
 
 __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
-    return CreateWindowEx(0, L"BUTTON", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
+    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
@@ -88,7 +89,7 @@ bool MainWindowView::createWindow() {
         return true; // Already created.
     }
 
-    // TODO: This may need WS_CLIPCHILDREN?
+    // TODO: This may need WS_CLIPCHILDREN / WS_CLIPSIBLINGS?
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", languageTable.getStrings()[LangID::APP_TITLE],
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
@@ -117,8 +118,14 @@ UINT MainWindowView::doLoop() {
     MSG msg;
     
     while(GetMessage(&msg, NULL, 0, 0) > 0) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        
+        if(aboutWindow.getHandle() && IsDialogMessage(aboutWindow.getHandle(), &msg)) {
+        }
+        else if (!IsDialogMessage(hWnd, &msg)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+ 
     }
 
     return msg.wParam;
@@ -131,6 +138,7 @@ UINT MainWindowView::doLoop() {
 bool MainWindowView::registerSelf() {
     
     WNDCLASSEX wc;
+    HICON appIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON));
 
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
@@ -138,12 +146,12 @@ bool MainWindowView::registerSelf() {
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
     wc.hInstance     = hInstance;
-    wc.hIcon         = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIcon         = appIcon;
     wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
     wc.lpszMenuName  = NULL;
     wc.lpszClassName = L"XmasTilesMainWindow";
-    wc.hIconSm       = LoadIcon(NULL, IDI_APPLICATION);
+    wc.hIconSm       = appIcon;
 
     if(!RegisterClassEx(&wc)) {
         MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);
@@ -422,7 +430,6 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
     switch(msg) {
         default:
             return DefWindowProc(hWnd, msg, wParam, lParam);
-
         case WM_TIMER:
             if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
                 onElapsedTimeTimer();
@@ -463,6 +470,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::BOARD_5x9:
                 case MenuID::BOARD_10x10:
                     windowPresenter.updateBoardSize(0, 0, (wParam - MenuID::BOARD_3x3) + 1);
+                    break;
+
+                case MenuID::ABOUT:
+                    aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
                     break;
                 
             }

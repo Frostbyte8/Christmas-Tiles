@@ -5,7 +5,7 @@
 bool GamePanel::isRegistered = false;
 
 //-----------------------------------------------------------------------------
-// createWindow - Creates the main Window.
+// createWindow - Creates the panel that will contain the game board
 //-----------------------------------------------------------------------------
 
 // TODO: X,Y,W,H, Style Flags
