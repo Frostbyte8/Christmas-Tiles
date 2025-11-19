@@ -1,5 +1,5 @@
 #include "about_window.h"
-
+#include "../../resources/resource.h"
 bool AboutWindow::isRegistered = false;
 
 static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME | WS_MINIMIZEBOX);
@@ -30,6 +30,14 @@ bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
     }
 
     EnableWindow(parent, FALSE);
+
+    if(!iconHandle) {
+        iconHandle = LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, 0);
+        //iconHandle = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON));
+    }
+    appIcon = CreateWindow(L"Static", L"", WS_CHILD | WS_VISIBLE | SS_ICON | SS_REALSIZEIMAGE, 0, 0, 32, 32, hWnd, 0, hInst, 0);
+    SendMessage(appIcon, STM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)iconHandle);
+
 
     // TODO: Center window, monitor info, etc
     ShowWindow(hWnd, SW_NORMAL);

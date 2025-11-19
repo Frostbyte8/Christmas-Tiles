@@ -119,6 +119,8 @@ UINT MainWindowView::doLoop() {
     
     while(GetMessage(&msg, NULL, 0, 0) > 0) {
         
+        // TODO: Cache which window is open instead
+
         if(aboutWindow.getHandle() && IsDialogMessage(aboutWindow.getHandle(), &msg)) {
         }
         else if (!IsDialogMessage(hWnd, &msg)) {
@@ -138,20 +140,21 @@ UINT MainWindowView::doLoop() {
 bool MainWindowView::registerSelf() {
     
     WNDCLASSEX wc;
-    HICON appIcon = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON));
 
+    // TODO: DPI
+    
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
     wc.lpfnWndProc   = MainWindowView::WndProc;
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
     wc.hInstance     = hInstance;
-    wc.hIcon         = appIcon;
+    wc.hIcon         = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, 0);
     wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
     wc.lpszMenuName  = NULL;
     wc.lpszClassName = L"XmasTilesMainWindow";
-    wc.hIconSm       = appIcon;
+    wc.hIconSm       = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, 0);
 
     if(!RegisterClassEx(&wc)) {
         MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);

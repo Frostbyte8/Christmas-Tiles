@@ -8,7 +8,16 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     public:
 
-        AboutWindow() : hWnd(0), parentHWnd(0) {}
+        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0) {
+        }
+
+        ~AboutWindow() {
+            if(iconHandle) {
+                DestroyIcon((HICON)iconHandle);
+                iconHandle = NULL;
+            }
+        }
+
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
         UINT doLoop();
         static bool registerSelf(const HINSTANCE& hInst);
@@ -16,9 +25,22 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
+        static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
+            ::SendMessage(child, WM_SETFONT, font, TRUE);
+            return true;
+        }
         
         static bool isRegistered;
         HWND hWnd;
         HWND parentHWnd;
 
+        HANDLE iconHandle;
+        HWND appIcon;
+        HWND appTitle;
+        HWND versionInfo;
+        HWND speratorBar;
+        HWND okButton;
+
+
+        //WindowMetrics   metrics;
 };
