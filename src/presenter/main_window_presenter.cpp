@@ -14,6 +14,8 @@
 
 #endif // _WIN32
 
+
+
 //==============================================================================
 // Namespaces / Enums / Constants
 //==============================================================================
@@ -227,6 +229,33 @@ bool MainWindowPresenter::updateTileTypes(const uint8_t& tileTypes) {
     tryNewGame();
     return true;
 }
+
+//------------------------------------------------------------------------------
+// tryUpdateGameBoard - Used when changing size, tile types, or both.
+// Note: Method only checks IGNORE_WIDTH when ignoring sizes. If Width is valid,
+// it assumes height is too.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryUpdateGameBoard(uint8_t& newWidth, uint8_t& newHeight, uint8_t& tileTypes) {
+    
+    if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
+        newWidth = gameBoard.getWidth();
+        newHeight = gameBoard.getHeight();
+    }
+
+    if(tileTypes == WindowPresenterConstants::IGNORE_NUMTILES) {
+        tileTypes = gameBoard.getNumTileTypes();
+    }
+
+    gameBoard = GameBoard(newWidth, newHeight, tileTypes);
+
+    // TODO: might need to do something about a new game
+    gameState = GameState::STATE_GAMEWON;
+    tryNewGame();
+    return true;
+
+}
+
 
 //------------------------------------------------------------------------------
 // unflipTiles - Unflips tiles if necessary

@@ -14,6 +14,12 @@ namespace GameState {
     };
 }
 
+namespace WindowPresenterConstants {
+    static const uint8_t IGNORE_WIDTH       = 255;
+    static const uint8_t IGNORE_HEIGHT      = 255;
+    static const uint8_t IGNORE_NUMTILES    = 255;
+}
+
 class MainWindowPresenter {
 
     public:
@@ -31,6 +37,7 @@ class MainWindowPresenter {
 
         bool tryTogglePause();
         bool tryNewGame();
+        bool tryUpdateGameBoard(uint8_t& newWidth, uint8_t& newHeight, uint8_t& tileTypes);
         bool updateTileTypes(const uint8_t& tileTypes);
         bool updateBoardSize(const uint8_t& newWidth, const uint8_t& newHeight, const int defaultSize = 0);
 

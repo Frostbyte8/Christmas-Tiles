@@ -219,11 +219,13 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(L"Pause", hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
-    // TODO: gamePanel should get the presenter via it's constructor
+    // TODO: gamePanel should get the presenter via it's constructor?
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
 
-    windowPresenter.updateTileTypes(static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+    // TODO: Window Presenter 
     gamePanel.setWindowPresenter(&windowPresenter);
+    windowPresenter.updateTileTypes(static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+    
 
     metrics.initWindowMetrics();
 
