@@ -582,6 +582,11 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         }
 
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
+
+        if(newState == GameState::STATE_GAMEWON) {
+            enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd);
+        }
+
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));

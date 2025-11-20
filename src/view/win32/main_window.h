@@ -7,7 +7,9 @@
 #include "window_meterics.h"
 #include "../../presenter/main_window_presenter.h"
 #include "../../interface/main_window_interface.h"
+
 #include "about_window.h"
+#include "enter_score_window.h"
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
@@ -57,6 +59,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
 
         HWND hWnd;
         AboutWindow aboutWindow;
+        EnterScoreWindow enterScoreWindow;
         
         HMENU menuBar;
         HMENU fileMenu;

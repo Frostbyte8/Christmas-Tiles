@@ -4,19 +4,11 @@
 #include "subclassed_controls.h"
 #include "window_meterics.h"
 
-class AboutWindow : public WndAsClass<AboutWindow> {
+class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     friend WndAsClass;
 
     public:
-
-        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0) {
-        }
-
-        ~AboutWindow() {
-            if(iconHandle) {
-                DestroyIcon((HICON)iconHandle);
-                iconHandle = NULL;
-            }
+        EnterScoreWindow() : hWnd(0), parentHWnd(0) {
         }
 
         bool onCreate();
@@ -27,6 +19,7 @@ class AboutWindow : public WndAsClass<AboutWindow> {
         inline const HWND& getHandle() const { return hWnd; }
 
     private:
+
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
             ::SendMessage(child, WM_SETFONT, font, TRUE);
@@ -36,14 +29,6 @@ class AboutWindow : public WndAsClass<AboutWindow> {
         static bool isRegistered;
         HWND hWnd;
         HWND parentHWnd;
+        
 
-        HANDLE iconHandle;
-        HWND appIcon;
-        HWND labelTitle;
-        HWND labelVersion;
-        HWND seperatorBar;
-        HWND labelCopyright;
-        HWND buttonOK;
-
-        WindowMetrics  metrics;
 };

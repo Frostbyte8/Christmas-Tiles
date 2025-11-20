@@ -211,6 +211,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\view\win32\enter_score_window.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\view\win32\enter_score_window.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\view\win32\game_panel.cpp"
 					>
 				</File>
