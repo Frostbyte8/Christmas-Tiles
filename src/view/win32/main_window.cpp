@@ -359,7 +359,7 @@ void MainWindowView::moveControls() {
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 
-    // TODO: This causes flicker as the window is not cenetered
+    // TODO: This causes flicker as the window is not centered
     MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, TRUE);
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
@@ -506,7 +506,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             switch (wParam) {
 
                 case MenuID::NEW_GAME:
-                    if(windowPresenter.tryNewGame()) {
+                    if(windowPresenter.requestNewGame()) {
                         onElapsedTimeTimer(); // TODO: Might be beneficial to inline this
                         updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
                         updateScore(scoreLabel.getHandle(), windowPresenter.getScore());

@@ -35,8 +35,8 @@ class MainWindowPresenter {
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }
 
+        bool requestNewGame();
         bool tryTogglePause();
-        bool tryNewGame();
         bool tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes);
 
         // TODO: The constructor is the only thing that needs this?
@@ -49,6 +49,8 @@ class MainWindowPresenter {
 
         MainWindowInterface *mainWindow;
 
+        bool checkAndAskNewGame();
+        bool tryNewGame();
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();

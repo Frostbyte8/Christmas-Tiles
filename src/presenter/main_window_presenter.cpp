@@ -46,29 +46,6 @@ __forceinline void MainWindowPresenter::reset() {
 // Public Functions
 //==============================================================================
     
-bool MainWindowPresenter::tryNewGame() {
-
-    // TODO: This should be it's own function.
-    if(gameState != GameState::STATE_GAMEWON) {
-        wchar_t message[] = L"Game in progress.";
-        wchar_t title[] = L"Are you sure?";
-        const int retVal = mainWindow->implAskYesNoQuestion(message, title);
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
-    }
-
-    reset();
-    gameBoard.tryNewGame();
-
-    gameState = GameState::STATE_NOT_STARTED;
-    mainWindow->implGameStateChanged(gameState);
-    
-    return true;
-}
-
 //------------------------------------------------------------------------------
 // onClickTile - Call when the tile is clicked
 // Note that yIndex is over written.
@@ -190,6 +167,10 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 
 bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes) {
     
+    if(!checkAndAskNewGame()) {
+        return false;
+    }
+
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
         newWidth = gameBoard.getWidth();
         newHeight = gameBoard.getHeight();
@@ -201,13 +182,23 @@ bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight
 
     gameBoard = GameBoard(newWidth, newHeight, tileTypes);
 
-    // TODO: might need to do something about a new game
-    gameState = GameState::STATE_GAMEWON;
     tryNewGame();
     return true;
 
 }
 
+//------------------------------------------------------------------------------
+// RequestNewGame - The user has requested a new game
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::requestNewGame() {
+    
+    if(!checkAndAskNewGame()) {
+        return false;
+    }
+
+    return tryNewGame();
+}
 
 //------------------------------------------------------------------------------
 // unflipTiles - Unflips tiles if necessary
@@ -230,6 +221,44 @@ inline void MainWindowPresenter::unflipTiles() {
 //==============================================================================
 // Private Functions
 //==============================================================================
+
+//------------------------------------------------------------------------------
+// checkAndAskNewGame - Check to see if a game is in progress, and if so, ask
+// the user if they want to start a new game.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::checkAndAskNewGame() {
+    
+    if(gameState != GameState::STATE_GAMEWON) {
+        wchar_t message[] = L"Game in progress.";
+        wchar_t title[] = L"Are you sure?";
+        const int retVal = mainWindow->implAskYesNoQuestion(message, title);
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
+    }
+
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// tryNewGame - Attempts to start a new game
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryNewGame() {
+
+    reset();
+    gameBoard.tryNewGame();
+
+    gameState = GameState::STATE_NOT_STARTED;
+    mainWindow->implGameStateChanged(gameState);
+    
+    return true;
+
+}
 
 //------------------------------------------------------------------------------
 // tryPause - Attempt to pause the game. If it does, it will also update how
