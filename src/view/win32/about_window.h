@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include "subclassed_controls.h"
+#include "window_meterics.h"
 
 class AboutWindow : public WndAsClass<AboutWindow> {
     friend WndAsClass;
@@ -18,6 +19,8 @@ class AboutWindow : public WndAsClass<AboutWindow> {
             }
         }
 
+        bool onCreate();
+        void moveControls();
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
         UINT doLoop();
         static bool registerSelf(const HINSTANCE& hInst);
@@ -36,11 +39,11 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
         HANDLE iconHandle;
         HWND appIcon;
-        HWND appTitle;
-        HWND versionInfo;
-        HWND speratorBar;
-        HWND okButton;
+        HWND labelTitle;
+        HWND labelVersion;
+        HWND seperatorBar;
+        HWND labelCopyright;
+        HWND buttonOK;
 
-
-        //WindowMetrics   metrics;
+        WindowMetrics  metrics;
 };

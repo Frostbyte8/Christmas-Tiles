@@ -139,6 +139,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
         }
 
         // Tiles do not match, but keep track of this until the next selection
+
+        points = points > 5 ? points - 5 : 0;
+
         selectedIndex2 = yIndex;
         return GameBoardFlipErrors::TilesNotMatched;
 

@@ -6,6 +6,7 @@
 
 namespace LangID {
     enum LangID {
+        ERROR_STR_NOT_FOUND = -1,
         APP_TITLE = 0,
         VERSION_TEXT,
         COPYRIGHT_TEXT,
