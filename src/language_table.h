@@ -2,9 +2,15 @@
 
 #include <vector>
 
+#define GET_LANG_STR(x) languageTable.getStrings()[x]
+
 namespace LangID {
     enum LangID {
-        APP_TITLE               = 0,
+        APP_TITLE = 0,
+        VERSION_TEXT,
+        COPYRIGHT_TEXT,
+        OK_BUTTON_CAPTION,
+        CANCEL_BUTTON_CAPTION,
         SCORE_BOX_CAPTION,
         POINTS_BOX_CAPTION,
         TIME_BOX_CAPTION,
@@ -30,6 +36,8 @@ class LanguageTable {
 
     public:
     LanguageTable() {
+
+        /*
         languageStrings.resize(1);
 
         wchar_t* str = NULL;
@@ -38,14 +46,16 @@ class LanguageTable {
 
         wcsncpy_s(str, stringLength+1, PROGRAM_TITLE, stringLength);
         str[stringLength] = 0;
+        */
 
-        languageStrings[LangID::APP_TITLE] = str;
+        //languageStrings[LangID::APP_TITLE] = str;
     }
 
-    //void loadStrings();
+    void loadStrings();
 
     void freeStrings() {
         for(size_t i = 0; i < languageStrings.size(); ++i) {
+            
             free(languageStrings[i]);
             languageStrings[i] = NULL;
         }

@@ -91,7 +91,7 @@ bool MainWindowView::createWindow() {
 
     // TODO: This may need WS_CLIPCHILDREN / WS_CLIPSIBLINGS?
 
-    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", languageTable.getStrings()[LangID::APP_TITLE],
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", GET_LANG_STR(LangID::APP_TITLE),
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
         NULL, NULL, hInstance, this);
 
@@ -219,15 +219,15 @@ bool MainWindowView::onCreate() {
 
     static const DWORD DEF_STYLE_FLAGS = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
     
-    groupStats[0] = createGroupBox(L"Score", hWnd, CtrlID::GROUP_SCORE, hInstance);
-    groupStats[1] = createGroupBox(L"Points", hWnd, CtrlID::GROUP_POINTS, hInstance);
-    groupStats[2] = createGroupBox(L"Time", hWnd, CtrlID::GROUP_TIME, hInstance);
+    groupStats[0] = createGroupBox(GET_LANG_STR(LangID::SCORE_BOX_CAPTION), hWnd, CtrlID::GROUP_SCORE, hInstance);
+    groupStats[1] = createGroupBox(GET_LANG_STR(LangID::POINTS_BOX_CAPTION), hWnd, CtrlID::GROUP_POINTS, hInstance);
+    groupStats[2] = createGroupBox(GET_LANG_STR(LangID::TIME_BOX_CAPTION), hWnd, CtrlID::GROUP_TIME, hInstance);
 
     scoreLabel.createWindow(hInstance, L"000000000", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_SCORE));
     pointsLabel.createWindow(hInstance, L"50", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_POINTS));
     timeLabel.createWindow(hInstance, L"00:00", hWnd, reinterpret_cast<HMENU>(CtrlID::LABEL_TIME));
 
-    buttonPause = createButton(L"Pause", hWnd, CtrlID::BUTTON_PAUSE, hInstance);
+    buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
     // TODO: gamePanel should get the presenter via it's constructor?
@@ -520,7 +520,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
     if(newState == GameState::STATE_PLAYING) {
         EnableWindow(buttonPause, TRUE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
-        SetWindowTextW(buttonPause, L"Pause");
+        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
     }
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
@@ -528,7 +528,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
     }
     else if(newState == GameState::STATE_PAUSED) {
-        SetWindowTextW(buttonPause, L"Unpause");
+        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"Un&pause");
     }
 }

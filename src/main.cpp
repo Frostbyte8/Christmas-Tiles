@@ -19,6 +19,8 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 
+    languageTable.loadStrings();
+
     MainWindowView mainWindowView(hInstance);
     
     if(!mainWindowView.registerSelf()) {
