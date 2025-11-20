@@ -285,6 +285,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\..\src\gitinfo.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\src\language_table.cpp"
 			>
 		</File>

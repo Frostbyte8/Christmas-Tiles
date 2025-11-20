@@ -351,7 +351,10 @@ void MainWindowView::moveControls() {
     // Resize Window
     // TODO: Get Monitor Window is on?
 
-    const int horzTiles = windowPresenter.getGameBoard().getWidth();
+    int horzTiles = windowPresenter.getGameBoard().getWidth();
+    if(horzTiles < 5) {
+        horzTiles = 5;
+    }
 
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);

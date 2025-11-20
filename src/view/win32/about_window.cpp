@@ -1,10 +1,14 @@
 #include "about_window.h"
 #include "../../resources/resource.h"
 #include "../../language_table.h"
+#include "../../gitinfo.h"
+
 bool AboutWindow::isRegistered = false;
 
 static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
 static const DWORD WINDOW_STYLE_EX = WS_EX_DLGMODALFRAME;
+
+static const wchar_t COPYRIGHT_NAME[] = L"\xA9 2025 Frostbyte";
 
 namespace CtrlID {
     enum CtrlID {
@@ -143,6 +147,18 @@ bool AboutWindow::registerSelf(const HINSTANCE& hInst) {
     return true;
 }
 
+wchar_t* expandText(const int& LANG_ID, const wchar_t* textToAdd) {
+
+    const wchar_t* langText = GET_LANG_STR(LANG_ID);
+    const int TEXT_LEN = wcslen(langText) + wcslen(textToAdd);
+    wchar_t* fullText = (wchar_t*)malloc(sizeof(wchar_t) * TEXT_LEN);
+
+    wsprintf(fullText, langText, textToAdd);
+
+    return fullText;
+
+}
+
 bool AboutWindow::onCreate() {
 
     const HINSTANCE hInst = GetModuleHandle(NULL);
@@ -159,9 +175,17 @@ bool AboutWindow::onCreate() {
     labelTitle      = createLabel(GET_LANG_STR(LangID::APP_TITLE), hWnd, CtrlID::TITLE_LABEL, hInst);
     
     // TODO: Copyright and Version need a text replacement
-    labelVersion    = createLabel(GET_LANG_STR(LangID::VERSION_TEXT), hWnd, CtrlID::VERSION_LABEL, hInst);
+    wchar_t* fullText = expandText(LangID::VERSION_TEXT, GIT_HASH);
+    labelVersion    = createLabel(fullText, hWnd, CtrlID::VERSION_LABEL, hInst);
+    free(fullText);
+
     seperatorBar    = createSeperator(hWnd, CtrlID::SEPERATOR, hInst);
-    labelCopyright  = createLabel(GET_LANG_STR(LangID::COPYRIGHT_TEXT), hWnd, CtrlID::COPYRIGHT_LABEL, hInst);
+    
+
+    fullText = expandText(LangID::COPYRIGHT_TEXT, COPYRIGHT_NAME);
+    labelCopyright  = createLabel(fullText, hWnd, CtrlID::COPYRIGHT_LABEL, hInst);
+    free(fullText);
+
     buttonOK        = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
 
     metrics.initWindowMetrics();
