@@ -15,6 +15,8 @@ namespace MainWindowViewConstants {
     static const int FLIP_TIMER_ID      = 2;
     static const UINT MENU_ENABLED_FLAGS = MF_BYCOMMAND | MF_ENABLED | MF_STRING;
     static const UINT MENU_DISABLED_FLAGS = MF_BYCOMMAND | MF_DISABLED | MF_GRAYED | MF_STRING;
+    static const UINT MENU_CHECKED_FLAGS = MF_BYCOMMAND | MF_CHECKED;
+    static const UINT MENU_UNCHECKED_FLAGS = MF_BYCOMMAND;
 }
 
 namespace CtrlID {
@@ -235,8 +237,8 @@ bool MainWindowView::onCreate() {
 
     // TODO: Window Presenter 
     gamePanel.setWindowPresenter(&windowPresenter);
-    windowPresenter.updateTileTypes(static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
-    
+    windowPresenter.tryUpdateGameBoard(3, 3, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+   
 
     metrics.initWindowMetrics();
 
@@ -292,10 +294,14 @@ LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    const LONG minHeight = 288;
+    const long minHeight = gamePanel.getTilesetHeight() * 9;
+    const long boardheight = gamePanel.getTilesetHeight() * windowPresenter.getGameBoard().getHeight();
+
 
     LONG tallestPoint = (CD.YLABEL * 3) + (CS.YFIRST_GROUPBOX_MARGIN * 3) + (CS.YLAST_GROUPBOX_MARGIN * 3) +
                         (CD.YBUTTON);
+
+    tallestPoint = tallestPoint < boardheight ? boardheight : tallestPoint;
     
     return (tallestPoint < minHeight) ? minHeight : tallestPoint;
 }
@@ -339,14 +345,19 @@ void MainWindowView::moveControls() {
     const LONG widestGroupBox = getWidestGroupBox();
 
     // TODO: This may not need to actually be here
+    // TODO: minWidth = GroupBox + 5 tiles
     // TODO: Min Height = the Height of Standard Tile. So that is gamePanel.getTilesetHeight() * 9
 
     // Resize Window
     // TODO: Get Monitor Window is on?
 
-    RECT rc = {0, 0, (gamePanel.getTilesetHeight() * 5) + widestGroupBox, tallestPoint};
+    const int horzTiles = windowPresenter.getGameBoard().getWidth();
+
+    RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
-    MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, FALSE);
+
+    // TODO: This causes flicker as the window is not cenetered
+    MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, TRUE);
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
     
@@ -363,7 +374,7 @@ void MainWindowView::moveControls() {
     hDeferedWindows = DeferWindowPos(hDeferedWindows, timeLabel.getHandle(), HWND_NOTOPMOST, CS.XGROUPBOX_MARGIN, CS.YFIRST_GROUPBOX_MARGIN + (boxHeight * 2), widestGroupBox - (CS.XGROUPBOX_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonPause, HWND_NOTOPMOST, 0, boxHeight * 3, widestGroupBox, tallestPoint - (boxHeight * 3), SWP_NOZORDER);
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, 160, 288, SWP_NOZORDER);
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, (gamePanel.getTilesetHeight() * horzTiles), tallestPoint, SWP_NOZORDER);
 
     EndDeferWindowPos(hDeferedWindows);
 
@@ -424,6 +435,43 @@ void MainWindowView::onElapsedTimeTimer() {
 
 }
 
+void MainWindowView::onChangeBoardSize(const int& menuID) {
+    
+    bool retVal = false;
+
+    switch(menuID) {
+        case MenuID::BOARD_3x3:
+            retVal = windowPresenter.tryUpdateGameBoard(3, 3, WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+        case MenuID::BOARD_4x4:
+            retVal = windowPresenter.tryUpdateGameBoard(4, 4, WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+        case MenuID::BOARD_5x5:
+            retVal = windowPresenter.tryUpdateGameBoard(5, 5, WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+        case MenuID::BOARD_5x9:
+            retVal = windowPresenter.tryUpdateGameBoard(5, 9, WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+        case MenuID::BOARD_10x10:
+            retVal = windowPresenter.tryUpdateGameBoard(10, 10, WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+    }
+
+    if(retVal) {
+        for(int i = MenuID::BOARD_3x3; i <= MenuID::BOARD_10x10; ++i) {
+
+            if(i != menuID) {
+                CheckMenuItem(optionsMenu, i, MainWindowViewConstants::MENU_UNCHECKED_FLAGS);
+            }
+            else {
+                CheckMenuItem(optionsMenu, i, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+            }
+
+        }
+    }
+
+}
+
 //------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //------------------------------------------------------------------------------
@@ -472,7 +520,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::BOARD_5x5:
                 case MenuID::BOARD_5x9:
                 case MenuID::BOARD_10x10:
-                    windowPresenter.updateBoardSize(0, 0, (wParam - MenuID::BOARD_3x3) + 1);
+                    onChangeBoardSize(wParam);
                     break;
 
                 case MenuID::ABOUT:
@@ -525,10 +573,16 @@ void MainWindowView::implGameStateChanged(const int& newState) {
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
+
+        if(newState == GameState::STATE_NOT_STARTED) {
+            moveControls();
+        }
+
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"Un&pause");
     }
+
 }

@@ -36,6 +36,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
         void moveControls();
+        void onChangeBoardSize(const int& menuID);
         void onTimer();
         void onElapsedTimeTimer();
         void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);

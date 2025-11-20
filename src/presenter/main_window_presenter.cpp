@@ -183,63 +183,12 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 }
 
 //------------------------------------------------------------------------------
-// updateBoardSize - Updates how wide/tall the board is
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::updateBoardSize(const uint8_t& newWidth, const uint8_t& newHeight, const int defaultSize) {
-    
-    switch(defaultSize) {
-        case 1:
-            gameBoard = GameBoard(3, 3, gameBoard.getNumTileTypes());
-            break;
-
-        case 2:
-            gameBoard = GameBoard(4, 4, gameBoard.getNumTileTypes());
-            break;
-
-        case 3:
-            gameBoard = GameBoard(5, 5, gameBoard.getNumTileTypes());
-            break;
-
-        case 4:
-            gameBoard = GameBoard(5, 9, gameBoard.getNumTileTypes());
-            break;
-
-        case 5:
-            gameBoard = GameBoard(10, 10, gameBoard.getNumTileTypes());
-            break;
-
-        default:
-            gameBoard = GameBoard(newWidth, newHeight, gameBoard.getNumTileTypes());
-            break;
-    }
-    
-    // TODO: might need to do something about a new game
-    gameState = GameState::STATE_GAMEWON;
-    tryNewGame();
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// updateTileTypes - Updates how many tile types are on the current tileset
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::updateTileTypes(const uint8_t& tileTypes) {
-    gameBoard.setNumTileTypes(tileTypes);
-    
-    // TODO: might need to do something about a new game
-    gameState = GameState::STATE_GAMEWON;
-    tryNewGame();
-    return true;
-}
-
-//------------------------------------------------------------------------------
 // tryUpdateGameBoard - Used when changing size, tile types, or both.
 // Note: Method only checks IGNORE_WIDTH when ignoring sizes. If Width is valid,
 // it assumes height is too.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryUpdateGameBoard(uint8_t& newWidth, uint8_t& newHeight, uint8_t& tileTypes) {
+bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes) {
     
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
         newWidth = gameBoard.getWidth();
