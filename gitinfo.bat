@@ -1,4 +1,6 @@
 @echo off
+cd %~dp0
+echo "working"
 set githash=fatal
 FOR /F "usebackq tokens=* delims=" %%I IN (`git.exe rev-parse --short^=16 HEAD`) DO (
 	SET githash=%%I

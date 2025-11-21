@@ -25,6 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(SolutionDir)..\\..\\gitinfo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -100,6 +101,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="$(SolutionDir)..\\..\\gitinfo.bat"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
