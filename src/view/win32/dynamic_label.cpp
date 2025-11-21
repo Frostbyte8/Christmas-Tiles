@@ -44,9 +44,13 @@ bool DynamicLabel::registerSelf(HINSTANCE hInst) {
 // createWindow - Creates the main Window.
 //-----------------------------------------------------------------------------
 
-// TODO: X,Y,W,H, Style Flags
-
 bool DynamicLabel::createWindow(const HINSTANCE& hInst, wchar_t inCaption[], const HWND& parent, const HMENU& ID) {
+
+    // Future Ideas:
+    // Being able to set style flags
+    // X,Y,W,H is pretty much no needed as it will just get moved anyways
+    // Bolding
+    // Cache String to avoid a call GetWindowText each time
 
     if(hWnd) {
         return true; // Already created.
@@ -54,7 +58,7 @@ bool DynamicLabel::createWindow(const HINSTANCE& hInst, wchar_t inCaption[], con
 
     hWnd = CreateWindowEx(0, L"DynamicLabel", inCaption,
         WS_CHILD | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 192, 320,
+        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, ID, hInst, this);
 
     if(hWnd == NULL) {
@@ -111,7 +115,7 @@ void DynamicLabel::onPaint() {
 
     PAINTSTRUCT ps;
     if(!BeginPaint(hWnd, &ps)) {
-        // TODO: Begin Paint failed.
+        // Painting Failed
         return;
     }
 

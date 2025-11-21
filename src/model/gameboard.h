@@ -15,17 +15,6 @@ namespace GameBoardConstants {
     static const uint8_t MAX_TILE_TYPES = 100;
 }
 
-// TODO: None of these should be here
-
-namespace GameBoardFlipErrors {
-    static const int AlreadyFlipped = -2;
-    static const int OutOfBounds    = -1;
-    static const int WasSuccessful  = 0; // < 0 = Success, > 0 = Failure
-    static const int TileFlipped    = 1;
-    static const int TilesMatched   = 2;
-    static const int TilesNotMatched = 3;
-}
-
 class GameBoard {
 
     public:

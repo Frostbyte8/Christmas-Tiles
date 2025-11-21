@@ -43,7 +43,7 @@ bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"EnterScoreWindow", GET_LANG_STR(LangID::ENTER_SCORE_WINDOW_TITLE),
         WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 320, 320,
+        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {

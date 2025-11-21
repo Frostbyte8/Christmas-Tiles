@@ -52,6 +52,7 @@ void WindowMetrics::initWindowMetrics() {
     cs.XWINDOW_MARGIN               = XDLU2PIX(7);
     cs.YWINDOW_MARGIN               = YDLU2PIX(7);
 
+    cs.XRELATED_MARGIN              = XDLU2PIX(4);
     cs.YRELATED_MARGIN              = YDLU2PIX(4);
 
     cs.XGROUPBOX_MARGIN             = XDLU2PIX(6);

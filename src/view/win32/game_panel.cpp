@@ -8,8 +8,6 @@ bool GamePanel::isRegistered = false;
 // createWindow - Creates the panel that will contain the game board
 //-----------------------------------------------------------------------------
 
-// TODO: X,Y,W,H, Style Flags
-
 bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
 
     if(hWnd) {
@@ -32,8 +30,6 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
     GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
     bmpWidth    = bmInfo.bmWidth;
     bmpHeight   = bmInfo.bmHeight;
-
-    // TODO: MainWindowPresenter stuff?
 
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
@@ -128,23 +124,25 @@ void GamePanel::onPaint() {
     tilesetHDC = CreateCompatibleDC(ps.hdc);
     HBITMAP tempBMP = (HBITMAP)SelectObject(tilesetHDC, tilesetBMP);
 
-    // TODO: This is obviously not complete
+    if(windowPresenter) {
+        
+        // TODO: Scrollbars are the only thing missing now
+        const GameBoard& gameBoard = windowPresenter->getGameBoard();
 
-    const GameBoard& gameBoard = windowPresenter->getGameBoard();
-
-    const uint8_t& boardWidth = gameBoard.getWidth();
-    const uint8_t& boardHeight = gameBoard.getHeight();
+        const uint8_t& boardWidth = gameBoard.getWidth();
+        const uint8_t& boardHeight = gameBoard.getHeight();
 
 
-    const std::vector<TileData>& tiles = gameBoard.getTiles();
+        const std::vector<TileData>& tiles = gameBoard.getTiles();
 
-    for(uint8_t k = 0; k < boardHeight; ++k) {
-        for(uint8_t i = 0; i < boardWidth; ++i) {
-            if(!tiles[DX2_TO_DX1(i, k, boardWidth)].flags) {
-                BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, 0, 0, SRCCOPY);
-            }
-            else {
-                BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, bmpHeight * tiles[DX2_TO_DX1(i, k, boardWidth)].ID, 0, SRCCOPY);
+        for(uint8_t k = 0; k < boardHeight; ++k) {
+            for(uint8_t i = 0; i < boardWidth; ++i) {
+                if(!tiles[DX2_TO_DX1(i, k, boardWidth)].flags) {
+                    BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, 0, 0, SRCCOPY);
+                }
+                else {
+                    BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, bmpHeight * tiles[DX2_TO_DX1(i, k, boardWidth)].ID, 0, SRCCOPY);
+                }
             }
         }
     }

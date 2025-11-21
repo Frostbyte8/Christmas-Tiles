@@ -2,6 +2,17 @@
 
 #include <windows.h>
 
+//==============================================================================
+// Window Messages
+//==============================================================================
+
+#define UWM_TILE_SELECTED   (WM_USER + 100) // WPARAM = Tile Index Selected
+#define UWM_SCORE_ENTERED   (WM_USER + 101) // Enter Score Window is closed
+
+//==============================================================================
+// Functions
+//==============================================================================
+
 //------------------------------------------------------------------------------
 // createBackBuffer - Creates a back buffer for the context given. You must call
 // destroyBackBuffer when you are done with the back buffer

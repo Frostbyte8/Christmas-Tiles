@@ -2,12 +2,6 @@
 
 #include <windows.h>
 
-// WPARAM = Tile Index Selected
-// I'm starting with 100 here, in case I need the first 100 ever for anything.
-// TODO: Move this somewhere better
-#define UWM_TILE_SELECTED   (WM_USER + 100)
-#define UWM_SCORE_ENTERED   (WM_USER + 101)
-
 // This makes it so Windows can be put inside a class.
 
 template <class T>
@@ -15,8 +9,6 @@ class WndAsClass {
     public:
         static LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             T* self;
-
-            // TODO: Look into options to avoid duplicating this code.
 
             if(msg == WM_NCCREATE) {
                 // Store a copy of an instance of this window in the USERDATA section

@@ -12,7 +12,7 @@ class GamePanel : public WndAsClass<GamePanel> {
 
     public:
         GamePanel(): hWnd(NULL), tilesetBMP(0), windowPresenter(NULL) {}
-        static bool registerSelf(HINSTANCE hInst); // TODO: Make this static?
+        static bool registerSelf(HINSTANCE hInst);
         bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID);
         UINT doLoop();
 

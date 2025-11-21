@@ -20,6 +20,17 @@ namespace WindowPresenterConstants {
     static const uint8_t IGNORE_NUMTILES    = 255;
 }
 
+namespace GameBoardFlipErrors {
+    static const int GameAlreadyWon = -4;
+    static const int CannotUnpause = -3;
+    static const int AlreadyFlipped = -2;
+    static const int OutOfBounds    = -1;
+    static const int WasSuccessful  = 0; // < 0 = Success, > 0 = Failure
+    static const int TileFlipped    = 1;
+    static const int TilesMatched   = 2;
+    static const int TilesNotMatched = 3;
+}
+
 class MainWindowPresenter {
 
     public:

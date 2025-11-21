@@ -67,6 +67,8 @@ bool ScoreTable::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_
     for(size_t i = 0; i < scores.size(); ++i) {
         if(newScore.score > scores[i].score) {
 
+            // TODO: Overwrite score rather than insert?
+
             newScore.name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
             wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, name);
 

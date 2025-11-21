@@ -191,7 +191,6 @@ __forceinline void MainWindowView::createMenuBar() {
     AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, L"&Exit");
 
     // Options Menu
-    // TODO: MenuItemInfo may be necessary for radio buttons
     AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, L"&Change Tileset...");
     AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, L"&Change Language...");
     AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
@@ -202,7 +201,7 @@ __forceinline void MainWindowView::createMenuBar() {
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_10x10, L"10x10");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, L"&Custom Size...");
 
-    // Help Menu
+    // Help Meun
     AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, L"&Help...");
     AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
     AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, L"&About Christmas Tiles...");
@@ -293,8 +292,6 @@ void MainWindowView::centerWindow() {
 // getTallestPoint - Obtain the tallest point of the window.
 //------------------------------------------------------------------------------
 
-// TODO: Tile Size, etc.
-
 LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
@@ -364,9 +361,6 @@ void MainWindowView::moveControls() {
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 
-    // TODO: This causes flicker as the window is not centered
-    MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, TRUE);
-
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
     
     // Move Controls into position
@@ -386,7 +380,8 @@ void MainWindowView::moveControls() {
 
     EndDeferWindowPos(hDeferedWindows);
 
-    centerWindow();
+    // TODO: Prev monitor tracking
+    CenterWindow(hWnd, rc, prevMonitor);
     
 }
 
@@ -512,7 +507,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
                 case MenuID::NEW_GAME:
                     if(windowPresenter.requestNewGame()) {
-                        onElapsedTimeTimer(); // TODO: Might be beneficial to inline this
+                        onElapsedTimeTimer();
                         updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
                         updateScore(scoreLabel.getHandle(), windowPresenter.getScore());
                     }

@@ -40,7 +40,7 @@ bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"HighscoresWindow", GET_LANG_STR(LangID::ENTER_SCORE_WINDOW_TITLE),
         WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 320, 320,
+        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {
@@ -138,11 +138,10 @@ void HighscoresWindow::moveControls() {
     const LONG SCORE_WIDTH  = metrics.calculateStringWidth(L"000000000");
     const LONG DATE_WIDTH   = metrics.calculateStringWidth(L"1900/01/01");
 
-    const LONG SCORE_XOFFSET    = CS.XWINDOW_MARGIN + CS.YWINDOW_MARGIN + NAME_WIDTH;
-    const LONG DATE_XOFFSET     = CS.YWINDOW_MARGIN+ SCORE_XOFFSET + SCORE_WIDTH;
+    const LONG SCORE_XOFFSET    = CS.XWINDOW_MARGIN + CS.XRELATED_MARGIN + NAME_WIDTH;
+    const LONG DATE_XOFFSET     = CS.XRELATED_MARGIN + SCORE_XOFFSET + SCORE_WIDTH;
     
-    // TODO: Horiz gap between controls
-    const LONG totalWidth = (CS.XWINDOW_MARGIN * 2) + (CS.YWINDOW_MARGIN * 2) + NAME_WIDTH + SCORE_WIDTH + DATE_WIDTH;
+    const LONG totalWidth = (CS.XWINDOW_MARGIN * 2) + (CS.XRELATED_MARGIN * 2) + NAME_WIDTH + SCORE_WIDTH + DATE_WIDTH;
     const LONG totalHeight = (CS.YWINDOW_MARGIN * 2) + (CD.YLABEL * 12) + CD.YBUTTON + (CS.YRELATED_MARGIN * 12);
 
     HDWP hDeferedWindows = BeginDeferWindowPos(5 + (3 * ScoreTableConstants::MAX_SCORES));

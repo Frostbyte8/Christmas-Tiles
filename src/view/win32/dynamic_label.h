@@ -11,7 +11,7 @@ class DynamicLabel : public WndAsClass<DynamicLabel> {
 
     public:
         DynamicLabel() : hWnd(0) {}
-        static bool registerSelf(HINSTANCE hInst); // TODO: Make this static?
+        static bool registerSelf(HINSTANCE hInst);
         bool createWindow(const HINSTANCE& hInst, wchar_t inCaption[], const HWND& parent, const HMENU& ID);
         UINT doLoop();
         inline const HWND getHandle() const { return hWnd; }

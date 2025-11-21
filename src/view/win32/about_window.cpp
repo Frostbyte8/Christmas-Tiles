@@ -41,8 +41,6 @@ __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const 
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-// TODO: X,Y,W,H, Style Flags
-
 bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
 
     if(hWnd) {
@@ -53,7 +51,7 @@ bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"AboutWindow", L"Add Title Here",
         WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 320, 320,
+        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {
@@ -83,8 +81,6 @@ void AboutWindow::moveControls() {
     RECT rc = {0, 0, 200, 250};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
     MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, FALSE);
-
-    // TODO: Assuming 200x250 for now
 
     HDWP hDeferedWindows = BeginDeferWindowPos(5);
 

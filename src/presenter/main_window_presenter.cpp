@@ -56,10 +56,10 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
     if(gameState != GameState::STATE_PLAYING) {
         
         if(gameState == GameState::STATE_GAMEWON) {
-            return GameBoardFlipErrors::AlreadyFlipped; // TODO: New error for game won
+            return GameBoardFlipErrors::GameAlreadyWon;
         }
         else if(!tryUnpause()) {
-            return GameBoardFlipErrors::AlreadyFlipped; // TODO: New error for pausing
+            return GameBoardFlipErrors::CannotUnpause;
         }
     }
 
@@ -272,15 +272,6 @@ bool MainWindowPresenter::tryPause() {
         return false;
     }
 
-    // Matches should never be able to go above the total needed
-    /*
-    assert(matchesMade <= gameBoard.getMatchesNeeded());
-
-    if(matchesMade == gameBoard.getMatchesNeeded()) {
-        return false;
-    }
-    */
-
     updateElapsedTime();
     gameState = GameState::STATE_PAUSED;
     mainWindow->implGameStateChanged(gameState);
@@ -300,17 +291,7 @@ bool MainWindowPresenter::tryUnpause() {
         // Cannot Unpause if game is playing or won.
         return false;
     }
-
-
-    /*
-    // Matches should never be able to go above the total needed
-    assert(matchesMade <= gameBoard.getMatchesNeeded());
-
-    if(matchesMade == gameBoard.getMatchesNeeded()) {
-        return false;
-    }
-    */
-    
+   
     milliStartTime = GET_MILLI_COUNT();
     gameState = GameState::STATE_PLAYING;
     mainWindow->implGameStateChanged(gameState);

@@ -9,6 +9,7 @@ struct ControlSpacing {
     int XWINDOW_MARGIN;
     int YWINDOW_MARGIN;
 
+    int XRELATED_MARGIN;
     int YRELATED_MARGIN;
 
     int XGROUPBOX_MARGIN;
