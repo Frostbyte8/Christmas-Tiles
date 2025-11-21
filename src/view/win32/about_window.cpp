@@ -2,6 +2,7 @@
 #include "../../resources/resource.h"
 #include "../../language_table.h"
 #include "../../gitinfo.h"
+#include "shared_functions.h"
 
 bool AboutWindow::isRegistered = false;
 
@@ -175,7 +176,7 @@ bool AboutWindow::onCreate() {
     metrics.initWindowMetrics();
 
     HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
 
     moveControls();
 

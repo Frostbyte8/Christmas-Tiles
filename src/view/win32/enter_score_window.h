@@ -11,8 +11,6 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
         EnterScoreWindow() : hWnd(0), parentHWnd(0) {
         }
 
-        bool onCreate();
-        void moveControls();
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
 
         static bool registerSelf(const HINSTANCE& hInst);
@@ -20,15 +18,17 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
 
     private:
 
+        void onCreate();
+        void moveControls();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
-        static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
-            ::SendMessage(child, WM_SETFONT, font, TRUE);
-            return true;
-        }
         
         static bool isRegistered;
         HWND hWnd;
         HWND parentHWnd;
-        
+        HWND labelMessage1;
+        HWND labelMessage2;
+        HWND textYourName;
+        HWND buttonOK;
+        WindowMetrics metrics;
 
 };

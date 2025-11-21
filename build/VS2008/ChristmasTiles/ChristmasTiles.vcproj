@@ -235,6 +235,10 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\view\win32\shared_functions.cpp"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\view\win32\shared_functions.h"
 					>
 				</File>

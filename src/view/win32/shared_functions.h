@@ -1,5 +1,7 @@
 #pragma once
 
+#include <windows.h>
+
 //------------------------------------------------------------------------------
 // createBackBuffer - Creates a back buffer for the context given. You must call
 // destroyBackBuffer when you are done with the back buffer
@@ -28,3 +30,12 @@ __forceinline void destroyBackBuffer(HDC& backBuffer, HBITMAP& backBitmap, HBITM
     DeleteObject(backBitmap);
     DeleteDC(backBuffer);
 }
+
+//------------------------------------------------------------------------------
+// ChangeControlsFont - Changes the font on the control given. Meant to be used
+// with EnumChildWindows.
+// @param HWND of the child window to change
+// @param Font to be set
+//------------------------------------------------------------------------------
+
+bool CALLBACK ChangeControlsFont(HWND child, LPARAM font);

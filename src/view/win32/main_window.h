@@ -44,13 +44,6 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
-        // This is a helpful function that will set the font on all the controls
-        // to what the user has defined on their system.
-        static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
-            ::SendMessage(child, WM_SETFONT, font, TRUE);
-            return true;
-        }
-
         // Disable copy constructor
         MainWindowView &operator=(const MainWindowView&);
 

@@ -2,6 +2,7 @@
 #include "subclassed_controls.h"
 #include "../../language_table.h"
 #include "../../resources/resource.h"
+#include "shared_functions.h"
 
 //==============================================================================
 // Namespaces / Enums / Constants
@@ -243,7 +244,7 @@ bool MainWindowView::onCreate() {
     metrics.initWindowMetrics();
 
     HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(SetProperFont), (LPARAM)dialogFont);
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 

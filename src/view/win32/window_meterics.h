@@ -25,6 +25,8 @@ struct ControlDimensions {
 
     int XSCROLLBAR;
     int YSCROLLBAR;
+
+    int YTEXTBOX_ONE_LINE_ALONE;
 };
 
 class WindowMetrics {

@@ -65,6 +65,8 @@ void WindowMetrics::initWindowMetrics() {
     cd.XBUTTON                     = XDLU2PIX(50);
     cd.YBUTTON                     = YDLU2PIX(14);
 
+    cd.YTEXTBOX_ONE_LINE_ALONE     = YDLU2PIX(12);
+
     // A Few extras that are obtained via GetSystemMetrics
     cd.XSCROLLBAR                   = GetSystemMetrics(SM_CXVSCROLL);
     cd.YSCROLLBAR                   = GetSystemMetrics(SM_CYHSCROLL);

@@ -28,10 +28,6 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
-        static bool CALLBACK SetProperFont(HWND child, LPARAM font) {
-            ::SendMessage(child, WM_SETFONT, font, TRUE);
-            return true;
-        }
         
         static bool isRegistered;
         HWND hWnd;
