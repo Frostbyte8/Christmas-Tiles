@@ -126,6 +126,8 @@ UINT MainWindowView::doLoop() {
 
         if(aboutWindow.getHandle() && IsDialogMessage(aboutWindow.getHandle(), &msg)) {
         }
+        else if(enterScoreWindow.getHandle() && IsDialogMessage(enterScoreWindow.getHandle(), &msg)) {
+        }
         else if (!IsDialogMessage(hWnd, &msg)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);

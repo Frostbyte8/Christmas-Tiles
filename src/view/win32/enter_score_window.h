@@ -9,6 +9,8 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
 
     public:
         EnterScoreWindow() : hWnd(0), parentHWnd(0) {
+            strCache[0] = NULL;
+            strCache[1] = NULL;
         }
 
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
@@ -29,6 +31,9 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
         HWND labelMessage2;
         HWND textYourName;
         HWND buttonOK;
+
+        wchar_t* strCache[2];
+
         WindowMetrics metrics;
 
 };

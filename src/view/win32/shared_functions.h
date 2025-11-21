@@ -39,3 +39,5 @@ __forceinline void destroyBackBuffer(HDC& backBuffer, HBITMAP& backBitmap, HBITM
 //------------------------------------------------------------------------------
 
 bool CALLBACK ChangeControlsFont(HWND child, LPARAM font);
+
+void CenterWindow(const HWND& hWnd, const RECT& windowRC, HMONITOR& prevMonitor);

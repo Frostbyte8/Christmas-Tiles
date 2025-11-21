@@ -1,0 +1,27 @@
+# Program Title
+Christmas Tiles
+# Version Text
+Version %s
+# Copyright
+Copyright %s
+# OK Button Text
+OK
+# Cancel Button Text
+Cancel
+# Score Groupbox Caption
+Score
+# Points Groupbox Caption
+Points
+# Time Groupbox Caption
+Time
+# Pause Button Caption
+Pause
+# Unpause Button Caption
+Unpause
+# Enter Score Window Title
+Enter your name
+# Enter Score Message line 1
+Congratulations! You achieved a new highscore!
+# Enter Score Message line 2
+Enter your name below:
+# END STRINGS
