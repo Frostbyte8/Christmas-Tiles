@@ -1,6 +1,7 @@
 #include "highscores_window.h"
 #include "../../language_table.h"
 #include "shared_functions.h"
+#include <cassert>
 
 bool HighscoresWindow::isRegistered = false;
 
@@ -27,7 +28,9 @@ namespace CtrlID {
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
+bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, ScoreTable* inScoreTable) {
+
+    scoreTable = inScoreTable;
 
     if(hWnd) {
         return true; // Already created.
@@ -89,10 +92,12 @@ bool HighscoresWindow::registerSelf(const HINSTANCE& hInst) {
 //-----------------------------------------------------------------------------
 
 void HighscoresWindow::onCreate() {
+
+    assert(scoreTable != NULL);
+
     const HINSTANCE hInst = GetModuleHandle(NULL);
 
-    ScoreTable scoreTable;
-    const std::vector<ScoreT>& scores = scoreTable.getScores();
+    const std::vector<ScoreT>& scores = scoreTable->getScores();
 
     labelCaption = createLabel(L"Top 10 Players", SS_CENTER, hWnd, 100, hInst);
 
@@ -102,8 +107,14 @@ void HighscoresWindow::onCreate() {
 
     for(size_t i = 0; i < scores.size(); ++i) {
         labelName[i]    = createLabel(scores[i].name, SS_LEFT, hWnd, 100, hInst);
-        labelScore[i]   = createLabel(L"999999999", SS_CENTER, hWnd, 100, hInst);
-        labelDate[i]    = createLabel(L"1900/01/01", SS_CENTER, hWnd, 100, hInst);
+
+        wchar_t score[16] = {0};
+        swprintf_s(score, 10, L"%d", scores[i].score);
+        labelScore[i] = createLabel(score, SS_CENTER, hWnd, 100, hInst);
+
+        wchar_t date[16] = {0};
+        swprintf_s(date, 11, L"%d/%02d/%02d", scores[i].year, scores[i].month, scores[i].day);
+        labelDate[i] = createLabel(date, SS_CENTER, hWnd, 100, hInst);
     }
 
 
@@ -118,7 +129,6 @@ void HighscoresWindow::onCreate() {
 }
 
 void HighscoresWindow::moveControls() {
-
     
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
@@ -156,21 +166,6 @@ void HighscoresWindow::moveControls() {
     }
 
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonOK, HWND_NOTOPMOST, (totalWidth / 2) - (CD.XBUTTON / 2), yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
-
-    /*
-    HDWP hDeferedWindows = BeginDeferWindowPos(4);
-
-    int yOffset = CS.YWINDOW_MARGIN;
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, labelMessage1, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
-    yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, labelMessage2, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
-    yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, textYourName, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YTEXTBOX_ONE_LINE_ALONE, SWP_NOZORDER);
-    yOffset += CD.YTEXTBOX_ONE_LINE_ALONE + CS.YRELATED_MARGIN;
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonOK, HWND_NOTOPMOST, (totalWidth / 2) - (CD.XBUTTON / 2), yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
-
-    EndDeferWindowPos(hDeferedWindows);
-    */
 
     EndDeferWindowPos(hDeferedWindows);
 

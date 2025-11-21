@@ -6,6 +6,7 @@
 // I'm starting with 100 here, in case I need the first 100 ever for anything.
 // TODO: Move this somewhere better
 #define UWM_TILE_SELECTED   (WM_USER + 100)
+#define UWM_SCORE_ENTERED   (WM_USER + 101)
 
 // This makes it so Windows can be put inside a class.
 

@@ -30,19 +30,48 @@ ScoreTable::~ScoreTable() {
     scores.resize(0);
 }
 
+size_t ScoreTable::isNewHighscore(const uint32_t& score) {
+    for(size_t i = 0; i < scores.size(); ++i) {
+        if(score > scores[i].score) {
+            return i;
+        }
+    }
+
+    return 10;
+}
+
+void ScoreTable::insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index) {
+    ScoreT newScore;
+
+    newScore.name = name;
+    newScore.score = score < ScoreTableConstants::MAX_POSSIBLE_SCORE ? score : ScoreTableConstants::MAX_POSSIBLE_SCORE;
+    newScore.month = month < 12 ? month : 12;
+    newScore.day = day < 31 ? day : 31;
+
+    newScore.year = year > 9999 ? 9999 : (year < 1000 ? 1000 : year);
+
+    scores.pop_back();
+    scores.insert(scores.begin()+index, newScore);
+
+}
+
 bool ScoreTable::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day) {
 
     ScoreT newScore;
 
-    newScore.name = name;
-    newScore.score = score;
-    newScore.month = month;
-    newScore.day = day;
-    newScore.year = year;
+    newScore.score = score < ScoreTableConstants::MAX_POSSIBLE_SCORE ? score : ScoreTableConstants::MAX_POSSIBLE_SCORE;
+    newScore.month = month < 12 ? month : 12;
+    newScore.day = day < 31 ? day : 31;
+    newScore.year = year > 9999 ? 9999 : (year < 1000 ? 1000 : year);
 
     for(size_t i = 0; i < scores.size(); ++i) {
         if(newScore.score > scores[i].score) {
 
+            newScore.name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
+            wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, name);
+
+            free(scores[scores.size()-1].name);
+            scores[scores.size()-1].name = NULL;
             scores.pop_back();
             scores.insert(scores.begin()+i, newScore);
 

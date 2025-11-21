@@ -55,6 +55,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         AboutWindow aboutWindow;
         EnterScoreWindow enterScoreWindow;
         HighscoresWindow highscoresWindow;
+        ScoreTable scoreTable;
         
         HMENU menuBar;
         HMENU fileMenu;

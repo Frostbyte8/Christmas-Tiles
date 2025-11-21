@@ -14,6 +14,7 @@
 namespace ScoreTableConstants {
     static const int MAX_NAME_LENGTH = 25;
     static const size_t MAX_SCORES = 10;
+    static const uint32_t MAX_POSSIBLE_SCORE = 999999999;
 }
 
 struct ScoreT {
@@ -30,6 +31,8 @@ class ScoreTable {
     public:
         ScoreTable();
         ~ScoreTable();
+        size_t isNewHighscore(const uint32_t& score);
+        void insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
         bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day);
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }
 

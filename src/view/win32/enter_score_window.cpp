@@ -1,6 +1,7 @@
 #include "enter_score_window.h"
 #include "../../language_table.h"
 #include "shared_functions.h"
+#include "../../model/scores.h"
 
 bool EnterScoreWindow::isRegistered = false;
 
@@ -30,7 +31,9 @@ namespace CtrlID {
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
+bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, size_t& inScoreIndex) {
+
+    scoreIndex = inScoreIndex;
 
     if(hWnd) {
         return true; // Already created.
@@ -102,7 +105,7 @@ void EnterScoreWindow::onCreate() {
 
     textYourName = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::NAME_ENTRY_BOX, hInst, 0);
 
-    SendMessage(textYourName, EM_SETLIMITTEXT, 25, 0); // TODO: Score List Model will have a constant for 25
+    SendMessage(textYourName, EM_SETLIMITTEXT, ScoreTableConstants::MAX_NAME_LENGTH, 0);
 
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
     SendMessage(hWnd, DM_SETDEFID, CtrlID::OK_BUTTON, 0);
@@ -168,9 +171,20 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             // Fall through
 
         case WM_CLOSE:
+
+            if(name) {
+                free(name);
+                name = NULL;
+            }
+
+            name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
+            name[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
+            GetWindowText(textYourName, name, ScoreTableConstants::MAX_NAME_LENGTH);
+
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
             DestroyWindow(hWnd);
+            SendMessage(parentHWnd, UWM_SCORE_ENTERED, 0, 0);
             hWnd = NULL;
             break;
 

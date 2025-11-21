@@ -8,15 +8,24 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     friend WndAsClass;
 
     public:
-        EnterScoreWindow() : hWnd(0), parentHWnd(0) {
+        EnterScoreWindow() : hWnd(0), parentHWnd(0), scoreIndex(0), name(0) {
             strCache[0] = NULL;
             strCache[1] = NULL;
         }
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent);
+        ~EnterScoreWindow() {
+            if(name) {
+                free(name);
+            }
+        }
+
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, size_t& inScoreIndex);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }
+
+        inline size_t const getScoreIndex() const { return scoreIndex; }
+        inline wchar_t* const getName() const { return name; }
 
     private:
 
@@ -33,6 +42,9 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
         HWND buttonOK;
 
         wchar_t* strCache[2];
+
+        size_t scoreIndex;
+        wchar_t* name;
 
         WindowMetrics metrics;
 

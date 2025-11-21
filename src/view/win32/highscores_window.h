@@ -9,9 +9,9 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
     friend WndAsClass;
 
     public:
-        HighscoresWindow() : hWnd(0), parentHWnd(0) {}
+        HighscoresWindow() : hWnd(0), parentHWnd(0), scoreTable(NULL) {}
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, ScoreTable* inScoreTable);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }
@@ -34,7 +34,8 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
         HWND labelScore[ScoreTableConstants::MAX_SCORES];
         HWND labelDate[ScoreTableConstants::MAX_SCORES];
         
-        
+        ScoreTable const *scoreTable;
+
         HWND buttonOK;
 
         WindowMetrics metrics;
