@@ -128,6 +128,8 @@ UINT MainWindowView::doLoop() {
         }
         else if(enterScoreWindow.getHandle() && IsDialogMessage(enterScoreWindow.getHandle(), &msg)) {
         }
+        else if(highscoresWindow.getHandle() && IsDialogMessage(highscoresWindow.getHandle(), &msg)) {
+        }
         else if (!IsDialogMessage(hWnd, &msg)) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
@@ -527,6 +529,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::BOARD_5x9:
                 case MenuID::BOARD_10x10:
                     onChangeBoardSize(wParam);
+                    break;
+                
+                case MenuID::HIGHSCORES:
+                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd);
                     break;
 
                 case MenuID::ABOUT:

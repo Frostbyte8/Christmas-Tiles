@@ -10,6 +10,7 @@
 
 #include "about_window.h"
 #include "enter_score_window.h"
+#include "highscores_window.h"
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
@@ -53,6 +54,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         HWND hWnd;
         AboutWindow aboutWindow;
         EnterScoreWindow enterScoreWindow;
+        HighscoresWindow highscoresWindow;
         
         HMENU menuBar;
         HMENU fileMenu;

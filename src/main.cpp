@@ -10,6 +10,7 @@
 #include "view/win32/main_window.h"
 #include "view/win32/about_window.h"
 #include "view/win32/enter_score_window.h"
+#include "view/win32/highscores_window.h"
 #include "interface/main_window_interface.h"
 
 
@@ -43,6 +44,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     if(!EnterScoreWindow::registerSelf(hInstance)) {
+        return 0;
+    }
+
+    if(!HighscoresWindow::registerSelf(hInstance)) {
         return 0;
     }
 

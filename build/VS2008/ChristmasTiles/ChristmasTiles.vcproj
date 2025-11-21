@@ -187,6 +187,14 @@
 				RelativePath="..\..\..\src\model\gametile.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\..\src\model\scores.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\model\scores.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="view"
@@ -224,6 +232,14 @@
 				</File>
 				<File
 					RelativePath="..\..\..\src\view\win32\game_panel.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\view\win32\highscores_window.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\view\win32\highscores_window.h"
 					>
 				</File>
 				<File
