@@ -17,6 +17,8 @@ Settings may differ slightly depending on your version of Visual Studio.
 **Step 3** - Project Properties
 First go to Project > Properties. Change configuration to All Configurations.
 
+- Under Debugging, change:
+-- Working Directory to $(TargetDir)
 - Under C/C++ > General, change:
 -- Warning Level to "Level 4 (/W4)"
 -  Under Linker > Input, change:
