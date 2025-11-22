@@ -11,7 +11,7 @@ class GamePanel : public WndAsClass<GamePanel> {
     friend WndAsClass;
 
     public:
-        GamePanel(): hWnd(NULL), tilesetBMP(0), windowPresenter(NULL) {}
+        GamePanel();
         static bool registerSelf(HINSTANCE hInst);
         bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID);
         UINT doLoop();
@@ -24,7 +24,11 @@ class GamePanel : public WndAsClass<GamePanel> {
         inline const LONG& getTilesetWidth() const { return bmpWidth; }
         inline const LONG& getTilesetHeight() const { return bmpHeight; }
 
+        void updateVirtualSize(const WORD& numXTiles, const WORD& numYTiles);
+
     private:
+
+        void onSize(const WORD& newWidth, const WORD& newHeight);
         void onClick(WORD xPos, WORD yPos);
         void onPaint();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
@@ -37,4 +41,8 @@ class GamePanel : public WndAsClass<GamePanel> {
         HBITMAP tilesetBMP;
         LONG bmpWidth;
         LONG bmpHeight;
+        WORD xOffset;
+        WORD yOffset;
+        WORD virtualWidth;
+        WORD virtualHeight;
 };

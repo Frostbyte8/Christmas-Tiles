@@ -21,7 +21,7 @@
 // Namespaces / Enums / Constants
 //==============================================================================
 
-static const uint32_t MAX_SCORE = 999999999;
+static const uint32_t MAX_SCORE = 999999999; // TODO: Score Table constant, not this.
 
 //==============================================================================
 // Constructors

@@ -4,9 +4,21 @@
 
 bool GamePanel::isRegistered = false;
 
-//-----------------------------------------------------------------------------
+//==============================================================================
+// Constructors
+//==============================================================================
+
+GamePanel::GamePanel() : hWnd(NULL), tilesetBMP(0), windowPresenter(NULL), xOffset(0), yOffset(0),
+virtualWidth(0), virtualHeight(0) {
+}
+
+//==============================================================================
+// Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
 // createWindow - Creates the panel that will contain the game board
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
 
@@ -37,9 +49,9 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
     return true;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 bool GamePanel::registerSelf(HINSTANCE hInst) {
     
@@ -73,17 +85,59 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
     return true;
 }
 
+void GamePanel::onSize(const WORD& newWidth, const WORD& newHeight) {
 
+    // First, we need to figure out which scroll bars we need
 
-//-----------------------------------------------------------------------------
+    const int ScrollSpanX = GetSystemMetrics(SM_CXHSCROLL);
+    const int ScrollSpanY = GetSystemMetrics(SM_CXVSCROLL);
+
+    if(newWidth < virtualWidth) {
+
+        // We might also need the other scrollbar if the span of the scrollbar
+        // makes the space small enoguh
+
+        if(newHeight - ScrollSpanX < virtualHeight) {
+            ShowScrollBar(hWnd, SB_BOTH, TRUE);
+        }
+        else {
+            ShowScrollBar(hWnd, SB_HORZ, TRUE);
+            ShowScrollBar(hWnd, SB_VERT, FALSE);
+        }
+
+    }
+    else if(newHeight < virtualHeight) {
+        
+        if(newWidth - ScrollSpanY < virtualWidth) {
+            ShowScrollBar(hWnd, SB_BOTH, TRUE);
+        }
+        else {
+            ShowScrollBar(hWnd, SB_VERT, TRUE);
+            ShowScrollBar(hWnd, SB_HORZ, FALSE);
+        }
+
+    }
+    else {
+        ShowScrollBar(hWnd, SB_BOTH, FALSE);
+    }
+
+}
+
+void GamePanel::updateVirtualSize(const WORD& newXTiles, const WORD& newYTiles) {
+    virtualWidth = static_cast<WORD>(newXTiles * bmpHeight);
+    virtualHeight = static_cast<WORD>(newYTiles * bmpHeight);
+}
+
+//------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
+        case WM_SIZE: onSize(LOWORD(lParam), HIWORD(lParam)); break;
         case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam), HIWORD(lParam)); break;
         case WM_PAINT:      onPaint(); break;
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
@@ -92,9 +146,9 @@ LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM
     return 0;
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // onPaint - Processing of the WM_PAINT message
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 #define DX2_TO_DX1(i, k, width)    ( (k * width) + i)
 

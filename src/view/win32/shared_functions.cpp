@@ -20,9 +20,10 @@ void CenterWindow(const HWND& hWnd, const RECT& windowRC, HMONITOR& prevMonitor)
     const int workXCenter = abs(monitorInfo.rcWork.left - monitorInfo.rcWork.right) / 2;
     const int workYCenter = abs(monitorInfo.rcWork.top - monitorInfo.rcWork.bottom) / 2;
 
+    // TODO: Is SWP_SHOWWINDOW fine? SWP_NOREDRAW is obviously not right
     SetWindowPos(hWnd, NULL,
                  monitorInfo.rcWork.right - (workXCenter + (winWidth / 2)), 
                  monitorInfo.rcWork.bottom - (workYCenter + (winHeight / 2)),
-                 winWidth, winHeight, SWP_NOREDRAW);
+                 winWidth, winHeight, SWP_SHOWWINDOW);
 
 }

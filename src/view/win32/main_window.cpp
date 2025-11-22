@@ -4,6 +4,9 @@
 #include "../../resources/resource.h"
 #include "shared_functions.h"
 
+const int MAX_HEIGHT = 300;
+const int MAX_WIDTH = 400;
+
 //==============================================================================
 // Namespaces / Enums / Constants
 //==============================================================================
@@ -359,6 +362,15 @@ void MainWindowView::moveControls() {
     }
 
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
+
+    if(rc.bottom > MAX_HEIGHT) {
+        rc.bottom = MAX_HEIGHT;
+    }
+
+    if(rc.right > MAX_WIDTH) {
+        rc.right = MAX_WIDTH;
+    }
+
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
@@ -376,13 +388,12 @@ void MainWindowView::moveControls() {
     hDeferedWindows = DeferWindowPos(hDeferedWindows, timeLabel.getHandle(), HWND_NOTOPMOST, CS.XGROUPBOX_MARGIN, CS.YFIRST_GROUPBOX_MARGIN + (boxHeight * 2), widestGroupBox - (CS.XGROUPBOX_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonPause, HWND_NOTOPMOST, 0, boxHeight * 3, widestGroupBox, tallestPoint - (boxHeight * 3), SWP_NOZORDER);
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, (gamePanel.getTilesetHeight() * horzTiles), tallestPoint, SWP_NOZORDER);
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, rc.bottom, SWP_NOZORDER);
 
     EndDeferWindowPos(hDeferedWindows);
 
     // TODO: Prev monitor tracking
     CenterWindow(hWnd, rc, prevMonitor);
-    
 }
 
 //------------------------------------------------------------------------------
@@ -609,7 +620,9 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
 
-        if(newState == GameState::STATE_NOT_STARTED) {
+        if(newState == GameState::STATE_NOT_STARTED) { // AKA New Game
+            const GameBoard& gameBoard = windowPresenter.getGameBoard();
+            gamePanel.updateVirtualSize(gameBoard.getWidth(), gameBoard.getHeight());
             moveControls();
         }
 
