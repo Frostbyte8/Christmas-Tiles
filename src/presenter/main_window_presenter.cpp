@@ -14,6 +14,7 @@
 
 #endif // _WIN32
 
+#include "../language_table.h"
 
 
 //==============================================================================
@@ -167,8 +168,12 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 
 bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes) {
     
-    if(!checkAndAskNewGame()) {
-        return false;
+    if(gameState != GameState::STATE_GAMEWON) {
+        const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
     }
 
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
@@ -193,8 +198,14 @@ bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight
 
 bool MainWindowPresenter::requestNewGame() {
     
-    if(!checkAndAskNewGame()) {
-        return false;
+    if(gameState != GameState::STATE_GAMEWON) {
+
+        const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
     }
 
     return tryNewGame();
@@ -222,27 +233,6 @@ inline void MainWindowPresenter::unflipTiles() {
 // Private Functions
 //==============================================================================
 
-//------------------------------------------------------------------------------
-// checkAndAskNewGame - Check to see if a game is in progress, and if so, ask
-// the user if they want to start a new game.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::checkAndAskNewGame() {
-    
-    if(gameState != GameState::STATE_GAMEWON) {
-        wchar_t message[] = L"Game in progress.";
-        wchar_t title[] = L"Are you sure?";
-        const int retVal = mainWindow->implAskYesNoQuestion(message, title);
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
-    }
-
-    return true;
-
-}
 
 //------------------------------------------------------------------------------
 // tryNewGame - Attempts to start a new game

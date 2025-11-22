@@ -49,7 +49,7 @@ bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
 
     parentHWnd = parent;
 
-    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"AboutWindow", L"Add Title Here",
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"AboutWindow", GET_LANG_STR(LangID::ABOUT_TITLE),
         WINDOW_STYLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, NULL, hInst, this);

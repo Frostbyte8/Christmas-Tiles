@@ -1,9 +1,5 @@
 # Program Title
 Christmas Tiles
-# Version Text
-Version %s
-# Copyright
-Copyright %s
 # OK Button Text
 OK
 # Cancel Button Text
@@ -18,10 +14,70 @@ Time
 Pause
 # Unpause Button Caption
 Unpause
+# Menu New Game
+&New Game
+# Menu Pause
+&Pause
+# Menu Unpause
+Un&pause
+# Menu Highscores
+&Highscores...
+# Menu Exit
+E&xit
+# Menu Change Tileset
+Change &Tileset...
+# Menu Change Language
+Change &Language...
+# Custom Size Menu
+Custom &Size...
+# Help Menu Item (Not the top level menu)
+&Help
+# About Menu
+&About Christmas Tiles..
+# File Top Level Menu
+&File
+# Options Top Level Menu
+&Options
+# Help Top Level Menu
+&Help
+# You Win Text
+Game Completed!
+# You Win Title
+You Win!
+# Give Up Message
+Are you sure you want to give up?
+# Give up Title
+Give Up?
+# Game In Progress Quit Message
+A game is currently in progress. Are you sure you want to quit?
+# Game in Progress Quit Title
+Quit Game?
+# A Game in Progress New
+A game is currently in progress. Are you sure you want to start a new game?
+# A Game in Progress Title
+Start New Game?
+# Do you want to Play Again Text
+Do you want to play again?
+# Do you want to Play Again Title
+Play Again?
+# This Action Text
+A game is currently in progress. This action will start a new game. Continue?
+# This Action Title
+Continue?
 # Enter Score Window Title
 Enter your name
 # Enter Score Message line 1
 Congratulations! You achieved a new highscore!
 # Enter Score Message line 2
 Enter your name below:
+# Highscores Title
+Highscores
+# Highscores Text
+Top 10 Players
+# About Title
+About Christmas Tiles
+# Version Text
+Version %s
+# Copyright
+Copyright %s
 # END STRINGS

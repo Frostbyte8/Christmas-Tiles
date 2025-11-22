@@ -45,6 +45,7 @@ class MainWindowPresenter {
         inline void unflipTiles();
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }
+        inline const int& getGameState() const { return gameState; }
 
         bool requestNewGame();
         bool tryTogglePause();
@@ -60,7 +61,6 @@ class MainWindowPresenter {
 
         MainWindowInterface *mainWindow;
 
-        bool checkAndAskNewGame();
         bool tryNewGame();
         bool tryPause();
         bool tryUnpause();

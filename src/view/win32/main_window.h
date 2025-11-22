@@ -39,6 +39,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
         void moveControls();
+        void onClose();
         void onChangeBoardSize(const int& menuID);
         void onTimer();
         void onElapsedTimeTimer();

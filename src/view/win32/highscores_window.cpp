@@ -38,7 +38,7 @@ bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
 
     parentHWnd = parent;
 
-    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"HighscoresWindow", GET_LANG_STR(LangID::ENTER_SCORE_WINDOW_TITLE),
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"HighscoresWindow", GET_LANG_STR(LangID::HIGHSCORES_TITLE),
         WINDOW_STYLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         parent, NULL, hInst, this);
@@ -99,7 +99,7 @@ void HighscoresWindow::onCreate() {
 
     const std::vector<ScoreT>& scores = scoreTable->getScores();
 
-    labelCaption = createLabel(L"Top 10 Players", SS_CENTER, hWnd, 100, hInst);
+    labelCaption = createLabel(GET_LANG_STR(LangID::HIGHSCORES_TEXT), SS_CENTER, hWnd, 100, hInst);
 
     labelHeader[0] = createLabel(L"Name", SS_CENTER, hWnd, 100, hInst);
     labelHeader[1] = createLabel(L"Score", SS_CENTER, hWnd, 100, hInst);

@@ -183,33 +183,33 @@ __forceinline void MainWindowView::createMenuBar() {
 
     // File Menu
 
-    AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, L"&New Game");
-    AppendMenu(fileMenu, MF_STRING | MF_DISABLED | MF_GRAYED, MenuID::PAUSE_GAME, L"&Pause");
+    AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, GET_LANG_STR(LangID::MENU_NEW_GAME));
+    AppendMenu(fileMenu, MF_STRING | MF_DISABLED | MF_GRAYED, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
     AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, L"&Highscores");
+    AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, GET_LANG_STR(LangID::MENU_HIGHSCORES));
     AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, L"&Exit");
+    AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, GET_LANG_STR(LangID::MENU_EXIT));
 
     // Options Menu
-    AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, L"&Change Tileset...");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, L"&Change Language...");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, GET_LANG_STR(LangID::MENU_CHANGE_TILESET));
+    AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, GET_LANG_STR(LangID::MENU_CHANGE_LANGUAGE));
     AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
     AppendMenu(optionsMenu, MF_STRING | MF_CHECKED, MenuID::BOARD_3x3, L"3x3");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x5, L"5x5");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x9, L"5x9");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_10x10, L"10x10");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, L"&Custom Size...");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, GET_LANG_STR(LangID::MENU_CUSTOM_SIZE));
 
     // Help Meun
-    AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, L"&Help...");
+    AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, GET_LANG_STR(LangID::MENU_HELP_ITEM));
     AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, L"&About Christmas Tiles...");
+    AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, GET_LANG_STR(LangID::MENU_ABOUT));
 
     // Now attach each menu to the menu bar
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(fileMenu), L"&File");
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(optionsMenu), L"&Options");
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(helpMenu), L"&Help");
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(fileMenu), GET_LANG_STR(LangID::MENU_FILE));
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(optionsMenu), GET_LANG_STR(LangID::MENU_OPTIONS));
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(helpMenu), GET_LANG_STR(LangID::MENU_HELP));
 
     SetMenu(hWnd, menuBar);
 }
@@ -417,6 +417,22 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
 }
 
 //------------------------------------------------------------------------------
+// onClose - User wants to quit the program
+//------------------------------------------------------------------------------
+
+void MainWindowView::onClose() {
+
+    if(windowPresenter.getGameState() != GameState::STATE_GAMEWON) {
+        if(implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TITLE)) != MainWindowInterfaceResponses::YES) {
+            return;
+        }
+    }
+
+    KillTimer(hWnd, 1);
+    DestroyWindow(hWnd);
+}
+
+//------------------------------------------------------------------------------
 // onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
 // ID.
 //------------------------------------------------------------------------------
@@ -438,8 +454,12 @@ void MainWindowView::onElapsedTimeTimer() {
 
 }
 
+//------------------------------------------------------------------------------
+// onChangeBoardSize - User wants to change the size of the game board
+//------------------------------------------------------------------------------
+
 void MainWindowView::onChangeBoardSize(const int& menuID) {
-    
+
     bool retVal = false;
 
     switch(menuID) {
@@ -533,6 +553,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::ABOUT:
                     aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
                     break;
+
+                case MenuID::EXIT:
+                    onClose();
+                    break;
                 
             }
 
@@ -548,8 +572,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case WM_CLOSE:
-            KillTimer(hWnd, 1);
-            DestroyWindow(hWnd); 
+            onClose();
             break;
 
         case WM_DESTROY: 
@@ -579,12 +602,12 @@ int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* 
 void MainWindowView::implGameStateChanged(const int& newState) {
     if(newState == GameState::STATE_PLAYING) {
         EnableWindow(buttonPause, TRUE);
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
     }
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, L"&Pause");
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
 
         if(newState == GameState::STATE_NOT_STARTED) {
             moveControls();
@@ -605,7 +628,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
     }
     else if(newState == GameState::STATE_PAUSED) {
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, L"Un&pause");
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_UNPAUSE));
     }
 
 }
