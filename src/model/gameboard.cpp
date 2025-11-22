@@ -118,7 +118,7 @@ bool GameBoard::tryNewGame() {
 
 #ifdef _DEBUG
 
-    return true;
+    //return true;
    
     wchar_t outStr[5] = {0};
 

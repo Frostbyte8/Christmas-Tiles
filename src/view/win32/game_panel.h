@@ -28,6 +28,8 @@ class GamePanel : public WndAsClass<GamePanel> {
 
     private:
 
+        void onHScroll(const WORD& dir);
+        void onVScroll(const WORD& dir);
         void onSize(const WORD& newWidth, const WORD& newHeight);
         void onClick(WORD xPos, WORD yPos);
         void onPaint();
@@ -41,8 +43,8 @@ class GamePanel : public WndAsClass<GamePanel> {
         HBITMAP tilesetBMP;
         LONG bmpWidth;
         LONG bmpHeight;
-        WORD xOffset;
-        WORD yOffset;
+        int xOffset;
+        int yOffset;
         WORD virtualWidth;
         WORD virtualHeight;
 };

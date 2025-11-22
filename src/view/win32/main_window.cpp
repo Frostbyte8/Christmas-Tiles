@@ -4,9 +4,6 @@
 #include "../../resources/resource.h"
 #include "shared_functions.h"
 
-const int MAX_HEIGHT = 300;
-const int MAX_WIDTH = 400;
-
 //==============================================================================
 // Namespaces / Enums / Constants
 //==============================================================================
@@ -363,6 +360,7 @@ void MainWindowView::moveControls() {
 
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
 
+    /*
     if(rc.bottom > MAX_HEIGHT) {
         rc.bottom = MAX_HEIGHT;
     }
@@ -370,6 +368,7 @@ void MainWindowView::moveControls() {
     if(rc.right > MAX_WIDTH) {
         rc.right = MAX_WIDTH;
     }
+    */
 
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 
