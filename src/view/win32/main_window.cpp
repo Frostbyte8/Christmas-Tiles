@@ -8,7 +8,7 @@
 // Namespaces / Enums / Constants
 //==============================================================================
 
-static const DWORD WINDOW_STYLE = WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME);
+static const DWORD WINDOW_STYLE = WS_CLIPCHILDREN | (WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME));
 static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW | WS_EX_CONTROLPARENT;
 
 namespace MainWindowViewConstants {
@@ -366,8 +366,8 @@ void MainWindowView::moveControls() {
     mi.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(prevMonitor, &mi);
     
-    if(rc.right > mi.rcMonitor.right * 0.80) {
-        rc.right = mi.rcMonitor.right * 0.80;
+    if(rc.right > mi.rcMonitor.right * 0.10) {
+        rc.right = mi.rcMonitor.right * 0.10;
     }
 
     if(rc.bottom > mi.rcMonitor.bottom * 0.80) {

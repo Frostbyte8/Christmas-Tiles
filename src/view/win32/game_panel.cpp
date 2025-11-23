@@ -93,9 +93,13 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
     return true;
 }
 
-void GamePanel::onSize(const LONG& newWidth, const LONG& newHeight) {
+void GamePanel::onSize() {
 
-    if(newWidth == 0 || newHeight == 0) {
+    RECT rc;
+    ShowScrollBar(hWnd, SB_BOTH, FALSE); // Turn off scrollbars to get correct client size.
+    GetClientRect(hWnd, &rc);
+
+    if(rc.right == 0 || rc.bottom == 0) {
         return;
         // In the future, run an assert.
     }
@@ -107,32 +111,38 @@ void GamePanel::onSize(const LONG& newWidth, const LONG& newHeight) {
 
     int whichBars = 0;
 
-    if(newWidth < virtualWidth) {
+    if(rc.right < virtualWidth) {
 
         // We might also need the other scrollbar if the span of the scrollbar
         // makes the space small enough
 
-        if(newHeight - ScrollSpanX < virtualHeight) {
+        if(rc.bottom - ScrollSpanX < virtualHeight) {
             ShowScrollBar(hWnd, SB_BOTH, TRUE);
             whichBars = ScrollType::BOTH;
+            rc.right -= ScrollSpanY;
+            rc.bottom -= ScrollSpanX;
          }
         else {
             ShowScrollBar(hWnd, SB_HORZ, TRUE);
             ShowScrollBar(hWnd, SB_VERT, FALSE);
             whichBars = ScrollType::HORZ;
+            rc.bottom -= ScrollSpanX;
         }
 
     }
-    else if(newHeight < virtualHeight) {
+    else if(rc.bottom < virtualHeight) {
         
-        if(newWidth - ScrollSpanY < virtualWidth) {
+        if(rc.right - ScrollSpanY < virtualWidth) {
             ShowScrollBar(hWnd, SB_BOTH, TRUE);
             whichBars = ScrollType::BOTH;
+            rc.right -= ScrollSpanY;
+            rc.bottom -= ScrollSpanX;
         }
         else {
             ShowScrollBar(hWnd, SB_VERT, TRUE);
             ShowScrollBar(hWnd, SB_HORZ, FALSE);
             whichBars = ScrollType::VERT;
+            rc.right -= ScrollSpanY;
         }
 
     }
@@ -142,11 +152,11 @@ void GamePanel::onSize(const LONG& newWidth, const LONG& newHeight) {
     }
 
     if(whichBars & ScrollType::HORZ) {
-        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - newWidth, TRUE);
+        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - rc.right, TRUE);
     }
 
     if(whichBars & ScrollType::VERT) {
-        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - newHeight, TRUE);
+        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - rc.bottom, TRUE);
     }
 
 }
@@ -158,15 +168,10 @@ void GamePanel::updateVirtualSize(const WORD& newXTiles, const WORD& newYTiles) 
     yOffset = 0;
     SetScrollPos(hWnd, SB_HORZ, 0, TRUE);
     SetScrollPos(hWnd, SB_VERT, 0, TRUE);
-
-    // TODO: Probably can just put this in onSize
-    RECT rc;
-    GetClientRect(hWnd, &rc);
-
-    onSize(rc.right, rc.bottom);
+    onSize();
 }
 
-void GamePanel::onHScroll(const WORD& dir) {
+void GamePanel::onHScroll(const WORD& dir, const WORD& pos) {
 
     int minRange = 0;
     int maxRange = 0;
@@ -174,17 +179,44 @@ void GamePanel::onHScroll(const WORD& dir) {
     GetScrollRange(hWnd, SB_HORZ, &minRange, &maxRange);
 
     if(dir == SB_LINERIGHT) {
-        if(xOffset < maxRange) {
-            xOffset++;
-            SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
+
+        xOffset += bmpHeight / 8;
+        
+        if(xOffset > maxRange) {
+            xOffset = maxRange;
         }
+
+        SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
+    }
+    else if(dir == SB_PAGERIGHT) {
+        xOffset += bmpHeight / 4;
+        
+        if(xOffset > maxRange) {
+            xOffset = maxRange;
+        }
+        SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
     }
     else if(dir == SB_LINELEFT) {
 
-        if(xOffset > 0) {
-            xOffset--;
-            SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
+        xOffset -= bmpHeight / 8;
+
+        if(xOffset < 0) {
+            xOffset = 0;
         }
+        SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
+
+    }
+    else if(dir == SB_PAGELEFT) {
+        xOffset -= bmpHeight / 4;
+
+        if(xOffset < 0) {
+            xOffset = 0;
+        }
+        SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
+    }
+    else if(dir == SB_THUMBPOSITION || dir == SB_THUMBTRACK) {
+        xOffset = pos;
+        SetScrollPos(hWnd, SB_HORZ, xOffset, TRUE);
     }
     else {
         return;
@@ -193,7 +225,7 @@ void GamePanel::onHScroll(const WORD& dir) {
 
 }
 
-void GamePanel::onVScroll(const WORD& dir) {
+void GamePanel::onVScroll(const WORD& dir, const WORD& pos) {
 
     int minRange = 0;
     int maxRange = 0;
@@ -201,21 +233,49 @@ void GamePanel::onVScroll(const WORD& dir) {
     GetScrollRange(hWnd, SB_VERT, &minRange, &maxRange);
 
     if(dir == SB_LINEDOWN) {
-        if(yOffset < maxRange) {
-            yOffset++;
-            SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
+
+        yOffset += bmpHeight / 8;
+        
+        if(yOffset > maxRange) {
+            yOffset = maxRange;
         }
+
+        SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
+    }
+    else if(dir == SB_PAGEDOWN) {
+        yOffset += bmpHeight / 4;
+        
+        if(yOffset > maxRange) {
+            yOffset = maxRange;
+        }
+        SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
     }
     else if(dir == SB_LINEUP) {
 
-        if(yOffset > 0) {
-            yOffset--;
-            SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
+        yOffset -= bmpHeight / 8;
+
+        if(yOffset < 0) {
+            yOffset = 0;
         }
+        SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
+
+    }
+    else if(dir == SB_PAGEUP) {
+        yOffset -= bmpHeight / 4;
+
+        if(yOffset < 0) {
+            yOffset = 0;
+        }
+        SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
+    }
+    else if(dir == SB_THUMBPOSITION || dir == SB_THUMBTRACK) {
+        yOffset = pos;
+        SetScrollPos(hWnd, SB_VERT, yOffset, TRUE);
     }
     else {
         return;
     }
+
     InvalidateRect(hWnd, NULL, TRUE);
 
 }
@@ -230,8 +290,8 @@ LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_HSCROLL: onHScroll(LOWORD(wParam)); break;
-        case WM_VSCROLL: onVScroll(LOWORD(wParam)); break;
+        case WM_HSCROLL: onHScroll(LOWORD(wParam), HIWORD(wParam)); break;
+        case WM_VSCROLL: onVScroll(LOWORD(wParam), HIWORD(wParam)); break;
         case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam) + xOffset, HIWORD(lParam) + yOffset); break;
         case WM_PAINT:      onPaint(); break;
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT

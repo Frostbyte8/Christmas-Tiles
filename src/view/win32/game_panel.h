@@ -28,9 +28,9 @@ class GamePanel : public WndAsClass<GamePanel> {
 
     private:
 
-        void onHScroll(const WORD& dir);
-        void onVScroll(const WORD& dir);
-        void onSize(const LONG& newWidth, const LONG& newHeight);
+        void onHScroll(const WORD& dir, const WORD& pos);
+        void onVScroll(const WORD& dir, const WORD& pos);
+        void onSize();
         void onClick(WORD xPos, WORD yPos);
         void onPaint();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
