@@ -360,17 +360,19 @@ void MainWindowView::moveControls() {
 
     RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
 
-    /*
-    if(rc.bottom > MAX_HEIGHT) {
-        rc.bottom = MAX_HEIGHT;
+    // TODO: This is just for testing scroll bars. set it to a tiny size to try it out
+
+    MONITORINFO mi = {0};
+    mi.cbSize = sizeof(MONITORINFO);
+    GetMonitorInfo(prevMonitor, &mi);
+    
+    if(rc.right > mi.rcMonitor.right * 0.80) {
+        rc.right = mi.rcMonitor.right * 0.80;
     }
 
-    if(rc.right > MAX_WIDTH) {
-        rc.right = MAX_WIDTH;
+    if(rc.bottom > mi.rcMonitor.bottom * 0.80) {
+        rc.bottom = mi.rcMonitor.bottom * 0.80;
     }
-    */
-
-    AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
     
@@ -387,10 +389,13 @@ void MainWindowView::moveControls() {
     hDeferedWindows = DeferWindowPos(hDeferedWindows, timeLabel.getHandle(), HWND_NOTOPMOST, CS.XGROUPBOX_MARGIN, CS.YFIRST_GROUPBOX_MARGIN + (boxHeight * 2), widestGroupBox - (CS.XGROUPBOX_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonPause, HWND_NOTOPMOST, 0, boxHeight * 3, widestGroupBox, tallestPoint - (boxHeight * 3), SWP_NOZORDER);
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, rc.bottom, SWP_NOZORDER);
+
+    // 
+
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, tallestPoint, SWP_NOZORDER);
 
     EndDeferWindowPos(hDeferedWindows);
-
+    AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
     // TODO: Prev monitor tracking
     CenterWindow(hWnd, rc, prevMonitor);
 }
@@ -491,6 +496,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
     }
 
     if(retVal) {
+
         for(int i = MenuID::BOARD_3x3; i <= MenuID::BOARD_10x10; ++i) {
 
             if(i != menuID) {
@@ -502,6 +508,8 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
         }
     }
+
+    
 
 }
 
@@ -610,6 +618,7 @@ int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* 
 //-----------------------------------------------------------------------------
 
 void MainWindowView::implGameStateChanged(const int& newState) {
+
     if(newState == GameState::STATE_PLAYING) {
         EnableWindow(buttonPause, TRUE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
@@ -618,13 +627,6 @@ void MainWindowView::implGameStateChanged(const int& newState) {
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
-
-        if(newState == GameState::STATE_NOT_STARTED) { // AKA New Game
-            const GameBoard& gameBoard = windowPresenter.getGameBoard();
-            gamePanel.updateVirtualSize(gameBoard.getWidth(), gameBoard.getHeight());
-            moveControls();
-        }
-
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
 
         if(newState == GameState::STATE_GAMEWON) {
@@ -635,6 +637,12 @@ void MainWindowView::implGameStateChanged(const int& newState) {
                 enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);
             }
 
+        }
+        else {
+            const GameBoard& gameBoard = windowPresenter.getGameBoard();
+            // TODO: Better way of handling this, it causes too many resizes, and things go out of sync
+            moveControls();
+            gamePanel.updateVirtualSize(gameBoard.getWidth(), gameBoard.getHeight());
         }
 
     }

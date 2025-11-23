@@ -30,7 +30,7 @@ class GamePanel : public WndAsClass<GamePanel> {
 
         void onHScroll(const WORD& dir);
         void onVScroll(const WORD& dir);
-        void onSize(const WORD& newWidth, const WORD& newHeight);
+        void onSize(const LONG& newWidth, const LONG& newHeight);
         void onClick(WORD xPos, WORD yPos);
         void onPaint();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);

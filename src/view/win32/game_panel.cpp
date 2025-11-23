@@ -93,15 +93,17 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
     return true;
 }
 
-void GamePanel::onSize(const WORD& newWidth, const WORD& newHeight) {
+void GamePanel::onSize(const LONG& newWidth, const LONG& newHeight) {
+
+    if(newWidth == 0 || newHeight == 0) {
+        return;
+        // In the future, run an assert.
+    }
 
     // First, we need to figure out which scroll bars we need
 
     const int ScrollSpanX = GetSystemMetrics(SM_CXHSCROLL);
     const int ScrollSpanY = GetSystemMetrics(SM_CXVSCROLL);
-
-    int finalWidth = newWidth;
-    int finalHeight = newHeight;
 
     int whichBars = 0;
 
@@ -113,14 +115,11 @@ void GamePanel::onSize(const WORD& newWidth, const WORD& newHeight) {
         if(newHeight - ScrollSpanX < virtualHeight) {
             ShowScrollBar(hWnd, SB_BOTH, TRUE);
             whichBars = ScrollType::BOTH;
-            finalHeight -= ScrollSpanX;
-            finalWidth -= ScrollSpanY;
-        }
+         }
         else {
             ShowScrollBar(hWnd, SB_HORZ, TRUE);
             ShowScrollBar(hWnd, SB_VERT, FALSE);
             whichBars = ScrollType::HORZ;
-            finalHeight -= ScrollSpanX;
         }
 
     }
@@ -129,14 +128,11 @@ void GamePanel::onSize(const WORD& newWidth, const WORD& newHeight) {
         if(newWidth - ScrollSpanY < virtualWidth) {
             ShowScrollBar(hWnd, SB_BOTH, TRUE);
             whichBars = ScrollType::BOTH;
-            finalHeight -= ScrollSpanX;
-            finalWidth -= ScrollSpanY;
         }
         else {
             ShowScrollBar(hWnd, SB_VERT, TRUE);
             ShowScrollBar(hWnd, SB_HORZ, FALSE);
             whichBars = ScrollType::VERT;
-            finalWidth -= ScrollSpanY;
         }
 
     }
@@ -146,11 +142,11 @@ void GamePanel::onSize(const WORD& newWidth, const WORD& newHeight) {
     }
 
     if(whichBars & ScrollType::HORZ) {
-        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - finalWidth, TRUE);
+        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - newWidth, TRUE);
     }
 
     if(whichBars & ScrollType::VERT) {
-        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - finalHeight, TRUE);
+        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - newHeight, TRUE);
     }
 
 }
@@ -162,6 +158,12 @@ void GamePanel::updateVirtualSize(const WORD& newXTiles, const WORD& newYTiles) 
     yOffset = 0;
     SetScrollPos(hWnd, SB_HORZ, 0, TRUE);
     SetScrollPos(hWnd, SB_VERT, 0, TRUE);
+
+    // TODO: Probably can just put this in onSize
+    RECT rc;
+    GetClientRect(hWnd, &rc);
+
+    onSize(rc.right, rc.bottom);
 }
 
 void GamePanel::onHScroll(const WORD& dir) {
@@ -230,7 +232,6 @@ LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
         case WM_HSCROLL: onHScroll(LOWORD(wParam)); break;
         case WM_VSCROLL: onVScroll(LOWORD(wParam)); break;
-        case WM_SIZE: onSize(LOWORD(lParam), HIWORD(lParam)); break;
         case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam) + xOffset, HIWORD(lParam) + yOffset); break;
         case WM_PAINT:      onPaint(); break;
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
@@ -252,7 +253,6 @@ void GamePanel::onPaint() {
 
     PAINTSTRUCT ps;
     if(!BeginPaint(hWnd, &ps)) {
-        // TODO: Begin Paint failed.
         return;
     }
 
@@ -280,8 +280,8 @@ void GamePanel::onPaint() {
         const int minXTile = static_cast<int>(floor(static_cast<float>(xOffset) / bmpHeight));
         const int minYTile = static_cast<int>(floor(static_cast<float>(yOffset) / bmpHeight));
 
-        int maxXTile = static_cast<int>(ceil(static_cast<float>(rc.right) / bmpHeight));
-        int maxYTile = static_cast<int>(ceil(static_cast<float>(rc.bottom) / bmpHeight));
+        int maxXTile = minXTile + static_cast<int>(ceil(static_cast<float>(rc.right + xOffset) / bmpHeight));
+        int maxYTile = minYTile + static_cast<int>(ceil(static_cast<float>(rc.bottom + yOffset) / bmpHeight));
 
         if(maxXTile > gameBoard.getWidth()) {
             maxXTile = gameBoard.getWidth();
@@ -342,23 +342,6 @@ void GamePanel::onPaint() {
 
 
         }
-
-
-        /*
-        for(uint8_t k = 0; k < boardHeight; ++k) {
-            
-            for(uint8_t i = 0; i < boardWidth; ++i) {
-
-                if(!tiles[DX2_TO_DX1(i, k, boardWidth)].flags) {
-                    BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, 0, 0, SRCCOPY);
-                }
-                else {
-                    BitBlt(backBuffer, i * bmpHeight, k * bmpHeight, bmpHeight, bmpHeight, tilesetHDC, bmpHeight * tiles[DX2_TO_DX1(i, k, boardWidth)].ID, 0, SRCCOPY);
-                }
-
-            }
-        }
-        */
     }
 
     SelectObject(tilesetHDC, tempBMP);
