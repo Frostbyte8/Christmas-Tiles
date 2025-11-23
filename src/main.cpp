@@ -13,7 +13,6 @@
 #include "view/win32/highscores_window.h"
 #include "interface/main_window_interface.h"
 
-
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     
 #if defined(_MSC_VER) && defined(_DEBUG)

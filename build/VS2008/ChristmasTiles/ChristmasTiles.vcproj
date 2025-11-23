@@ -321,6 +321,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\..\src\frost_util.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\..\src\gitinfo.h"
 			>
 		</File>

@@ -3,6 +3,8 @@
 #include "../../language_table.h"
 #include "../../resources/resource.h"
 #include "shared_functions.h"
+#include "../../constants.h"
+#include "../../frost_util.h"
 
 //==============================================================================
 // Namespaces / Enums / Constants
@@ -76,6 +78,11 @@ __forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
     wchar_t scoreStr[16] = {0};
     wsprintf(scoreStr, L"%09d", score);
     SetWindowText(ctrl, scoreStr);
+}
+
+__forceinline BOOL DoesFileExist(const wchar_t* path) {
+    const DWORD fileAttrib = GetFileAttributes(path);
+    return (fileAttrib != INVALID_FILE_ATTRIBUTES && !(fileAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 //==============================================================================
@@ -236,10 +243,45 @@ bool MainWindowView::onCreate() {
     // TODO: gamePanel should get the presenter via it's constructor?
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
 
-    // TODO: Window Presenter 
+    uint8_t boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
+    uint8_t boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
+
+    if(!DoesFileExist(L".\\ChristmasTiles.ini")) {
+        wchar_t buffer[4] = {0};
+        wsprintf(buffer, L"%d", boardWidth);
+        WritePrivateProfileStringW(L"settings", L"width", buffer, L".\\ChristmasTiles.ini");
+        wsprintf(buffer, L"%d", boardHeight);
+        WritePrivateProfileStringW(L"settings", L"height", buffer, L".\\ChristmasTiles.ini");
+    }
+    else {
+        boardWidth = static_cast<uint8_t>(GetPrivateProfileInt(L"settings", L"width", ChristmasTilesConstants::DEFAULT_BOARD_WIDTH, L".\\ChristmasTiles.ini"));
+        boardHeight = static_cast<uint8_t>(GetPrivateProfileInt(L"settings", L"height", ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT, L".\\ChristmasTiles.ini"));
+
+        boardWidth = FrostUtil::ClampInts(boardWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
+        boardHeight = FrostUtil::ClampInts(boardHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
+    }
+
     gamePanel.setWindowPresenter(&windowPresenter);
-    windowPresenter.tryUpdateGameBoard(3, 3, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
-   
+    windowPresenter.tryUpdateGameBoard(boardWidth, boardHeight, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+
+    if(boardWidth == 3 && boardHeight == 3) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_3x3, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(boardWidth == 4 && boardHeight == 4) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_4x4, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(boardWidth == 5 && boardHeight == 5) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_5x5, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(boardWidth == 5 && boardHeight == 9) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_5x9, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(boardWidth == 10 && boardHeight == 10) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_10x10, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_CUSTOM, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
 
     metrics.initWindowMetrics();
 

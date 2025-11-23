@@ -12,6 +12,8 @@ namespace GameBoardConstants {
     static const uint8_t NO_SELECTED_INDEX = 255;
     static const uint8_t MAX_WIDTH = 15;
     static const uint8_t MAX_HEIGHT = 15;
+    static const uint8_t MIN_WIDTH = 2;
+    static const uint8_t MIN_HEIGHT = 2;
     static const uint8_t MAX_TILE_TYPES = 100;
 }
 
