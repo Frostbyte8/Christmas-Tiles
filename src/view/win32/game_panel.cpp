@@ -12,6 +12,11 @@ namespace ScrollType {
     static const int BOTH = HORZ | VERT;
 }
 
+__forceinline BOOL DoesFileExist(const wchar_t* path) {
+    const DWORD fileAttrib = GetFileAttributes(path);
+    return (fileAttrib != INVALID_FILE_ATTRIBUTES && !(fileAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
 //==============================================================================
 // Constructors
 //==============================================================================
@@ -28,7 +33,7 @@ virtualWidth(0), virtualHeight(0) {
 // createWindow - Creates the panel that will contain the game board
 //------------------------------------------------------------------------------
 
-bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
+bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID, const wchar_t* tilesetPath) {
 
     if(hWnd) {
         return true; // Already created.
@@ -44,8 +49,16 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
         return false;
     }
 
-    // TODO: This should be a function
-    tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    // TODO: This should be a function, 
+    // it should also warn about incomplete sets (need at least 3 tiles: Unflipped, Free, and a single tile.
+
+    if(!DoesFileExist(tilesetPath)) {
+        tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    }
+    else {
+        tilesetBMP = (HBITMAP)LoadImage(NULL, tilesetPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    }
+
     BITMAP bmInfo = {0};
     GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
     bmpWidth    = bmInfo.bmWidth;

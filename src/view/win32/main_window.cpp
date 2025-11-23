@@ -240,27 +240,36 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
-    // TODO: gamePanel should get the presenter via it's constructor?
-    gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD));
-
     uint8_t boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
     uint8_t boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
+    wchar_t filePath[MAX_PATH] = {0};
 
     if(!DoesFileExist(L".\\ChristmasTiles.ini")) {
+
+        // Board Dimensions
         wchar_t buffer[4] = {0};
         wsprintf(buffer, L"%d", boardWidth);
         WritePrivateProfileStringW(L"settings", L"width", buffer, L".\\ChristmasTiles.ini");
         wsprintf(buffer, L"%d", boardHeight);
         WritePrivateProfileStringW(L"settings", L"height", buffer, L".\\ChristmasTiles.ini");
+        
+        // Tileset Options
+        WritePrivateProfileStringW(L"settings", L"tileset", L"", L".\\ChristmasTiles.ini");
+
     }
     else {
+    
         boardWidth = static_cast<uint8_t>(GetPrivateProfileInt(L"settings", L"width", ChristmasTilesConstants::DEFAULT_BOARD_WIDTH, L".\\ChristmasTiles.ini"));
         boardHeight = static_cast<uint8_t>(GetPrivateProfileInt(L"settings", L"height", ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT, L".\\ChristmasTiles.ini"));
+        GetPrivateProfileString(L"settings", L"tileset", NULL, filePath, MAX_PATH-1, L".\\ChristmasTiles.ini");
 
         boardWidth = FrostUtil::ClampInts(boardWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
         boardHeight = FrostUtil::ClampInts(boardHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
+
     }
 
+    // TODO: gamePanel should get the presenter via it's constructor?
+    gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD), filePath);
     gamePanel.setWindowPresenter(&windowPresenter);
     windowPresenter.tryUpdateGameBoard(boardWidth, boardHeight, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
 

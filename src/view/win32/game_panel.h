@@ -13,7 +13,7 @@ class GamePanel : public WndAsClass<GamePanel> {
     public:
         GamePanel();
         static bool registerSelf(HINSTANCE hInst);
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID, const wchar_t* tilesetPath);
         UINT doLoop();
 
         inline const HWND& getHandle() const { return hWnd; }
