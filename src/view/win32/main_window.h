@@ -35,10 +35,11 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
 
     private:
 
-        void centerWindow();
+        //void centerWindow();
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
         void moveControls();
+        void onWindowMoved();
         void onClose();
         void onChangeBoardSize(const int& menuID);
         void onTimer();

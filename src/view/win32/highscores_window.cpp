@@ -50,10 +50,6 @@ bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
 
     EnableWindow(parent, FALSE);
     
-    // TODO: Center window, monitor info, etc
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
-
     return true;
 
 }
@@ -125,7 +121,13 @@ void HighscoresWindow::onCreate() {
     HFONT dialogFont = metrics.GetCurrentFont();
     EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
 
+    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+
     moveControls();
+    
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
+
 }
 
 void HighscoresWindow::moveControls() {
@@ -178,6 +180,20 @@ void HighscoresWindow::moveControls() {
 }
 
 //-----------------------------------------------------------------------------
+// onWindowMoved - Adjust the window, if needed after is has been moved.
+//-----------------------------------------------------------------------------
+
+void HighscoresWindow::onWindowMoved() {
+    HMONITOR currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    if(currentMonitor != prevMonitor) {
+        prevMonitor = currentMonitor;
+        moveControls(); // This will also center it
+    }
+
+}
+
+//-----------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //-----------------------------------------------------------------------------
 
@@ -186,7 +202,7 @@ LRESULT HighscoresWindow::windowProc(const UINT& msg, const WPARAM wParam, const
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-
+        case WM_EXITSIZEMOVE: onWindowMoved(); break;
         case WM_CREATE:
             onCreate();
             break;

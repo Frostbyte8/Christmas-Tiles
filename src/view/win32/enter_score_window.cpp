@@ -53,10 +53,6 @@ bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
 
     EnableWindow(parent, FALSE);
     
-    // TODO: Center window, monitor info, etc
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
-
     return true;
 
 }
@@ -113,8 +109,12 @@ void EnterScoreWindow::onCreate() {
     metrics.initWindowMetrics();
     HFONT dialogFont = metrics.GetCurrentFont();
     EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
 
     moveControls();
+
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
 }
 
 void EnterScoreWindow::moveControls() {
@@ -140,9 +140,21 @@ void EnterScoreWindow::moveControls() {
 
     RECT rc = {0, 0, totalWidth, totalHeight};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
+    CenterWindow(hWnd, rc, prevMonitor);
 
-    HMONITOR notDoneYet = 0; // TODO: Monitor Tracking.
-    CenterWindow(hWnd, rc, notDoneYet);
+}
+
+//-----------------------------------------------------------------------------
+// onWindowMoved - Adjust the window, if needed after is has been moved.
+//-----------------------------------------------------------------------------
+
+void EnterScoreWindow::onWindowMoved() {
+    HMONITOR currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    if(currentMonitor != prevMonitor) {
+        prevMonitor = currentMonitor;
+        moveControls(); // This will also center it
+    }
 
 }
 
@@ -159,6 +171,8 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
         case WM_CREATE:
             onCreate();
             break;
+
+        case WM_EXITSIZEMOVE: onWindowMoved(); break;
 
         case DM_GETDEFID:
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);

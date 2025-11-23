@@ -20,9 +20,11 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
 
         void onCreate();
         void moveControls();
+        void onWindowMoved();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         
         static bool isRegistered;
+        HMONITOR prevMonitor;
         HWND hWnd;
         HWND parentHWnd;
 

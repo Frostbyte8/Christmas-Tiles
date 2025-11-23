@@ -8,7 +8,7 @@
 // Namespaces / Enums / Constants
 //==============================================================================
 
-static const DWORD WINDOW_STYLE = WS_CLIPCHILDREN | (WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME));
+static const DWORD WINDOW_STYLE = (WS_OVERLAPPEDWINDOW & ~(WS_MAXIMIZEBOX | WS_THICKFRAME));
 static const DWORD WINDOW_STYLE_EX = WS_EX_OVERLAPPEDWINDOW | WS_EX_CONTROLPARENT;
 
 namespace MainWindowViewConstants {
@@ -95,7 +95,7 @@ bool MainWindowView::createWindow() {
     // TODO: This may need WS_CLIPCHILDREN / WS_CLIPSIBLINGS?
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", GET_LANG_STR(LangID::APP_TITLE),
-        WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 200, 200,
+        WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         NULL, NULL, hInstance, this);
 
     if(hWnd == NULL) {
@@ -103,10 +103,12 @@ bool MainWindowView::createWindow() {
         return false;
     }
 
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
+    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    // TODO: Don't show the window until everything has been moved
+    //ShowWindow(hWnd, SW_NORMAL);
+    //UpdateWindow(hWnd);
 
-    // TODO: This should be set for the first time when the game starts.
+    // TODO: This should be set for the first time when the game starts?
     SetTimer(hWnd, MainWindowViewConstants::ELAPSED_TIMER_ID, 100, 0);
 
     return true;
@@ -248,11 +250,15 @@ bool MainWindowView::onCreate() {
 
     HFONT dialogFont = metrics.GetCurrentFont();
     EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
-
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-
     moveControls();
+
+    // Now that the window is done being created, move and show it.
+    // This is to reduce flicker.
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
+
     return true;
 
 }
@@ -262,31 +268,27 @@ bool MainWindowView::onCreate() {
 //==============================================================================
 
 //------------------------------------------------------------------------------
-// centerWindow - Centers the window on the monitor it was said to have last
-// been on.
+// onWindowMoved - Track which monitor the window is on after it has been moved,
+// and if it has changed which monitor it is on center it.
 //------------------------------------------------------------------------------
 
-void MainWindowView::centerWindow() {
+void MainWindowView::onWindowMoved() {
+    HMONITOR currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-    MONITORINFO monitorInfo = {0};
-    monitorInfo.cbSize = sizeof(monitorInfo);
-    GetMonitorInfoW(prevMonitor, &monitorInfo);
+    if(currentMonitor != prevMonitor) {
+        prevMonitor = currentMonitor;
 
-    RECT windowRC;
-    GetWindowRect(hWnd, &windowRC);
+        /*
+        RECT rc;
+        GetWindowRect(hWnd, &rc);
+        CenterWindow(hWnd, rc, prevMonitor);
+        */
 
-    const int winWidth  = windowRC.right - windowRC.left; 
-    const int winHeight = windowRC.bottom - windowRC.top;
-    const int workXCenter = abs(monitorInfo.rcWork.left - monitorInfo.rcWork.right) / 2;
-    const int workYCenter = abs(monitorInfo.rcWork.top - monitorInfo.rcWork.bottom) / 2;
+        moveControls(); // This will also center it
 
-    SetWindowPos(hWnd, NULL,
-                 monitorInfo.rcWork.right - (workXCenter + (winWidth / 2)), 
-                 monitorInfo.rcWork.bottom - (workYCenter + (winHeight / 2)),
-                 winWidth, winHeight, SWP_NOREDRAW);
-
+    }
+    
 }
-
 
 //------------------------------------------------------------------------------
 // getTallestPoint - Obtain the tallest point of the window.
@@ -333,10 +335,12 @@ LONG MainWindowView::getWidestGroupBox() const {
 
 void MainWindowView::moveControls() {
 
+    // TODO: This for some reason is called twice, figure out why.
+
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    // Obtain Client Area Width
+    // TODO: This entire code needs to be rewritten.
     // Client Area Width is Widest GroupBox + GameBoard Width
     // Client Area Height is whatever is taller: 3 Groupboxes + Button, or Gameboard
     // Min Width: GroupBox + at least 5 tiles
@@ -347,8 +351,6 @@ void MainWindowView::moveControls() {
     const LONG widestGroupBox = getWidestGroupBox();
 
     // TODO: This may not need to actually be here
-    // TODO: minWidth = GroupBox + 5 tiles
-    // TODO: Min Height = the Height of Standard Tile. So that is gamePanel.getTilesetHeight() * 9
 
     // Resize Window
     // TODO: Get Monitor Window is on?
@@ -366,18 +368,18 @@ void MainWindowView::moveControls() {
     mi.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(prevMonitor, &mi);
     
-    if(rc.right > mi.rcMonitor.right * 0.10) {
-        rc.right = mi.rcMonitor.right * 0.10;
+    if(rc.right > abs(mi.rcMonitor.right - mi.rcMonitor.left) * 0.80) {
+        rc.right = abs(mi.rcMonitor.right - mi.rcMonitor.right) * 0.80;
     }
 
-    if(rc.bottom > mi.rcMonitor.bottom * 0.80) {
-        rc.bottom = mi.rcMonitor.bottom * 0.80;
+    if(rc.bottom > abs(mi.rcMonitor.bottom - mi.rcMonitor.top) * 0.80) {
+        rc.bottom = abs(mi.rcMonitor.bottom - mi.rcMonitor.top) * 0.80;
     }
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
     
     // Move Controls into position
-
+    
     HDWP hDeferedWindows = BeginDeferWindowPos(8);
 
     hDeferedWindows = DeferWindowPos(hDeferedWindows, groupStats[0], HWND_NOTOPMOST, 0, 0, widestGroupBox, boxHeight, SWP_NOZORDER);
@@ -398,6 +400,12 @@ void MainWindowView::moveControls() {
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
     // TODO: Prev monitor tracking
     CenterWindow(hWnd, rc, prevMonitor);
+
+    // Revalidate Game Panel, but then invalidate it only to repaint, not erase it.
+    GetClientRect(hWnd, &rc);
+    rc.left = widestGroupBox;
+    ValidateRect(hWnd, &rc);
+    InvalidateRect(hWnd, &rc, FALSE);
 }
 
 //------------------------------------------------------------------------------
@@ -534,7 +542,9 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 }
             }
             break;
-
+        case WM_EXITSIZEMOVE:
+            onWindowMoved(); 
+            break;
         case WM_CREATE:
             onCreate();
             break;
@@ -640,7 +650,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         }
         else {
             const GameBoard& gameBoard = windowPresenter.getGameBoard();
-            // TODO: Better way of handling this, it causes too many resizes, and things go out of sync
+            // TODO: Stop this from running the first time, the window is already moved.
             moveControls();
             gamePanel.updateVirtualSize(gameBoard.getWidth(), gameBoard.getHeight());
         }

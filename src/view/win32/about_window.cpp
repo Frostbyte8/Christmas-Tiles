@@ -60,10 +60,6 @@ bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
     }
 
     EnableWindow(parent, FALSE);
-    
-    // TODO: Center window, monitor info, etc
-    ShowWindow(hWnd, SW_NORMAL);
-    UpdateWindow(hWnd);
 
     return true;
 }
@@ -80,7 +76,6 @@ void AboutWindow::moveControls() {
 
     RECT rc = {0, 0, 200, 250};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
-    MoveWindow(hWnd, 0, 0, rc.right-rc.left, rc.bottom-rc.top, FALSE);
 
     HDWP hDeferedWindows = BeginDeferWindowPos(5);
 
@@ -97,6 +92,9 @@ void AboutWindow::moveControls() {
     DeferWindowPos(hDeferedWindows, labelCopyright, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, 200 - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
 
     EndDeferWindowPos(hDeferedWindows);
+
+    CenterWindow(hWnd, rc, prevMonitor);
+
 }
 
 //------------------------------------------------------------------------------
@@ -174,9 +172,27 @@ bool AboutWindow::onCreate() {
     HFONT dialogFont = metrics.GetCurrentFont();
     EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
 
+    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+
     moveControls();
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
 
     return true;
+}
+
+//-----------------------------------------------------------------------------
+// onWindowMoved - Adjust the window, if needed after is has been moved.
+//-----------------------------------------------------------------------------
+
+void AboutWindow::onWindowMoved() {
+    HMONITOR currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    if(currentMonitor != prevMonitor) {
+        prevMonitor = currentMonitor;
+        moveControls(); // This will also center it
+    }
+
 }
 
 //-----------------------------------------------------------------------------
@@ -188,6 +204,7 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
+        case WM_EXITSIZEMOVE: onWindowMoved(); break;
         case WM_CREATE:
             onCreate();
             break;
@@ -197,6 +214,7 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
             DestroyWindow(hWnd);
             hWnd = NULL;
             break;
+
 
     }
 

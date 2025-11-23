@@ -30,10 +30,12 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     private:
 
         void onCreate();
+        void onWindowMoved();
         void moveControls();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         
         static bool isRegistered;
+        HMONITOR prevMonitor;
         HWND hWnd;
         HWND parentHWnd;
         HWND labelMessage1;

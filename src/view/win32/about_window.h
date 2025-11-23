@@ -28,10 +28,12 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
-        
+        void onWindowMoved();
+
         static bool isRegistered;
         HWND hWnd;
         HWND parentHWnd;
+        HMONITOR prevMonitor;
 
         HANDLE iconHandle;
         HWND appIcon;
