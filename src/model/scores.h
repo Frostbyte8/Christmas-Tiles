@@ -14,7 +14,6 @@
 namespace ScoreTableConstants {
     static const int MAX_NAME_LENGTH = 25;
     static const size_t MAX_SCORES = 10;
-    static const uint32_t MAX_POSSIBLE_SCORE = 999999999;
 }
 
 struct ScoreT {

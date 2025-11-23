@@ -92,8 +92,6 @@ bool MainWindowView::createWindow() {
         return true; // Already created.
     }
 
-    // TODO: This may need WS_CLIPCHILDREN / WS_CLIPSIBLINGS?
-
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", GET_LANG_STR(LangID::APP_TITLE),
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         NULL, NULL, hInstance, this);
@@ -104,9 +102,6 @@ bool MainWindowView::createWindow() {
     }
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-    // TODO: Don't show the window until everything has been moved
-    //ShowWindow(hWnd, SW_NORMAL);
-    //UpdateWindow(hWnd);
 
     // TODO: This should be set for the first time when the game starts?
     SetTimer(hWnd, MainWindowViewConstants::ELAPSED_TIMER_ID, 100, 0);
@@ -278,11 +273,7 @@ void MainWindowView::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
 
-        /*
-        RECT rc;
-        GetWindowRect(hWnd, &rc);
-        CenterWindow(hWnd, rc, prevMonitor);
-        */
+        // TODO: Reinit Window Metrics, and reset fonts, if DPI has actually changed.
 
         moveControls(); // This will also center it
 

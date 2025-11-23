@@ -1,4 +1,5 @@
 #include "scores.h"
+#include "../constants.h"
 
 ScoreTable::ScoreTable() {
     ScoreT tempScore;
@@ -44,7 +45,7 @@ void ScoreTable::insertScore(wchar_t* name, const uint32_t& score, const uint16_
     ScoreT newScore;
 
     newScore.name = name;
-    newScore.score = score < ScoreTableConstants::MAX_POSSIBLE_SCORE ? score : ScoreTableConstants::MAX_POSSIBLE_SCORE;
+    newScore.score = score < ChristmasTilesConstants::MAX_SCORE ? score : ChristmasTilesConstants::MAX_SCORE;
     newScore.month = month < 12 ? month : 12;
     newScore.day = day < 31 ? day : 31;
 
@@ -59,7 +60,7 @@ bool ScoreTable::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_
 
     ScoreT newScore;
 
-    newScore.score = score < ScoreTableConstants::MAX_POSSIBLE_SCORE ? score : ScoreTableConstants::MAX_POSSIBLE_SCORE;
+    newScore.score = score < ChristmasTilesConstants::MAX_SCORE ? score : ChristmasTilesConstants::MAX_SCORE;
     newScore.month = month < 12 ? month : 12;
     newScore.day = day < 31 ? day : 31;
     newScore.year = year > 9999 ? 9999 : (year < 1000 ? 1000 : year);

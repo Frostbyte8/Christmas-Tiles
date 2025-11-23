@@ -89,7 +89,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\tileset.bmp&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\lang_en.txt&quot; &quot;$(TargetDir)&quot; /Y /D"
+				CommandLine="XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\tileset.bmp&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\lang_en.txt&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;"
 			/>
 		</Configuration>
 		<Configuration
@@ -169,7 +169,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\tileset.bmp&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\lang_en.txt&quot; &quot;$(TargetDir)&quot; /Y /D"
+				CommandLine="XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\tileset.bmp&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;XCOPY &quot;$(SolutionDir)..\\..\\src\\assets\\lang_en.txt&quot; &quot;$(TargetDir)&quot; /Y /D&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -316,6 +316,10 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\..\src\constants.h"
+			>
+		</File>
 		<File
 			RelativePath="..\..\..\src\gitinfo.h"
 			>

@@ -135,7 +135,7 @@ void HighscoresWindow::moveControls() {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    // TODO: Optionally, we could figure out the longest name and use that to shrink the size of the Window.    
+    // TODO: Optionally, we could figure out the longest name and use that to shrink the size of the Window.
     const LONG NAME_WIDTH   = metrics.calculateStringWidth(L"WWWWWWWWWWWWWWWWWWWWWWWWW");
     const LONG SCORE_WIDTH  = metrics.calculateStringWidth(L"000000000");
     const LONG DATE_WIDTH   = metrics.calculateStringWidth(L"1900/01/01");
@@ -173,10 +173,8 @@ void HighscoresWindow::moveControls() {
     RECT rc = {0, 0, totalWidth, totalHeight};
     AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
 
-    HMONITOR notDoneYet = 0; // TODO: Monitor Tracking.
-    CenterWindow(hWnd, rc, notDoneYet);
+    CenterWindow(hWnd, rc, prevMonitor);
     
-
 }
 
 //-----------------------------------------------------------------------------

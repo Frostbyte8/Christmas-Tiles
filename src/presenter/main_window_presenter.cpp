@@ -15,13 +15,7 @@
 #endif // _WIN32
 
 #include "../language_table.h"
-
-
-//==============================================================================
-// Namespaces / Enums / Constants
-//==============================================================================
-
-static const uint32_t MAX_SCORE = 999999999; // TODO: Score Table constant, not this.
+#include "../constants.h"
 
 //==============================================================================
 // Constructors
@@ -101,8 +95,8 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
             matchesMade++;
 
             score += points;
-            if(score > MAX_SCORE) {
-                score = MAX_SCORE;
+            if(score > ChristmasTilesConstants::MAX_SCORE) {
+                score = ChristmasTilesConstants::MAX_SCORE;
             }
             points = 50;
 
