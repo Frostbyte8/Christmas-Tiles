@@ -48,6 +48,8 @@ namespace LangID {
         ABOUT_TITLE,
         VERSION_TEXT,
         COPYRIGHT_TEXT,
+        CUSTOM_SIZE_TITLE,
+        CUSTOM_SIZE_TEXT,
         LANG_ID_COUNT
     };
 }

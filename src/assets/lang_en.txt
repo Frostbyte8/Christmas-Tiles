@@ -80,4 +80,8 @@ About Christmas Tiles
 Version %s
 # Copyright
 Copyright %s
+# Custom Size Title
+Enter Custom Size
+# Custom Size Text
+Enter a custom game board size. Sizes can be no less than 2, and a maximum of 15.
 # END STRINGS

@@ -3,6 +3,8 @@
 #include "shared_functions.h"
 #include "../../model/scores.h"
 
+#include <assert.h>
+
 bool EnterScoreWindow::isRegistered = false;
 
 static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
@@ -118,6 +120,9 @@ void EnterScoreWindow::onCreate() {
 }
 
 void EnterScoreWindow::moveControls() {
+
+    assert(strCache[0] != NULL);
+    assert(strCache[1] != NULL);
 
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();

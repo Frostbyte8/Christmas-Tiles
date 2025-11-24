@@ -11,6 +11,7 @@
 #include "view/win32/about_window.h"
 #include "view/win32/enter_score_window.h"
 #include "view/win32/highscores_window.h"
+#include "view/win32/custom_size_window.h"
 #include "interface/main_window_interface.h"
 
 int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
@@ -47,6 +48,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     if(!HighscoresWindow::registerSelf(hInstance)) {
+        return 0;
+    }
+
+    if(!CustomSizeWindow::registerSelf(hInstance)) {
         return 0;
     }
 

@@ -215,6 +215,14 @@
 					>
 				</File>
 				<File
+					RelativePath="..\..\..\src\view\win32\custom_size_window.cpp"
+					>
+				</File>
+				<File
+					RelativePath="..\..\..\src\view\win32\custom_size_window.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\..\src\view\win32\dynamic_label.cpp"
 					>
 				</File>

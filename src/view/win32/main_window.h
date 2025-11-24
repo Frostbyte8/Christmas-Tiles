@@ -11,6 +11,7 @@
 #include "about_window.h"
 #include "enter_score_window.h"
 #include "highscores_window.h"
+#include "custom_size_window.h"
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
@@ -58,6 +59,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         EnterScoreWindow enterScoreWindow;
         HighscoresWindow highscoresWindow;
         ScoreTable scoreTable;
+        CustomSizeWindow customSizeWindow;
         
         HMENU menuBar;
         HMENU fileMenu;

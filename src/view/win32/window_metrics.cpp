@@ -52,8 +52,17 @@ void WindowMetrics::initWindowMetrics() {
     cs.XWINDOW_MARGIN               = XDLU2PIX(7);
     cs.YWINDOW_MARGIN               = YDLU2PIX(7);
 
+    cs.XLABELASSOC_MARGIN           = XDLU2PIX(3);
+    cs.YLABELASSOC_MARGIN           = YDLU2PIX(3);
+
+    // MSDN Says 3, but because of the comment below, it's actually 2.
+    cs.YLABELSAMELINE_MARGIN        = YDLU2PIX(2); 
+
     cs.XRELATED_MARGIN              = XDLU2PIX(4);
     cs.YRELATED_MARGIN              = YDLU2PIX(4);
+
+    cs.XUNRELATED_MARGIN            = XDLU2PIX(7);
+    cs.YUNRELATED_MARGIN            = YDLU2PIX(7);
 
     cs.XGROUPBOX_MARGIN             = XDLU2PIX(6);
     cs.YFIRST_GROUPBOX_MARGIN       = YDLU2PIX(11);
@@ -63,8 +72,20 @@ void WindowMetrics::initWindowMetrics() {
 
     cd.YLABEL                       = YDLU2PIX(8);
 
-    cd.XBUTTON                     = XDLU2PIX(50);
-    cd.YBUTTON                     = YDLU2PIX(14);
+    cd.XBUTTON                      = XDLU2PIX(50);
+    cd.YBUTTON                      = YDLU2PIX(14);
+
+    // MSDN says to use 14, however it seems that many applications, MS 
+    // applications included, use 12 if the button is alone, and only use the 14
+    // that is documented when the textbox is on the same row as a button,
+	// 14 just so happens to be the same height as a button.
+
+    // You can see this for yourself in the Internet Options dialog box: The
+    // the text boxes are 12 DLUs (20px~), while the one in the Accessibility
+    // sub-dialog for the style sheet is 14 (23px~) since it's on the same row
+    // as a button! Maybe MSDN is wrong? Maybe they forgot to mention this?
+
+    // Dialer.exe also uses 12 DLUs, which only leads me to believe MSDN is wrong.
 
     cd.YTEXTBOX_ONE_LINE_ALONE     = YDLU2PIX(12);
 

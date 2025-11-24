@@ -1,0 +1,216 @@
+#include "custom_size_window.h"
+#include "shared_functions.h"
+#include "../../language_table.h"
+bool CustomSizeWindow::isRegistered = false;
+
+static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
+static const DWORD WINDOW_STYLE_EX = WS_EX_DLGMODALFRAME;
+
+__forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+    return CreateWindowEx(0, L"Static", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_CENTER, 
+                          0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
+}
+
+__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
+                          0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
+}
+
+namespace CtrlID {
+    enum CtrlID {
+        ENTER_SIZE = 101,
+        XCOORD_LABEL,
+        YCOORD_LABEL,
+        XCOORD_TEXTBOX,
+        YCOORD_TEXTBOX,
+        OK_BUTTON,
+        CANCEL_BUTTON,
+    };
+}
+
+//-----------------------------------------------------------------------------
+// createWindow - Creates the about Window
+//-----------------------------------------------------------------------------
+
+bool CustomSizeWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
+
+    if(hWnd) {
+        return true; // Already created.
+    }
+
+    parentHWnd = parent;
+
+    hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"CustomSizeWindow", GET_LANG_STR(LangID::CUSTOM_SIZE_TITLE),
+        WINDOW_STYLE,
+        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
+        parent, NULL, hInst, this);
+
+    if(hWnd == NULL) {
+        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+        return false;
+    }
+
+    EnableWindow(parent, FALSE);
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// onCreate - Processes the WM_CREATE message
+//-----------------------------------------------------------------------------
+
+void CustomSizeWindow::onCreate() {
+
+    const HINSTANCE hInst = GetModuleHandle(NULL);
+
+    labelEnterSize = createLabel(GET_LANG_STR(LangID::CUSTOM_SIZE_TEXT), hWnd, CtrlID::ENTER_SIZE, hInst);
+    labelCoord[0] = createLabel(L"Width:", hWnd, CtrlID::XCOORD_LABEL, hInst);
+    labelCoord[1] = createLabel(L"Height:", hWnd, CtrlID::YCOORD_LABEL, hInst);
+    
+    textCoord[0] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::XCOORD_TEXTBOX, hInst, 0);
+    textCoord[1] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::YCOORD_TEXTBOX, hInst, 0);
+
+    SendMessage(textCoord[0], EM_SETLIMITTEXT, 2, 0);
+    SendMessage(textCoord[1], EM_SETLIMITTEXT, 2, 0);
+
+    // TODO: Button OK needs BS_DEFPUSHBUTTON
+    buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
+    buttonCancel = createButton(GET_LANG_STR(LangID::CANCEL_BUTTON_CAPTION), hWnd, CtrlID::CANCEL_BUTTON, hInst);
+
+
+    metrics.initWindowMetrics();
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+
+    moveControls();
+
+    ShowWindow(hWnd, SW_NORMAL);
+    UpdateWindow(hWnd);
+}
+
+//------------------------------------------------------------------------------
+// moveControls - Move/Resize Controls to their proper positions, and then
+// centers the window as this only happens when you change the board size
+//------------------------------------------------------------------------------
+
+void CustomSizeWindow::moveControls() {
+
+    const ControlDimensions& CD = metrics.getControlDimensions();
+    const ControlSpacing& CS = metrics.getControlSpacing();
+
+    const LONG totalWidth = metrics.calculateStringWidth(GET_LANG_STR(LangID::CUSTOM_SIZE_TEXT)) + (CS.XWINDOW_MARGIN * 2);
+    const LONG totalHeight = (CS.YWINDOW_MARGIN * 2) + CD.YLABEL + CD.YTEXTBOX_ONE_LINE_ALONE + CD.YBUTTON + (CS.YRELATED_MARGIN * 2);
+
+    const LONG LabelLength      = metrics.calculateStringWidth(L"WWWWW");
+    const LONG textBoxLength    = metrics.calculateStringWidth(L"000");
+
+    HDWP hDeferedWindows = BeginDeferWindowPos(7);
+
+    int yOffset = CS.YWINDOW_MARGIN;
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, labelEnterSize, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
+    yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
+    
+    // TODO: Labels next to text boxes correctly
+    int xOffset = CD.YBUTTON + CS.XWINDOW_MARGIN;
+
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, labelCoord[0], HWND_NOTOPMOST, xOffset, yOffset + CS.YLABELSAMELINE_MARGIN, LabelLength, CD.YLABEL, SWP_NOZORDER);
+    xOffset += CS.XRELATED_MARGIN + LabelLength;
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, textCoord[0], HWND_NOTOPMOST, xOffset, yOffset, textBoxLength, CD.YTEXTBOX_ONE_LINE_ALONE, SWP_NOZORDER);
+    xOffset += CS.XUNRELATED_MARGIN + textBoxLength;
+
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, labelCoord[1], HWND_NOTOPMOST, xOffset, yOffset + CS.YLABELSAMELINE_MARGIN, LabelLength, CD.YLABEL, SWP_NOZORDER);
+    xOffset += CS.XRELATED_MARGIN + LabelLength;
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, textCoord[1], HWND_NOTOPMOST, xOffset, yOffset, textBoxLength, CD.YTEXTBOX_ONE_LINE_ALONE, SWP_NOZORDER);
+
+    yOffset += CD.YTEXTBOX_ONE_LINE_ALONE + CS.YRELATED_MARGIN;
+    xOffset = (totalWidth / 2) - ( ((CD.XBUTTON * 2) + CS.XRELATED_MARGIN) / 2);
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonOK, HWND_NOTOPMOST, xOffset, yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
+    xOffset += CD.XBUTTON + CS.XRELATED_MARGIN;
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonCancel, HWND_NOTOPMOST, xOffset, yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
+    
+    EndDeferWindowPos(hDeferedWindows);
+
+    RECT rc = {0, 0, totalWidth, totalHeight};
+    AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
+    CenterWindow(hWnd, rc, prevMonitor);
+}
+
+//------------------------------------------------------------------------------
+// registerSelf - Registers the Window class.
+//------------------------------------------------------------------------------
+
+bool CustomSizeWindow::registerSelf(const HINSTANCE& hInst) {
+    
+    WNDCLASSEX wc;
+
+    wc.cbSize        = sizeof(WNDCLASSEX);
+    wc.style         = 0;
+    wc.lpfnWndProc   = CustomSizeWindow::WndProc;
+    wc.cbClsExtra    = 0;
+    wc.cbWndExtra    = 0;
+    wc.hInstance     = hInst;
+    wc.hIcon         = NULL;
+    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
+    wc.lpszMenuName  = NULL;
+    wc.lpszClassName = L"CustomSizeWindow";
+    wc.hIconSm       = NULL;
+
+    if(!RegisterClassEx(&wc)) {
+        MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);
+        return false;
+    }
+
+    return true;
+}
+
+//-----------------------------------------------------------------------------
+// onWindowMoved - Adjust the window, if needed after is has been moved.
+//-----------------------------------------------------------------------------
+
+void CustomSizeWindow::onWindowMoved() {
+    HMONITOR currentMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    if(currentMonitor != prevMonitor) {
+        prevMonitor = currentMonitor;
+        moveControls(); // This will also center it
+    }
+
+}
+//-----------------------------------------------------------------------------
+// windowProc - Standard window procedure for a window
+//-----------------------------------------------------------------------------
+
+LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
+
+    switch(msg) {
+        
+        default: return DefWindowProc(hWnd, msg, wParam, lParam);
+        case WM_EXITSIZEMOVE: onWindowMoved(); break;
+        case WM_CREATE:
+            onCreate();
+            break;
+
+        case DM_GETDEFID:
+            return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
+
+        case WM_COMMAND:
+            
+            if(wParam != CtrlID::OK_BUTTON) {
+                return DefWindowProc(hWnd, msg, wParam, lParam);
+            }
+            // Fall through
+
+        case WM_CLOSE:
+            EnableWindow(parentHWnd, TRUE);
+            SetFocus(parentHWnd);
+            DestroyWindow(hWnd);
+            hWnd = NULL;
+            break;
+
+
+    }
+
+    return 0;
+}

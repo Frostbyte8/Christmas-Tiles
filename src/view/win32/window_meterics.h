@@ -4,13 +4,19 @@
 
 struct ControlSpacing {
 
-    //friend class WindowMetrics;
-
     int XWINDOW_MARGIN;
     int YWINDOW_MARGIN;
 
+    int XLABELASSOC_MARGIN;
+    int YLABELASSOC_MARGIN;
+
+    int YLABELSAMELINE_MARGIN;
+
     int XRELATED_MARGIN;
     int YRELATED_MARGIN;
+
+    int XUNRELATED_MARGIN;
+    int YUNRELATED_MARGIN;
 
     int XGROUPBOX_MARGIN;
     int YFIRST_GROUPBOX_MARGIN;
