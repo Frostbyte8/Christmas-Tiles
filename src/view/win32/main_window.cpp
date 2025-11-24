@@ -647,6 +647,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, &scoreTable);
             break;
 
+        case UWM_CUSTOM_SIZE_ENETERD:
+            windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
+            break;
+
         case WM_CLOSE:
             onClose();
             break;

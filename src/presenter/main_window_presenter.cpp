@@ -16,6 +16,7 @@
 
 #include "../language_table.h"
 #include "../constants.h"
+#include "../frost_util.h"
 
 //==============================================================================
 // Constructors
@@ -178,6 +179,9 @@ bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight
     if(tileTypes == WindowPresenterConstants::IGNORE_NUMTILES) {
         tileTypes = gameBoard.getNumTileTypes();
     }
+
+    FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
+    FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 
     gameBoard = GameBoard(newWidth, newHeight, tileTypes);
 

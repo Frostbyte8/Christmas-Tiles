@@ -5,7 +5,7 @@
 #include <vector>
 
 // Max Dims: 15x15
-// TODO look into fast int types and what they do
+// TODO: look into fast int types and what they do
 
 namespace GameBoardConstants {
     static const uint8_t FREE_TILE_ID = 1; 

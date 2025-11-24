@@ -67,8 +67,8 @@ void CustomSizeWindow::onCreate() {
     labelCoord[0] = createLabel(L"Width:", hWnd, CtrlID::XCOORD_LABEL, hInst);
     labelCoord[1] = createLabel(L"Height:", hWnd, CtrlID::YCOORD_LABEL, hInst);
     
-    textCoord[0] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::XCOORD_TEXTBOX, hInst, 0);
-    textCoord[1] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::YCOORD_TEXTBOX, hInst, 0);
+    textCoord[0] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER | ES_NUMBER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::XCOORD_TEXTBOX, hInst, 0);
+    textCoord[1] = CreateWindowEx(WS_EX_CLIENTEDGE, L"Edit", L"5", WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_CENTER | ES_NUMBER, 0, 0, 0, 0, hWnd, (HMENU)CtrlID::YCOORD_TEXTBOX, hInst, 0);
 
     SendMessage(textCoord[0], EM_SETLIMITTEXT, 2, 0);
     SendMessage(textCoord[1], EM_SETLIMITTEXT, 2, 0);
@@ -183,7 +183,7 @@ void CustomSizeWindow::onWindowMoved() {
 //-----------------------------------------------------------------------------
 
 LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-
+    wchar_t buffer[4] = {0}; // TODO: own function.
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -201,11 +201,19 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
                 return DefWindowProc(hWnd, msg, wParam, lParam);
             }
             // Fall through
+            // TODO: Cancel Button
 
         case WM_CLOSE:
+
+            GetWindowText(textCoord[0], buffer, 4);
+            newWidth = wcstol(buffer, NULL, 10);
+            GetWindowText(textCoord[1], buffer, 4);
+            newHeight = wcstol(buffer, NULL, 10);
+
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
             DestroyWindow(hWnd);
+            SendMessage(parentHWnd, UWM_CUSTOM_SIZE_ENETERD, 0, 0);
             hWnd = NULL;
             break;
 

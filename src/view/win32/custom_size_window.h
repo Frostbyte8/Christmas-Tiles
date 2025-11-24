@@ -3,7 +3,7 @@
 #include <windows.h>
 #include "subclassed_controls.h"
 #include "window_meterics.h"
-
+#include "../../stdint_compat.h"
 
 class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
     friend WndAsClass;
@@ -19,6 +19,8 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }
+        inline const uint8_t& getNewWidth() const { return newWidth; } 
+        inline const uint8_t& getNewHeight() const { return newHeight; }
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
@@ -33,6 +35,9 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
         HWND textCoord[2];
         HWND buttonOK;
         HWND buttonCancel;
+
+        uint8_t newWidth;
+        uint8_t newHeight;
         
         HMONITOR prevMonitor;
         WindowMetrics  metrics;

@@ -6,8 +6,9 @@
 // Window Messages
 //==============================================================================
 
-#define UWM_TILE_SELECTED   (WM_USER + 100) // WPARAM = Tile Index Selected
-#define UWM_SCORE_ENTERED   (WM_USER + 101) // Enter Score Window is closed
+#define UWM_TILE_SELECTED       (WM_USER + 100) // WPARAM = Tile Index Selected
+#define UWM_SCORE_ENTERED       (WM_USER + 101) // Enter Score Window is closed
+#define UWM_CUSTOM_SIZE_ENETERD (WM_USER + 102)
 
 //==============================================================================
 // Functions
