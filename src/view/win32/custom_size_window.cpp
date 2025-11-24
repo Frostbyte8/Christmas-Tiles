@@ -7,7 +7,7 @@ static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS
 static const DWORD WINDOW_STYLE_EX = WS_EX_DLGMODALFRAME;
 
 __forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
-    return CreateWindowEx(0, L"Static", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_CENTER, 
+    return CreateWindowEx(0, L"Static", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
@@ -102,27 +102,36 @@ void CustomSizeWindow::moveControls() {
     const LONG totalWidth = metrics.calculateStringWidth(GET_LANG_STR(LangID::CUSTOM_SIZE_TEXT)) + (CS.XWINDOW_MARGIN * 2);
     const LONG totalHeight = (CS.YWINDOW_MARGIN * 2) + CD.YLABEL + CD.YTEXTBOX_ONE_LINE_ALONE + CD.YBUTTON + (CS.YRELATED_MARGIN * 2);
 
-    const LONG LabelLength      = metrics.calculateStringWidth(L"WWWWW");
-    const LONG textBoxLength    = metrics.calculateStringWidth(L"000");
+    LONG LabelLength    = max(metrics.calculateStringWidth(L"Width: "), metrics.calculateStringWidth(L"Height: "));
+    LONG textBoxLength  = metrics.calculateStringWidth(L"00");
+
+    RECT tempRC = {0, 0, textBoxLength, 0};
+    AdjustWindowRectEx(&tempRC, WS_VISIBLE, FALSE, WS_EX_CLIENTEDGE);
+    textBoxLength += abs(tempRC.right - tempRC.left);
 
     HDWP hDeferedWindows = BeginDeferWindowPos(7);
 
+    // First line is easy, this is just for the Label at the top and it gets the whole width
     int yOffset = CS.YWINDOW_MARGIN;
     hDeferedWindows = DeferWindowPos(hDeferedWindows, labelEnterSize, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
     
-    // TODO: Labels next to text boxes correctly
-    int xOffset = CD.YBUTTON + CS.XWINDOW_MARGIN;
+    // The second line, we need to calculate how long it will be, and where the center is.
+    // TODO: the total length could exceed totalWidth, so it should be in that calculation
+    int xOffset = (totalWidth / 2) - ( ((LabelLength * 2) + (textBoxLength * 2) + (CS.XLABELASSOC_MARGIN * 2) + (CS.XUNRELATED_MARGIN)) / 2);
 
+    // First Set of Coordinates
     hDeferedWindows = DeferWindowPos(hDeferedWindows, labelCoord[0], HWND_NOTOPMOST, xOffset, yOffset + CS.YLABELSAMELINE_MARGIN, LabelLength, CD.YLABEL, SWP_NOZORDER);
-    xOffset += CS.XRELATED_MARGIN + LabelLength;
+    xOffset += CS.XLABELASSOC_MARGIN + LabelLength;
     hDeferedWindows = DeferWindowPos(hDeferedWindows, textCoord[0], HWND_NOTOPMOST, xOffset, yOffset, textBoxLength, CD.YTEXTBOX_ONE_LINE_ALONE, SWP_NOZORDER);
     xOffset += CS.XUNRELATED_MARGIN + textBoxLength;
 
+    // Second Set of Coodrinates
     hDeferedWindows = DeferWindowPos(hDeferedWindows, labelCoord[1], HWND_NOTOPMOST, xOffset, yOffset + CS.YLABELSAMELINE_MARGIN, LabelLength, CD.YLABEL, SWP_NOZORDER);
-    xOffset += CS.XRELATED_MARGIN + LabelLength;
+    xOffset += CS.XLABELASSOC_MARGIN + LabelLength;
     hDeferedWindows = DeferWindowPos(hDeferedWindows, textCoord[1], HWND_NOTOPMOST, xOffset, yOffset, textBoxLength, CD.YTEXTBOX_ONE_LINE_ALONE, SWP_NOZORDER);
 
+    // Find the postion of the OK and CANCEL buttons
     yOffset += CD.YTEXTBOX_ONE_LINE_ALONE + CS.YRELATED_MARGIN;
     xOffset = (totalWidth / 2) - ( ((CD.XBUTTON * 2) + CS.XRELATED_MARGIN) / 2);
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonOK, HWND_NOTOPMOST, xOffset, yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
@@ -131,9 +140,12 @@ void CustomSizeWindow::moveControls() {
     
     EndDeferWindowPos(hDeferedWindows);
 
-    RECT rc = {0, 0, totalWidth, totalHeight};
-    AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
-    CenterWindow(hWnd, rc, prevMonitor);
+    //RECT rc = {0, 0, totalWidth, totalHeight};
+    tempRC.left = 0;    tempRC.right = totalWidth;
+    tempRC.top = 0;     tempRC.bottom = totalHeight;
+    
+    AdjustWindowRectEx(&tempRC, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
+    CenterWindow(hWnd, tempRC, prevMonitor);
 }
 
 //------------------------------------------------------------------------------
@@ -206,9 +218,9 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
         case WM_CLOSE:
 
             GetWindowText(textCoord[0], buffer, 4);
-            newWidth = wcstol(buffer, NULL, 10);
+            newWidth = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
             GetWindowText(textCoord[1], buffer, 4);
-            newHeight = wcstol(buffer, NULL, 10);
+            newHeight = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
 
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
