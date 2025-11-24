@@ -49,7 +49,7 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
         return false;
     }
 
-    // TODO: This should be a function, 
+    // TODO: This should be a function / adapted to work 100% with changeTileset
     // it should also warn about incomplete sets (need at least 3 tiles: Unflipped, Free, and a single tile.
 
     if(!DoesFileExist(tilesetPath)) {
@@ -293,6 +293,42 @@ void GamePanel::onVScroll(const WORD& dir, const WORD& pos) {
 
 }
 
+bool GamePanel::changeTileset(const wchar_t* tilesetPath) {
+
+    HBITMAP tempBMP; // TODO: load it as a tempBMP first to avoid destroying the original BMP incase we need it.
+
+    if(!DoesFileExist(tilesetPath)) {
+
+        if(tilesetBMP == NULL) {
+            // Load default
+            tempBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+        }
+        else {
+            return false; // Don't change anything.
+        }
+    }
+    else {
+        tempBMP =(HBITMAP)LoadImage(NULL, tilesetPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    }
+
+    if(!tempBMP) {
+        return false;
+    }
+
+    if(tilesetBMP) {
+        DeleteObject(tilesetBMP);
+    }
+
+
+    tilesetBMP = tempBMP;
+
+    BITMAP bmInfo = {0};
+    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
+    bmpWidth    = bmInfo.bmWidth;
+    bmpHeight   = bmInfo.bmHeight;
+
+    return true;
+}
 
 //------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window

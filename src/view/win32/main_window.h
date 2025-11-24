@@ -46,6 +46,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         void onTimer();
         void onElapsedTimeTimer();
         void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
+        void onChangeTileset();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
         // Disable copy constructor

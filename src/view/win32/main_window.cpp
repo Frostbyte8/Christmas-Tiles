@@ -273,6 +273,7 @@ bool MainWindowView::onCreate() {
     // TODO: gamePanel should get the presenter via it's constructor?
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD), filePath);
     gamePanel.setWindowPresenter(&windowPresenter);
+    // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2)
     windowPresenter.tryUpdateGameBoard(boardWidth, boardHeight, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
 
     if(boardWidth == 3 && boardHeight == 3) {
@@ -565,6 +566,34 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
 }
 
+void MainWindowView::onChangeTileset() {
+    
+    // TODO: Warn user about this action starting a new game
+    
+    OPENFILENAME ofnTileset = {0};
+    wchar_t filePath[MAX_PATH] = L"";
+
+    ofnTileset.lStructSize = sizeof(ofnTileset);
+    ofnTileset.hwndOwner = hWnd;
+
+    // TODO: LANG ID for this
+    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0";
+    ofnTileset.nMaxFile = MAX_PATH;
+    ofnTileset.lpstrFile = filePath;
+    ofnTileset.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+    ofnTileset.lpstrDefExt = L"bmp";
+
+    if(GetOpenFileName(&ofnTileset)) {
+
+        if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
+            // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
+            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2);
+        }
+
+    }
+
+}
+
 //------------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //------------------------------------------------------------------------------
@@ -608,6 +637,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case CtrlID::BUTTON_PAUSE: 
                 case MenuID::PAUSE_GAME:
                     windowPresenter.tryTogglePause(); 
+                    break;
+
+                case MenuID::TILESET:
+                    onChangeTileset();
                     break;
 
                 case MenuID::BOARD_3x3:

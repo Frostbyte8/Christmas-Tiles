@@ -24,6 +24,8 @@ class GamePanel : public WndAsClass<GamePanel> {
         inline const LONG& getTilesetWidth() const { return bmpWidth; }
         inline const LONG& getTilesetHeight() const { return bmpHeight; }
 
+        bool changeTileset(const wchar_t* tilesetPath);
+
         void updateVirtualSize(const WORD& numXTiles, const WORD& numYTiles);
 
     private:
