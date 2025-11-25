@@ -55,6 +55,9 @@ class MainWindowPresenter {
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }
+
+        bool writeSettings();
+
     private:
 
         __forceinline void reset();

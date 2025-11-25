@@ -7,10 +7,16 @@
 
 #include <windows.h>
 
+// TODO: __forceline instead of Macro?
+
 // GET_MILLI_COUNT - Must return the number of seconds elapsed since the system
 // was started. On Win32 this just calls GetTickCount
 
 #define GET_MILLI_COUNT GetTickCount
+
+// WRITE_INI_STRING - Writes a string to the section given to the INI file.
+
+#define WRITE_INI_STRING(SECTION, KEY_NAME, DATA, PATH_TO_FILE) WritePrivateProfileStringW(SECTION, KEY_NAME, DATA, PATH_TO_FILE)
 
 #endif // _WIN32
 
@@ -224,6 +230,27 @@ inline void MainWindowPresenter::unflipTiles() {
         selectedIndex2 = GameBoardConstants::NO_SELECTED_INDEX;
 
     }
+
+}
+
+//------------------------------------------------------------------------------
+// writeSettings - Writes to an ini file.
+//-----------------------------------------------------------------------------
+
+bool MainWindowPresenter::writeSettings() {
+    wchar_t buffer[4] = {0};
+    
+    wsprintf(buffer, L"%d", gameBoard.getWidth());
+    if( !WRITE_INI_STRING(L"settings", L"width", buffer, L".\\ChristmasTiles.ini") ) {
+        return false;
+    }
+
+    wsprintf(buffer, L"%d", gameBoard.getHeight());
+    if(!WRITE_INI_STRING(L"settings", L"height", buffer, L".\\ChristmasTiles.ini")) {
+        return false;
+    }
+    // TODO: Tileset
+    return true;
 
 }
 

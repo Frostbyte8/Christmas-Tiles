@@ -242,6 +242,8 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
+    // TODO: Retriving these settings should be in the presenter, not the view.
+
     uint8_t boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
     uint8_t boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
     wchar_t filePath[MAX_PATH] = {0};
@@ -495,6 +497,18 @@ void MainWindowView::onClose() {
             return;
         }
     }
+
+    do {
+        
+        if(windowPresenter.writeSettings()) {
+            break;
+        }
+
+        if(MessageBox(hWnd, L"Error writing settings file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+            break;
+        }
+
+    } while(1);
 
     KillTimer(hWnd, 1);
     DestroyWindow(hWnd);
