@@ -28,9 +28,9 @@ namespace CtrlID {
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, ScoreTable* inScoreTable) {
+bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, const ScoreTable& inScoreTable) {
 
-    scoreTable = inScoreTable;
+    scoreTable = &inScoreTable;
 
     if(hWnd) {
         return true; // Already created.

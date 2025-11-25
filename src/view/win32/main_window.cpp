@@ -670,7 +670,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                     break;
                 
                 case MenuID::HIGHSCORES:
-                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, &scoreTable);
+                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
                     break;
 
                 case MenuID::ABOUT:
@@ -690,8 +690,8 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_SCORE_ENTERED:
-            scoreTable.tryAddScore(enterScoreWindow.getName(), windowPresenter.getScore(), 2025, 11, 01);
-            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, &scoreTable);
+            windowPresenter.tryAddScore(enterScoreWindow.getName(), windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
+            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
             break;
 
         case UWM_CUSTOM_SIZE_ENETERD:
@@ -740,7 +740,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
         if(newState == GameState::STATE_GAMEWON) {
 
-            size_t isNewScore = scoreTable.isNewHighscore(windowPresenter.getScore());
+            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getScore());
 
             if(isNewScore < 10) {
                 enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);

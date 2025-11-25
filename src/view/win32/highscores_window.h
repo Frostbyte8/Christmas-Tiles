@@ -11,7 +11,7 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
     public:
         HighscoresWindow() : hWnd(0), parentHWnd(0), scoreTable(NULL) {}
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent, ScoreTable* inScoreTable);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const ScoreTable& inScoreTable);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }

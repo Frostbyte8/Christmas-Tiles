@@ -3,6 +3,7 @@
 #include "../model/gameboard.h"
 #include "../stdint_compat.h"
 #include "../interface/main_window_interface.h"
+#include "../model/scores.h"
 
 namespace GameState {
     enum GameState {
@@ -42,6 +43,7 @@ class MainWindowPresenter {
         const uint8_t& getPoints() const { return points; }
 
         int tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex);
+        bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
         inline void unflipTiles();
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }
@@ -50,6 +52,7 @@ class MainWindowPresenter {
         bool requestNewGame();
         bool tryTogglePause();
         bool tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes);
+        __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
 
         // TODO: The constructor is the only thing that needs this?
         void setMainWindow(MainWindowInterface* mwi) {
@@ -69,7 +72,6 @@ class MainWindowPresenter {
         bool tryUnpause();
         void updateElapsedTime();
 
-
         uint8_t     points;
         uint8_t     selectedIndex1;
         uint8_t     selectedIndex2;
@@ -83,4 +85,5 @@ class MainWindowPresenter {
         int         gameState;
 
         GameBoard   gameBoard;
+        ScoreTable  scoreTable;
 };

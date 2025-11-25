@@ -30,7 +30,7 @@ class ScoreTable {
     public:
         ScoreTable();
         ~ScoreTable();
-        size_t isNewHighscore(const uint32_t& score);
+        size_t isNewHighscore(const uint32_t& score) const;
         void insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
         bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day);
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }

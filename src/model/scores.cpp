@@ -31,7 +31,7 @@ ScoreTable::~ScoreTable() {
     scores.resize(0);
 }
 
-size_t ScoreTable::isNewHighscore(const uint32_t& score) {
+size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
     for(size_t i = 0; i < scores.size(); ++i) {
         if(score > scores[i].score) {
             return i;

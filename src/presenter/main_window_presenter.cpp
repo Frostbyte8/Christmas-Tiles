@@ -131,6 +131,17 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 }
 
 //------------------------------------------------------------------------------
+// tryAddScore - Attempt to add an entry to the score table
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index) {
+
+    // TODO: Clamp input, and so on.
+    scoreTable.tryAddScore(name, score, year, month, day);
+    return true; 
+}
+
+//------------------------------------------------------------------------------
 // tryTogglePause - Attempt to Pause/Unpause the game
 //------------------------------------------------------------------------------
 
