@@ -402,11 +402,11 @@ void MainWindowView::moveControls() {
     GetMonitorInfo(prevMonitor, &mi);
     
     if(rc.right > abs(mi.rcMonitor.right - mi.rcMonitor.left) * 0.80) {
-        rc.right = abs(mi.rcMonitor.right - mi.rcMonitor.right) * 0.80;
+        rc.right = static_cast<LONG>(abs(mi.rcMonitor.right - mi.rcMonitor.right) * 0.80);
     }
 
     if(rc.bottom > abs(mi.rcMonitor.bottom - mi.rcMonitor.top) * 0.80) {
-        rc.bottom = abs(mi.rcMonitor.bottom - mi.rcMonitor.top) * 0.80;
+        rc.bottom = static_cast<LONG>(abs(mi.rcMonitor.bottom - mi.rcMonitor.top) * 0.80);
     }
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
@@ -476,6 +476,10 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
 // onClose - User wants to quit the program
 //------------------------------------------------------------------------------
 
+// The while loops are fine, so we can disable this
+#pragma warning (push) 
+#pragma warning (disable: 4127)
+
 void MainWindowView::onClose() {
 
     if(windowPresenter.getGameState() != GameState::STATE_GAMEWON) {
@@ -514,6 +518,8 @@ void MainWindowView::onClose() {
     KillTimer(hWnd, 1);
     DestroyWindow(hWnd);
 }
+
+#pragma warning (pop) 
 
 //------------------------------------------------------------------------------
 // onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
@@ -620,7 +626,8 @@ void MainWindowView::onChangeTileset() {
 
         if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
             // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
-            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2);
+            // It could also pose a problem and needs to have proper error checking.
+            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
         }
 
     }
@@ -709,7 +716,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_SCORE_ENTERED:
-            windowPresenter.tryAddScore(enterScoreWindow.getName(), windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
+            windowPresenter.tryAddScore(enterScoreWindow.getName(), 9001); // TODO: Index //, windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
             highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
             break;
 

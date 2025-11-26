@@ -43,7 +43,7 @@ class MainWindowPresenter {
         const uint8_t& getPoints() const { return points; }
 
         int tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex);
-        bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
+        bool tryAddScore(wchar_t* name, const size_t& index);
         inline void unflipTiles();
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }

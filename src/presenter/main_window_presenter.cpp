@@ -142,10 +142,18 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
 // tryAddScore - Attempt to add an entry to the score table
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index) {
+bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
 
-    // TODO: Clamp input, and so on.
-    scoreTable.tryAddScore(name, score, year, month, day);
+    time_t currentTime;
+    tm timeInfo;
+
+    time(&currentTime);
+    localtime_s(&timeInfo, &currentTime);
+    
+    
+    scoreTable.tryAddScore(name, score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
+                                        static_cast<uint8_t>(timeInfo.tm_mon + 1), 
+                                        static_cast<uint8_t>(timeInfo.tm_mday));
     return true; 
 }
 
