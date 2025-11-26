@@ -202,7 +202,7 @@ __forceinline void MainWindowView::createMenuBar() {
     AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, GET_LANG_STR(LangID::MENU_CHANGE_TILESET));
     AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, GET_LANG_STR(LangID::MENU_CHANGE_LANGUAGE));
     AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(optionsMenu, MF_STRING | MF_CHECKED, MenuID::BOARD_3x3, L"3x3");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_3x3, L"3x3");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x5, L"5x5");
     AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x9, L"5x9");
@@ -281,24 +281,7 @@ bool MainWindowView::onCreate() {
     windowPresenter.tryUpdateGameBoard(boardWidth, boardHeight, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
     windowPresenter.readScores(); // TODO: This should be somewhere else.
 
-    if(boardWidth == 3 && boardHeight == 3) {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_3x3, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-    else if(boardWidth == 4 && boardHeight == 4) {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_4x4, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-    else if(boardWidth == 5 && boardHeight == 5) {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_5x5, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-    else if(boardWidth == 5 && boardHeight == 9) {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_5x9, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-    else if(boardWidth == 10 && boardHeight == 10) {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_10x10, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-    else {
-        CheckMenuItem(optionsMenu, MenuID::BOARD_CUSTOM, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
+    updateBoardSizeMenu(boardWidth, boardHeight, false);
 
     metrics.initWindowMetrics();
 
@@ -565,36 +548,54 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
     switch(menuID) {
         case MenuID::BOARD_3x3:
             retVal = windowPresenter.tryUpdateGameBoard(3, 3, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(3,3,true);
             break;
         case MenuID::BOARD_4x4:
             retVal = windowPresenter.tryUpdateGameBoard(4, 4, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(4,4,true);
             break;
         case MenuID::BOARD_5x5:
             retVal = windowPresenter.tryUpdateGameBoard(5, 5, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(5,5,true);
             break;
         case MenuID::BOARD_5x9:
             retVal = windowPresenter.tryUpdateGameBoard(5, 9, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(5,9,true);
             break;
         case MenuID::BOARD_10x10:
             retVal = windowPresenter.tryUpdateGameBoard(10, 10, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(10,10,true);
             break;
-    }
+    }    
 
-    if(retVal) {
+}
 
-        for(int i = MenuID::BOARD_3x3; i <= MenuID::BOARD_10x10; ++i) {
+void MainWindowView::updateBoardSizeMenu(const uint8_t& width, const uint8_t& height, bool clearChecks) {
 
-            if(i != menuID) {
-                CheckMenuItem(optionsMenu, i, MainWindowViewConstants::MENU_UNCHECKED_FLAGS);
-            }
-            else {
-                CheckMenuItem(optionsMenu, i, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-            }
-
+    if(clearChecks) {
+        for(int i = MenuID::BOARD_3x3; i <= MenuID::BOARD_CUSTOM; ++i) {
+            CheckMenuItem(optionsMenu, i, MainWindowViewConstants::MENU_UNCHECKED_FLAGS);
         }
     }
 
-    
+    if(width == 3 && height == 3) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_3x3, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(width == 4 && height == 4) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_4x4, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(width == 5 && height == 5) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_5x5, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(width == 5 && height == 9) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_5x9, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else if(width == 10 && height == 10) {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_10x10, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
+    else {
+        CheckMenuItem(optionsMenu, MenuID::BOARD_CUSTOM, MainWindowViewConstants::MENU_CHECKED_FLAGS);
+    }
 
 }
 
@@ -714,6 +715,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
         case UWM_CUSTOM_SIZE_ENETERD:
             windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(customSizeWindow.getNewWidth(), customSizeWindow.getNewHeight(), true);
             break;
 
         case WM_CLOSE:
