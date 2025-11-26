@@ -59,7 +59,11 @@ class MainWindowPresenter {
             mainWindow = mwi;
         }
 
+        // TODO: At some point this will all be moved in to the models they
+        // belong in.
+        bool readScores();
         bool writeSettings();
+        bool writeScores();
 
     private:
 

@@ -109,6 +109,9 @@ void DynamicLabel::onPaint() {
     RECT rc;
     GetClientRect(hWnd, &rc);
 
+    // TODO: It's safe to store our own string, so long as we follow what is
+    // outlined by Raymond Chen's Post on 2003-08-21.
+
     const static int MAX_CAPTION_SIZE = 16;
     wchar_t caption[MAX_CAPTION_SIZE] = {0};
     GetWindowText(hWnd, caption, MAX_CAPTION_SIZE);

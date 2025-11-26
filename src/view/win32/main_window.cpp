@@ -143,6 +143,8 @@ UINT MainWindowView::doLoop() {
  
     }
 
+    windowPresenter.~MainWindowPresenter();
+
     return msg.wParam;
 }
 
@@ -277,6 +279,7 @@ bool MainWindowView::onCreate() {
     gamePanel.setWindowPresenter(&windowPresenter);
     // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2)
     windowPresenter.tryUpdateGameBoard(boardWidth, boardHeight, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+    windowPresenter.readScores(); // TODO: This should be somewhere else.
 
     if(boardWidth == 3 && boardHeight == 3) {
         CheckMenuItem(optionsMenu, MenuID::BOARD_3x3, MainWindowViewConstants::MENU_CHECKED_FLAGS);
@@ -498,17 +501,32 @@ void MainWindowView::onClose() {
         }
     }
 
-    do {
+    while (true) {
         
         if(windowPresenter.writeSettings()) {
             break;
         }
 
+        // TODO: Language String
         if(MessageBox(hWnd, L"Error writing settings file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
             break;
         }
 
-    } while(1);
+    }
+
+    while (true) {
+        
+        if(windowPresenter.writeScores()) {
+            break;
+        }
+
+        // TODO: Language String
+        if(MessageBox(hWnd, L"Error writing scores file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+            break;
+        }
+
+    }
+
 
     KillTimer(hWnd, 1);
     DestroyWindow(hWnd);

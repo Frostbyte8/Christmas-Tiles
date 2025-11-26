@@ -18,6 +18,14 @@
 
 #define WRITE_INI_STRING(SECTION, KEY_NAME, DATA, PATH_TO_FILE) WritePrivateProfileStringW(SECTION, KEY_NAME, DATA, PATH_TO_FILE)
 
+// READ_INI_UINT - Reads an unsigned 32-bit integer.
+
+#define READ_INI_UINT(SECTION, KEY_NAME, PATH_TO_FILE) GetPrivateProfileIntW(SECTION, KEY_NAME, 0, PATH_TO_FILE)
+
+// READ_INI_STRINGW - Reads a string to the buffer provided
+
+#define READ_INI_STRINGW(SECTION, KEY_NAME, OUT_STRBUF_PTR, BUF_SIZE, PATH_TO_FILE) GetPrivateProfileStringW(SECTION, KEY_NAME, L"", OUT_STRBUF_PTR, BUF_SIZE, PATH_TO_FILE)
+
 #endif // _WIN32
 
 #include "../language_table.h"
@@ -246,7 +254,7 @@ inline void MainWindowPresenter::unflipTiles() {
 
 //------------------------------------------------------------------------------
 // writeSettings - Writes to an ini file.
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 bool MainWindowPresenter::writeSettings() {
     wchar_t buffer[4] = {0};
@@ -261,6 +269,87 @@ bool MainWindowPresenter::writeSettings() {
         return false;
     }
     // TODO: Tileset
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// readScores - Writes scores to an INI file
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::readScores() {
+
+    wchar_t buffer[ScoreTableConstants::MAX_NAME_LENGTH+1] = {0};
+    wchar_t keyName[16] = {0};
+
+    //GetPrivateProfileString(L"settings", L"tileset", NULL, filePath, MAX_PATH-1, L".\\ChristmasTiles.ini");
+    
+    for(size_t i = 0; i < ScoreTableConstants::MAX_SCORES; ++i) {
+    
+        ScoreT score;
+        buffer[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
+
+        wsprintf(keyName, L"name%d", i);
+        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
+        score.name = buffer;
+
+        wsprintf(keyName, L"score%d", i);
+        score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
+
+        // TODO: Dates
+
+        score.year = 2025;
+        score.month = 11;
+        score.day = 15;
+
+        // TODO: pass in a score object
+        scoreTable.tryAddScore(score.name, score.score, score.year, score.month, score.day);
+
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// writeScores - Writes scores to an INI file
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::writeScores() {
+
+    wchar_t buffer[ScoreTableConstants::MAX_NAME_LENGTH+1] = {0};
+    wchar_t keyName[16] = {0};
+    const std::vector<ScoreT>& scores = scoreTable.getScores();
+
+    // TODO: Clear old scores ini first before writing a new one.
+    
+    for(size_t i = 0; i < scores.size(); ++i) {
+
+        swprintf_s(buffer, ScoreTableConstants::MAX_NAME_LENGTH, L"%s", scores[i].name);
+        wsprintf(keyName, L"name%d", i);
+        if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
+            return false;
+        }
+        
+        wsprintf(buffer, L"%d", scores[i].score);
+        wsprintf(keyName, L"score%d", i);
+        if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
+            return false;
+        }
+
+        wsprintf(buffer, L"%d", scores[i].score);
+        wsprintf(keyName, L"score%d", i);
+        if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
+            return false;
+        }
+
+        wsprintf(buffer, L"%d/%0d/%0d", scores[i].year, scores[i].month, scores[i].day);
+        wsprintf(keyName, L"date%d", i);
+        if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
+            return false;
+        }
+
+    }
+
     return true;
 
 }
