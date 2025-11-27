@@ -304,11 +304,56 @@ bool MainWindowPresenter::readScores() {
         wsprintf(keyName, L"score%d", i);
         score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
 
-        // TODO: Dates
+        wsprintf(keyName, L"date%d", i);
+        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
 
-        score.year = 2025;
-        score.month = 11;
-        score.day = 15;
+        bool defaultScore = false;
+
+        if(wcslen(buffer) < 10) {
+
+            defaultScore = true;
+
+
+        }
+        else {
+
+            tm dayOfScore = {0};
+
+
+            wchar_t* token = wcstok(buffer, L"/");
+            if(!token) {
+                defaultScore = true;
+            }
+            
+            dayOfScore.tm_year =  _wtoi(token) - 1900;
+            score.year = _wtoi(token);
+
+            token = wcstok(NULL, L"/");
+            if(!token) {
+                defaultScore = true;
+            }
+
+            dayOfScore.tm_mon =  _wtoi(token) - 1;
+            score.month = _wtoi(token);
+
+            token = wcstok(NULL, L"/");
+            if(!token) {
+                defaultScore = true;
+            }
+            dayOfScore.tm_mday =  _wtoi(token);
+            score.day = _wtoi(token);
+
+            if(mktime(&dayOfScore) == -1) {
+                defaultScore = true;
+            }
+
+        }
+
+        if(defaultScore) {
+            score.year = 1995;
+            score.month = 12;
+            score.day = 25;
+        }
 
         // TODO: pass in a score object
         scoreTable.tryAddScore(score.name, score.score, score.year, score.month, score.day);
