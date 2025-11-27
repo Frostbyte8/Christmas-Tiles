@@ -71,7 +71,13 @@ bool ScoreTable::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_
             // TODO: Overwrite score rather than insert?
 
             newScore.name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
-            wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, name);
+
+            if(newScore.name) {
+                wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, name);
+            }
+            else {
+                wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, L"Player");
+            }
 
             free(scores[scores.size()-1].name);
             scores[scores.size()-1].name = NULL;

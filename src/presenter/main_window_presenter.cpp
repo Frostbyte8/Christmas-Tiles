@@ -297,17 +297,10 @@ bool MainWindowPresenter::readScores() {
         ScoreT score;
         buffer[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
 
-        wsprintf(keyName, L"name%d", i);
-        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
-        score.name = buffer;
-
-        wsprintf(keyName, L"score%d", i);
-        score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
+        bool defaultScore = false;
 
         wsprintf(keyName, L"date%d", i);
         READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
-
-        bool defaultScore = false;
 
         if(wcslen(buffer) < 10) {
 
@@ -316,6 +309,8 @@ bool MainWindowPresenter::readScores() {
 
         }
         else {
+
+            // TODO: This could be much better.
 
             tm dayOfScore = {0};
 
@@ -353,6 +348,17 @@ bool MainWindowPresenter::readScores() {
             score.year = 1995;
             score.month = 12;
             score.day = 25;
+            score.name = NULL;
+            score.score = 0;
+        }
+        else {
+
+            wsprintf(keyName, L"score%d", i);
+            score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
+
+            wsprintf(keyName, L"name%d", i);
+            READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
+            score.name = buffer;
         }
 
         // TODO: pass in a score object
@@ -383,12 +389,6 @@ bool MainWindowPresenter::writeScores() {
             return false;
         }
         
-        wsprintf(buffer, L"%d", scores[i].score);
-        wsprintf(keyName, L"score%d", i);
-        if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
-            return false;
-        }
-
         wsprintf(buffer, L"%d", scores[i].score);
         wsprintf(keyName, L"score%d", i);
         if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
