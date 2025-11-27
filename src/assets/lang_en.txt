@@ -33,7 +33,7 @@ Custom &Size...
 # Help Menu Item (Not the top level menu)
 &Help
 # About Menu
-&About Christmas Tiles..
+&About Christmas Tiles...
 # File Top Level Menu
 &File
 # Options Top Level Menu

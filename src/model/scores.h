@@ -22,7 +22,7 @@ struct ScoreT {
     uint8_t month;
     uint8_t day;
     wchar_t* name;
-    ScoreT() : name(NULL), score(0), year(2025), month(11), day(15) {}
+    ScoreT() : name(NULL), score(0), year(1995), month(12), day(25) {}
 };
 
 class ScoreTable {

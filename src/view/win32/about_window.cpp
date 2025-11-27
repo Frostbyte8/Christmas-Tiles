@@ -33,7 +33,7 @@ __forceinline HWND createSeperator(const HWND& parent, const int& ID, const HINS
 }
 
 __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
-    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
+    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON | BS_DEFPUSHBUTTON, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
@@ -74,25 +74,33 @@ void AboutWindow::moveControls() {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    RECT rc = {0, 0, 200, 250};
-    AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
+    wchar_t windowText[64];
+    GetWindowText(labelCopyright, windowText, 64);
+    const LONG totalWidth = metrics.calculateStringWidth(windowText) + (CS.XWINDOW_MARGIN * 2) + CD.YLABEL; // Y Label is for some extra padding.
+    const LONG totalHeight = (CS.YWINDOW_MARGIN * 2) + 32 + (CD.YLABEL * 3) + 2 + CD.YBUTTON + (CS.YRELATED_MARGIN * 4);
+
 
     HDWP hDeferedWindows = BeginDeferWindowPos(5);
 
     int yOffset = CS.YWINDOW_MARGIN;
 
-    DeferWindowPos(hDeferedWindows, appIcon, HWND_NOTOPMOST, (200/2)-16, yOffset, 32, 32, SWP_NOZORDER);
+    DeferWindowPos(hDeferedWindows, appIcon, HWND_NOTOPMOST, (totalWidth/2)-16, yOffset, 32, 32, SWP_NOZORDER);
     yOffset += 32 + CS.YRELATED_MARGIN;
-    DeferWindowPos(hDeferedWindows, labelTitle, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, 200 - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
+    DeferWindowPos(hDeferedWindows, labelTitle, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     yOffset += CD.YLABEL;
-    DeferWindowPos(hDeferedWindows, labelVersion, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, 200 - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
+    DeferWindowPos(hDeferedWindows, labelVersion, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
     yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
-    DeferWindowPos(hDeferedWindows, seperatorBar, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, 200 - (CS.XWINDOW_MARGIN * 2), 2, SWP_NOZORDER);
+    DeferWindowPos(hDeferedWindows, seperatorBar, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), 2, SWP_NOZORDER);
     yOffset += 2 + CS.YRELATED_MARGIN;
-    DeferWindowPos(hDeferedWindows, labelCopyright, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, 200 - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
+    DeferWindowPos(hDeferedWindows, labelCopyright, HWND_NOTOPMOST, CS.XWINDOW_MARGIN, yOffset, totalWidth - (CS.XWINDOW_MARGIN * 2), CD.YLABEL, SWP_NOZORDER);
+    yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
+    DeferWindowPos(hDeferedWindows, buttonOK, HWND_NOTOPMOST, (totalWidth/2)-(CD.XBUTTON/2), yOffset, CD.XBUTTON, CD.YBUTTON, SWP_NOZORDER);
+
 
     EndDeferWindowPos(hDeferedWindows);
 
+    RECT rc = {0, 0, totalWidth, totalHeight};
+    AdjustWindowRectEx(&rc, WINDOW_STYLE, FALSE, WINDOW_STYLE_EX);
     CenterWindow(hWnd, rc, prevMonitor);
 
 }
@@ -208,6 +216,17 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
         case WM_CREATE:
             onCreate();
             break;
+
+        case DM_GETDEFID:
+            return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
+
+        case WM_COMMAND:
+            
+            if(wParam != CtrlID::OK_BUTTON) {
+                return DefWindowProc(hWnd, msg, wParam, lParam);
+            }
+            // Fall through
+
         case WM_CLOSE:
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
