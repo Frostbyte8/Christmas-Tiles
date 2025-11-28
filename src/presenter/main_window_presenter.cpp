@@ -61,7 +61,7 @@ __forceinline void MainWindowPresenter::reset() {
 // Note that yIndex is over written.
 //------------------------------------------------------------------------------
 
-int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex) {
+int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex) {
 
     if(gameState != GameState::STATE_PLAYING) {
         
@@ -76,18 +76,20 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yInde
     // Unflip tiles if necessary
     unflipTiles();
 
-    const uint8_t MAX_X = gameBoard.getWidth() - 1;
-    const uint8_t MAX_Y = gameBoard.getHeight() - 1;
+    const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
+
+    //const uint8_t MAX_X = gameBoard.getWidth() - 1;
+    //const uint8_t MAX_Y = gameBoard.getHeight() - 1;
 
     // Validate indices
 
-    if(xIndex > MAX_X || yIndex > MAX_Y) {
+    if(xIndex > boardDimensions.width  - 1 || yIndex > boardDimensions.height - 1) {
         return GameBoardFlipErrors::OutOfBounds;
     }
 
     // Next, make sure the tile has not been flipped, and if it has not,
     // flip it
-    yIndex = (yIndex * (MAX_X+1)) + xIndex;
+    yIndex = (yIndex * (boardDimensions.width)) + xIndex;
     const std::vector<TileData>& tiles = gameBoard.getTiles();
 
     if(tiles[yIndex].flags) {
@@ -194,7 +196,7 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 // it assumes height is too.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes) {
+bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes) {
     
     if(gameState != GameState::STATE_GAMEWON) {
         const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
@@ -205,8 +207,12 @@ bool MainWindowPresenter::tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight
     }
 
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
-        newWidth = gameBoard.getWidth();
-        newHeight = gameBoard.getHeight();
+
+        const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
+
+        newWidth = boardDimensions.width;
+        newHeight = boardDimensions.height;
+
     }
 
     if(tileTypes == WindowPresenterConstants::IGNORE_NUMTILES) {
@@ -266,13 +272,15 @@ inline void MainWindowPresenter::unflipTiles() {
 
 bool MainWindowPresenter::writeSettings() {
     wchar_t buffer[4] = {0};
+
+    const GameBoardDimensions boardDimensions = gameBoard.getBoardDimensions();
     
-    wsprintf(buffer, L"%d", gameBoard.getWidth());
+    wsprintf(buffer, L"%d", boardDimensions.width);
     if( !WRITE_INI_STRING(L"settings", L"width", buffer, L".\\ChristmasTiles.ini") ) {
         return false;
     }
 
-    wsprintf(buffer, L"%d", gameBoard.getHeight());
+    wsprintf(buffer, L"%d", boardDimensions.height);
     if(!WRITE_INI_STRING(L"settings", L"height", buffer, L".\\ChristmasTiles.ini")) {
         return false;
     }

@@ -7,14 +7,14 @@
 #include <windows.h>
 #endif // _DEBUG
 
-GameBoard::GameBoard(const uint8_t& newWidth, const uint8_t& newHeight, 
+GameBoard::GameBoard(const unsigned int& newWidth, const unsigned int& newHeight, 
 const uint8_t& newTileTypes) : matchesNeeded(0) {
 
-    width = newWidth < GameBoardConstants::MAX_WIDTH ? newWidth : GameBoardConstants::MAX_WIDTH;
-    height = newHeight < GameBoardConstants::MAX_HEIGHT ? newHeight : GameBoardConstants::MAX_HEIGHT;
+    boardDimensions.width = newWidth < GameBoardConstants::MAX_WIDTH ? newWidth : GameBoardConstants::MAX_WIDTH;
+    boardDimensions.height = newHeight < GameBoardConstants::MAX_HEIGHT ? newHeight : GameBoardConstants::MAX_HEIGHT;
     numTileTypes = newTileTypes < GameBoardConstants::MAX_TILE_TYPES ? newTileTypes : GameBoardConstants::MAX_TILE_TYPES;
 
-    tiles.resize(width * height);
+    tiles.resize(newWidth * newHeight);
 }
 
 //------------------------------------------------------------------------------
@@ -23,12 +23,12 @@ const uint8_t& newTileTypes) : matchesNeeded(0) {
 
 bool GameBoard::tryNewGame() {
 
-    if(numTileTypes == 0 || width < 2 || height < 2) {
+    if(numTileTypes == 0 || boardDimensions.width < 2 || boardDimensions.height < 2) {
         return false;
     }
     
     // Get the number of tiles this board has
-    uint8_t numTiles = (width * height);
+    uint8_t numTiles = static_cast<uint8_t>((boardDimensions.width * boardDimensions.height));
     matchesNeeded = numTiles / 2;
 
     for(unsigned int i = 0; i < numTiles; ++i) {
@@ -130,7 +130,7 @@ bool GameBoard::tryNewGame() {
 
         ++k;
         OutputDebugStr(outStr);
-        if(k == width) {
+        if(k == boardDimensions.width) {
             k = 0;
             OutputDebugStr(L"\n");
         }

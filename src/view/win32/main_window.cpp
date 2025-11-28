@@ -327,12 +327,14 @@ void MainWindowView::onWindowMoved() {
 // getTallestPoint - Obtain the tallest point of the window.
 //------------------------------------------------------------------------------
 
+// TODO: Tallest and Widest could be merged into one function.
+
 LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
     const long minHeight = gamePanel.getTilesetHeight() * 9;
-    const long boardheight = gamePanel.getTilesetHeight() * windowPresenter.getGameBoard().getHeight();
+    const long boardheight = gamePanel.getTilesetHeight() * windowPresenter.getGameBoard().getBoardDimensions().height;
 
 
     LONG tallestPoint = (CD.YLABEL * 3) + (CS.YFIRST_GROUPBOX_MARGIN * 3) + (CS.YLAST_GROUPBOX_MARGIN * 3) +
@@ -388,7 +390,7 @@ void MainWindowView::moveControls() {
     // Resize Window
     // TODO: Get Monitor Window is on?
 
-    int horzTiles = windowPresenter.getGameBoard().getWidth();
+    int horzTiles = windowPresenter.getGameBoard().getBoardDimensions().width;
     if(horzTiles < 5) {
         horzTiles = 5;
     }
@@ -447,8 +449,8 @@ void MainWindowView::moveControls() {
 
 void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
     
-    uint8_t xPos = static_cast<uint8_t>(wParam / gamePanel.getTilesetHeight());
-    uint8_t yPos = static_cast<uint8_t>(lParam / gamePanel.getTilesetHeight());
+    unsigned int xPos = wParam / gamePanel.getTilesetHeight();
+    unsigned int yPos = lParam / gamePanel.getTilesetHeight();
 
     const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
 
@@ -778,7 +780,8 @@ void MainWindowView::implGameStateChanged(const int& newState) {
             const GameBoard& gameBoard = windowPresenter.getGameBoard();
             // TODO: Stop this from running the first time, the window is already moved.
             moveControls();
-            gamePanel.updateVirtualSize(gameBoard.getWidth(), gameBoard.getHeight());
+            const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
+            gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
         }
 
     }

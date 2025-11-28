@@ -42,7 +42,7 @@ class MainWindowPresenter {
         const uint32_t& getScore() const { return score; }
         const uint8_t& getPoints() const { return points; }
 
-        int tryFlipTileAtCoodinates(uint8_t& xIndex, uint8_t& yIndex);
+        int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryAddScore(wchar_t* name, const size_t& index);
         inline void unflipTiles();
 
@@ -51,7 +51,7 @@ class MainWindowPresenter {
 
         bool requestNewGame();
         bool tryTogglePause();
-        bool tryUpdateGameBoard(uint8_t newWidth, uint8_t newHeight, uint8_t tileTypes);
+        bool tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes);
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
 
         // TODO: The constructor is the only thing that needs this?

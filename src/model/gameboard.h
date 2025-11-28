@@ -4,18 +4,22 @@
 #include "../stdint_compat.h"
 #include <vector>
 
-// Max Dims: 15x15
 // TODO: look into fast int types and what they do
 
 namespace GameBoardConstants {
     static const uint8_t FREE_TILE_ID = 1; 
     static const uint8_t NO_SELECTED_INDEX = 255;
-    static const uint8_t MAX_WIDTH = 15;
-    static const uint8_t MAX_HEIGHT = 15;
-    static const uint8_t MIN_WIDTH = 2;
-    static const uint8_t MIN_HEIGHT = 2;
     static const uint8_t MAX_TILE_TYPES = 100;
+    static const unsigned int MAX_WIDTH = 15;
+    static const unsigned int MAX_HEIGHT = 15;
+    static const unsigned int MIN_WIDTH = 2;
+    static const unsigned int MIN_HEIGHT = 2;
 }
+
+struct GameBoardDimensions {
+    unsigned int width;
+    unsigned int height;
+};
 
 class GameBoard {
 
@@ -29,13 +33,12 @@ class GameBoard {
         }
         */
 
-        GameBoard(const uint8_t& newWidth, const uint8_t& newHeight, const uint8_t& newTileTypes);
+        GameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const uint8_t& newTileTypes);
 
         // Accessors
 
         inline const uint8_t& getMatchesNeeded() const { return matchesNeeded; }
-        inline const uint8_t& getWidth() const { return width; }
-        inline const uint8_t& getHeight() const { return height; }
+        inline const GameBoardDimensions& getBoardDimensions() const { return boardDimensions; }
         inline const std::vector<TileData>& getTiles() const { return tiles; }
         inline const uint8_t& getNumTileTypes() const { return numTileTypes; }
 
@@ -65,8 +68,8 @@ class GameBoard {
         
     private:
 
-        uint8_t width;
-        uint8_t height;
+        GameBoardDimensions boardDimensions;
+
         uint8_t numTileTypes;
         uint8_t matchesNeeded;
 

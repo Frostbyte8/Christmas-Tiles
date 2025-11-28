@@ -383,7 +383,7 @@ void GamePanel::onPaint() {
     if(windowPresenter) {
 
         const GameBoard& gameBoard = windowPresenter->getGameBoard();
-        const uint8_t& boardWidth = gameBoard.getWidth();
+        const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
         const std::vector<TileData>& tiles = gameBoard.getTiles();
 
         const int minXTile = static_cast<int>(floor(static_cast<float>(xOffset) / bmpHeight));
@@ -392,12 +392,12 @@ void GamePanel::onPaint() {
         int maxXTile = minXTile + static_cast<int>(ceil(static_cast<float>(rc.right + xOffset) / bmpHeight));
         int maxYTile = minYTile + static_cast<int>(ceil(static_cast<float>(rc.bottom + yOffset) / bmpHeight));
 
-        if(maxXTile > gameBoard.getWidth()) {
-            maxXTile = gameBoard.getWidth();
+        if(maxXTile > boardDimensions.width) {
+            maxXTile = boardDimensions.width;
         }
 
-        if(maxYTile >  gameBoard.getHeight()) {
-            maxYTile = gameBoard.getHeight();
+        if(maxYTile >  boardDimensions.height) {
+            maxYTile = boardDimensions.height;
         }
         
         int xDest = 0;
@@ -418,7 +418,7 @@ void GamePanel::onPaint() {
             for(int i = minXTile; i < maxXTile; ++i) {
 
                 // Note to self: MSVC does in fact optimize this!
-                const int realIndex = DX2_TO_DX1(i, k, boardWidth);
+                const int realIndex = DX2_TO_DX1(i, k, boardDimensions.width);
                 
                 if(!tiles[realIndex].flags) {
 
