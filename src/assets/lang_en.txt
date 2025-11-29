@@ -84,4 +84,12 @@ Copyright %s
 Enter Custom Size
 # Custom Size Text
 Enter a custom game board size. Sizes can be no less than 2, and a maximum of 15.
+# Error Changing Size Title
+Cannot change size
+# Error Changing Size Text
+Unable to change board size.
+# New game error title
+Error starting game
+# New game error text
+Unable to to start a new game.
 # END STRINGS

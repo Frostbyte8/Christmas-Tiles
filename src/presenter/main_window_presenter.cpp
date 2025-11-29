@@ -235,7 +235,7 @@ bool MainWindowPresenter::tryTogglePause() {
 // it assumes height is too.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes) {
+bool MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes) {
     
     if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
         const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
@@ -253,6 +253,9 @@ bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int
         newHeight = boardDimensions.height;
 
     }
+    else {
+        assert(newHeight != WindowPresenterConstants::IGNORE_HEIGHT); // Read the comment at the top.
+    }
 
     if(tileTypes == WindowPresenterConstants::IGNORE_NUMTILES) {
         tileTypes = gameBoard.getNumTileTypes();
@@ -261,11 +264,7 @@ bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int
     FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
     FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 
-    if(!createNewGameBoard(newWidth, newHeight, tileTypes)) {
-        // TODO: Handle error.
-    }
-
-    return true;
+    return createNewGameBoard(newWidth, newHeight, tileTypes);
 
 }
 

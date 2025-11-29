@@ -19,8 +19,8 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }
-        inline const uint8_t& getNewWidth() const { return newWidth; } 
-        inline const uint8_t& getNewHeight() const { return newHeight; }
+        inline const unsigned int& getNewWidth() const { return newWidth; } 
+        inline const unsigned int& getNewHeight() const { return newHeight; }
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
@@ -37,8 +37,8 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
         HWND buttonOK;
         HWND buttonCancel;
 
-        uint8_t newWidth;
-        uint8_t newHeight;
+        unsigned int newWidth;
+        unsigned int newHeight;
         
         HMONITOR prevMonitor;
         WindowMetrics  metrics;

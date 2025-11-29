@@ -16,8 +16,8 @@ namespace GameState {
 }
 
 namespace WindowPresenterConstants {
-    static const uint8_t IGNORE_WIDTH       = 255;
-    static const uint8_t IGNORE_HEIGHT      = 255;
+    static const unsigned int IGNORE_WIDTH       = 255;
+    static const unsigned int IGNORE_HEIGHT      = 255;
     static const uint8_t IGNORE_NUMTILES    = 255;
 }
 
@@ -59,7 +59,7 @@ class MainWindowPresenter {
         bool tryAddScore(wchar_t* name, const size_t& index);
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
-        bool tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes);
+        bool tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes);
         inline void unflipTiles();
 
         // TODO: At some point this will all be moved in to the models they

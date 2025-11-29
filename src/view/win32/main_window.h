@@ -58,7 +58,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
         void moveControls();
-        void updateBoardSizeMenu(const uint8_t& width, const uint8_t& height, bool clearChecks);
+        void updateBoardSizeMenu(const unsigned int& width, const unsigned int& height, bool clearChecks);
 
         // Member Variables
         

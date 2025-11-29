@@ -245,29 +245,43 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
     bool retVal = false;
 
+    unsigned int newWidth;
+    unsigned int newHeight;
+
     switch(menuID) {
         case MenuID::BOARD_3x3:
-            retVal = windowPresenter.tryUpdateGameBoard(3, 3, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(3,3,true);
+            newWidth = 3;
+            newHeight = 3;
             break;
         case MenuID::BOARD_4x4:
-            retVal = windowPresenter.tryUpdateGameBoard(4, 4, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(4,4,true);
+            newWidth = 4;
+            newHeight = 4;
             break;
         case MenuID::BOARD_5x5:
-            retVal = windowPresenter.tryUpdateGameBoard(5, 5, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(5,5,true);
+            newWidth = 5;
+            newHeight = 5;
             break;
         case MenuID::BOARD_5x9:
-            retVal = windowPresenter.tryUpdateGameBoard(5, 9, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(5,9,true);
+            newWidth = 5;
+            newHeight = 9;
             break;
         case MenuID::BOARD_10x10:
-            retVal = windowPresenter.tryUpdateGameBoard(10, 10, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(10,10,true);
+            newWidth = 10;
+            newHeight = 10;
             break;
-    }    
+        default:
+            assert(false); // Good job! You somehow screwed up.
+            break;
+    }
 
+    // Note that newWidth and newHeight can be altered by this function. This is fine because if they
+    // are altered for whatever reason, we don't want to display the wrong menu as checked.
+    if(windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES)) {
+        updateBoardSizeMenu(newWidth, newHeight, true);
+    }
+    else {
+        MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TEXT), GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TITLE), MB_ICONERROR | MB_OK);
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -297,7 +311,9 @@ void MainWindowView::onChangeTileset() {
         if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
             // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
             // It could also pose a problem and needs to have proper error checking.
-            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+            unsigned int tempWidth = WindowPresenterConstants::IGNORE_WIDTH;
+            unsigned int tempHeight = WindowPresenterConstants::IGNORE_WIDTH;
+            windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
         }
 
     }
@@ -377,8 +393,8 @@ bool MainWindowView::onCreate() {
 
     // TODO: Retrieving these settings should be in the presenter, not the view.
 
-    uint8_t boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
-    uint8_t boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
+    unsigned int boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
+    unsigned int boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
     wchar_t filePath[MAX_PATH] = {0};
 
     if(!DoesFileExist(L".\\ChristmasTiles.ini")) {
@@ -516,6 +532,10 @@ void MainWindowView::onWindowMoved() {
 
 LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
+    // move to new functon
+    unsigned int newWidth = 0;
+    unsigned int newHeight = 0;
+
     switch(msg) {
         default:
             return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -548,6 +568,9 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                         onElapsedTimeTimer();
                         updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
                         updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
+                    }
+                    else {
+                        MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TEXT), GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TITLE), MB_ICONERROR | MB_OK);
                     }
                     break;
 
@@ -602,8 +625,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_CUSTOM_SIZE_ENETERD:
-            windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(customSizeWindow.getNewWidth(), customSizeWindow.getNewHeight(), true);
+            newWidth = customSizeWindow.getNewWidth();
+            newHeight = customSizeWindow.getNewHeight();
+                
+            windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(newWidth, newHeight, true);
             break;
 
         case UWM_DIALOG_CLOSED:
@@ -794,7 +820,7 @@ void MainWindowView::moveControls() {
 // menu from the width/height given.
 //------------------------------------------------------------------------------
 
-void MainWindowView::updateBoardSizeMenu(const uint8_t& width, const uint8_t& height, bool clearChecks) {
+void MainWindowView::updateBoardSizeMenu(const unsigned int& width, const unsigned int& height, bool clearChecks) {
 
     if(clearChecks) {
         for(int i = MenuID::BOARD_3x3; i <= MenuID::BOARD_CUSTOM; ++i) {
