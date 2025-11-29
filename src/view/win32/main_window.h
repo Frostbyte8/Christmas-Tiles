@@ -1,84 +1,92 @@
 #pragma once
 
 #include <windows.h>
-#include "subclassed_controls.h"
-#include "game_panel.h"
-#include "dynamic_label.h"
-#include "window_meterics.h"
+
 #include "../../presenter/main_window_presenter.h"
 #include "../../interface/main_window_interface.h"
 
+#include "window_meterics.h"
+
+#include "dynamic_label.h"
+#include "game_panel.h"
+#include "subclassed_controls.h"
+
 #include "about_window.h"
+#include "custom_size_window.h"
 #include "enter_score_window.h"
 #include "highscores_window.h"
-#include "custom_size_window.h"
+
 
 class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInterface {
     friend WndAsClass;
 
     public:
 
-        // TODO: These should not be public ?
-        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false), activeModalDialog(0) {
-            windowPresenter.setMainWindow(reinterpret_cast<MainWindowInterface*>(this));
-        }
+        MainWindowView(const HINSTANCE hIn);
 
-        __forceinline void createMenuBar();
         bool createWindow();
-        UINT doLoop();
         bool registerSelf();
+        UINT doLoop();
+        
+        // Public interface functions
 
-        bool onCreate();
-        // Interface Functions
         int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title);
         void implGameStateChanged(const int& gameState);
 
-
     private:
+        
+        // Disable Copy Constructor
 
-        //void centerWindow();
+        MainWindowView(const MainWindowView&);
+        MainWindowView& operator = (const MainWindowView&);
+        
+        // Window Message Processing
+        
+        void onChangeBoardSize(const int& menuID);
+        void onChangeTileset();
+        void onClose();
+        bool onCreate();
+        void onElapsedTimeTimer();
+        void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
+        void onWindowMoved();
+
+        LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
+
+        // Private Functions
+
+        __forceinline void createMenuBar();
         LONG getTallestPoint() const;
         LONG getWidestGroupBox() const;
         void moveControls();
-        void onWindowMoved();
-        void onClose();
-        void onChangeBoardSize(const int& menuID);
-        void onTimer();
-        void onElapsedTimeTimer();
-        void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
-        void onChangeTileset();
         void updateBoardSizeMenu(const uint8_t& width, const uint8_t& height, bool clearChecks);
-        LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
-        // Disable copy constructor
-        MainWindowView &operator=(const MainWindowView&);
-
+        // Member Variables
+        
         MainWindowPresenter windowPresenter;
-        bool shouldUnflip;
 
         HWND hWnd;
         HWND activeModalDialog;
+        HMONITOR prevMonitor;
+        const HINSTANCE hInstance;
+
         AboutWindow aboutWindow;
         EnterScoreWindow enterScoreWindow;
         HighscoresWindow highscoresWindow;
         CustomSizeWindow customSizeWindow;
         
-        HMENU menuBar;
-        HMENU fileMenu;
-        HMENU optionsMenu;
-        HMENU helpMenu;
+        HMENU   menuBar;
+        HMENU   fileMenu;
+        HMENU   optionsMenu;
+        HMENU   helpMenu;      
 
-        HMONITOR prevMonitor;
-
-        HWND groupStats[3];
-        HWND buttonPause;
-                
-        DynamicLabel scoreLabel;
-        DynamicLabel pointsLabel;
-        DynamicLabel timeLabel;
-
+        HWND            groupStats[3];
+        HWND            buttonPause;
+        DynamicLabel    scoreLabel;
+        DynamicLabel    pointsLabel;
+        DynamicLabel    timeLabel;
         GamePanel       gamePanel;
-        const HINSTANCE hInstance;
+        
         WindowMetrics   metrics;
+        bool            shouldUnflip;
 
 };

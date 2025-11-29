@@ -87,6 +87,14 @@ __forceinline BOOL DoesFileExist(const wchar_t* path) {
 }
 
 //==============================================================================
+// Constructors
+//==============================================================================
+
+MainWindowView::MainWindowView(const HINSTANCE hIn) : windowPresenter(*this), hWnd(NULL),
+hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL) {
+}
+
+//==============================================================================
 // Public Functions
 //==============================================================================
 
@@ -127,8 +135,6 @@ UINT MainWindowView::doLoop() {
     
     while(GetMessage(&msg, NULL, 0, 0) > 0) {
         
-        // TODO: Cache which window is open instead
-
         if(activeModalDialog && IsDialogMessage(activeModalDialog, &msg)) {
         }
         else if (!IsDialogMessage(hWnd, &msg)) {
@@ -175,47 +181,177 @@ bool MainWindowView::registerSelf() {
 }
 
 //==============================================================================
-// Win32 Messages
+// Public Interface Functions
 //==============================================================================
 
-__forceinline void MainWindowView::createMenuBar() {
-    menuBar     = CreateMenu();
-    fileMenu    = CreateMenu();
-    optionsMenu = CreateMenu();
-    helpMenu    = CreateMenu();
+//-----------------------------------------------------------------------------
+// implAskYesNoQuestion - Ask the user for a yes, or a no
+//-----------------------------------------------------------------------------
 
-    // File Menu
-
-    AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, GET_LANG_STR(LangID::MENU_NEW_GAME));
-    AppendMenu(fileMenu, MF_STRING | MF_DISABLED | MF_GRAYED, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
-    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, GET_LANG_STR(LangID::MENU_HIGHSCORES));
-    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, GET_LANG_STR(LangID::MENU_EXIT));
-
-    // Options Menu
-    AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, GET_LANG_STR(LangID::MENU_CHANGE_TILESET));
-    AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, GET_LANG_STR(LangID::MENU_CHANGE_LANGUAGE));
-    AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_3x3, L"3x3");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x5, L"5x5");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x9, L"5x9");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_10x10, L"10x10");
-    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, GET_LANG_STR(LangID::MENU_CUSTOM_SIZE));
-
-    // Help Meun
-    AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, GET_LANG_STR(LangID::MENU_HELP_ITEM));
-    AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
-    AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, GET_LANG_STR(LangID::MENU_ABOUT));
-
-    // Now attach each menu to the menu bar
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(fileMenu), GET_LANG_STR(LangID::MENU_FILE));
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(optionsMenu), GET_LANG_STR(LangID::MENU_OPTIONS));
-    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(helpMenu), GET_LANG_STR(LangID::MENU_HELP));
-
-    SetMenu(hWnd, menuBar);
+int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* title) {
+    return MessageBox(hWnd, message, title, MB_YESNOCANCEL | MB_ICONQUESTION);
 }
+
+//-----------------------------------------------------------------------------
+// implGameStateChanged - Game state was changed
+//-----------------------------------------------------------------------------
+
+void MainWindowView::implGameStateChanged(const int& newState) {
+
+    if(newState == GameState::STATE_PLAYING) {
+        EnableWindow(buttonPause, TRUE);
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
+        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
+    }
+    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
+        EnableWindow(buttonPause, FALSE);
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
+        InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
+
+        if(newState == GameState::STATE_GAMEWON) {
+
+            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getMainWindowData().score);
+
+            if(isNewScore < 10) {
+                enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);
+            }
+
+        }
+        else {
+            const GameBoard& gameBoard = windowPresenter.getGameBoard();
+            // TODO: Stop this from running the first time, the window is already moved.
+            moveControls();
+            const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
+            gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
+        }
+
+    }
+    else if(newState == GameState::STATE_PAUSED) {
+        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_UNPAUSE));
+    }
+
+}
+
+//==============================================================================
+// Window Messages
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// onChangeBoardSize - User wants to change the size of the game board
+//------------------------------------------------------------------------------
+
+void MainWindowView::onChangeBoardSize(const int& menuID) {
+
+    bool retVal = false;
+
+    switch(menuID) {
+        case MenuID::BOARD_3x3:
+            retVal = windowPresenter.tryUpdateGameBoard(3, 3, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(3,3,true);
+            break;
+        case MenuID::BOARD_4x4:
+            retVal = windowPresenter.tryUpdateGameBoard(4, 4, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(4,4,true);
+            break;
+        case MenuID::BOARD_5x5:
+            retVal = windowPresenter.tryUpdateGameBoard(5, 5, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(5,5,true);
+            break;
+        case MenuID::BOARD_5x9:
+            retVal = windowPresenter.tryUpdateGameBoard(5, 9, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(5,9,true);
+            break;
+        case MenuID::BOARD_10x10:
+            retVal = windowPresenter.tryUpdateGameBoard(10, 10, WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(10,10,true);
+            break;
+    }    
+
+}
+
+//------------------------------------------------------------------------------
+// onChangeTileset - Called when the user requests to change the tileset
+// image being used.
+//------------------------------------------------------------------------------
+
+void MainWindowView::onChangeTileset() {
+    
+    // TODO: Warn user about this action starting a new game
+    
+    OPENFILENAME ofnTileset = {0};
+    wchar_t filePath[MAX_PATH] = L"";
+
+    ofnTileset.lStructSize = sizeof(ofnTileset);
+    ofnTileset.hwndOwner = hWnd;
+
+    // TODO: LANG ID for this
+    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0";
+    ofnTileset.nMaxFile = MAX_PATH;
+    ofnTileset.lpstrFile = filePath;
+    ofnTileset.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+    ofnTileset.lpstrDefExt = L"bmp";
+
+    if(GetOpenFileName(&ofnTileset)) {
+
+        if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
+            // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
+            // It could also pose a problem and needs to have proper error checking.
+            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+        }
+
+    }
+
+}
+
+//------------------------------------------------------------------------------
+// onClose - User wants to quit the program
+//------------------------------------------------------------------------------
+
+// The while loops are fine, so we can disable this
+#pragma warning (push) 
+#pragma warning (disable: 4127)
+
+void MainWindowView::onClose() {
+
+    if(windowPresenter.getGameState() != GameState::STATE_GAMEWON) {
+        if(implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TITLE)) != MainWindowInterfaceResponses::YES) {
+            return;
+        }
+    }
+
+    while (true) {
+        
+        if(windowPresenter.writeSettings()) {
+            break;
+        }
+
+        // TODO: Language String
+        if(MessageBox(hWnd, L"Error writing settings file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+            break;
+        }
+
+    }
+
+    while (true) {
+        
+        if(windowPresenter.writeScores()) {
+            break;
+        }
+
+        // TODO: Language String
+        if(MessageBox(hWnd, L"Error writing scores file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+            break;
+        }
+
+    }
+
+
+    KillTimer(hWnd, 1);
+    DestroyWindow(hWnd);
+}
+
+#pragma warning (pop) 
 
 
 //------------------------------------------------------------------------------
@@ -296,9 +432,60 @@ bool MainWindowView::onCreate() {
 
 }
 
-//==============================================================================
-// Private Functions
-//==============================================================================
+//------------------------------------------------------------------------------
+// onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
+// ID.
+//------------------------------------------------------------------------------
+
+void MainWindowView::onElapsedTimeTimer() {
+    
+    // TODO: tidy this up
+    DWORD elapsedTime = windowPresenter.getElapsedTime();
+
+    DWORD seconds = elapsedTime / 1000;
+    DWORD minutes = seconds / 60;
+    seconds = seconds - (minutes * 60);
+
+    wchar_t timeStr[32] = {0};
+    wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
+    SetWindowText(timeLabel.getHandle(), timeStr);
+
+    updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
+
+}
+
+//------------------------------------------------------------------------------
+// onTileSelected - Processes the UWM_TILE_SELECTED message
+//------------------------------------------------------------------------------
+
+void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
+    
+    unsigned int xPos = wParam / gamePanel.getTilesetHeight();
+    unsigned int yPos = lParam / gamePanel.getTilesetHeight();
+
+    const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
+
+    if(retVal > GameBoardFlipErrors::WasSuccessful) {
+        
+        InvalidateRect(gamePanel.getHandle(), NULL, TRUE);
+
+        if(retVal == GameBoardFlipErrors::TilesNotMatched) {
+            // Set/Reset timer
+            SetTimer(hWnd, MainWindowViewConstants::FLIP_TIMER_ID, 1000, NULL);
+            shouldUnflip = true;
+
+        }
+        else if(retVal == GameBoardFlipErrors::TilesMatched) {
+
+            const MainWindowData& windowData = windowPresenter.getMainWindowData();
+
+            updateScore(scoreLabel.getHandle(), windowData.score);
+            updatePoints(pointsLabel.getHandle(), windowData.points);
+
+        }
+
+    }
+}
 
 //------------------------------------------------------------------------------
 // onWindowMoved - Track which monitor the window is on after it has been moved,
@@ -317,6 +504,169 @@ void MainWindowView::onWindowMoved() {
 
     }
     
+}
+
+//==============================================================================
+// Window Procedure
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// windowProc - Standard window procedure for a window
+//------------------------------------------------------------------------------
+
+LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
+
+    switch(msg) {
+        default:
+            return DefWindowProc(hWnd, msg, wParam, lParam);
+        case WM_TIMER:
+            if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
+                onElapsedTimeTimer();
+            }
+            else if(wParam == MainWindowViewConstants::FLIP_TIMER_ID) {
+                if(shouldUnflip) {
+                    windowPresenter.unflipTiles();
+                    shouldUnflip = false;
+                    InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
+                }
+            }
+            break;
+        case WM_EXITSIZEMOVE:
+            onWindowMoved(); 
+            break;
+        case WM_CREATE:
+            onCreate();
+            break;
+
+        case WM_COMMAND:
+
+            switch (wParam) {
+
+                case MenuID::NEW_GAME:
+                    if(windowPresenter.requestNewGame()) {
+                        // TODO: Put in function
+                        onElapsedTimeTimer();
+                        updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
+                        updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
+                    }
+                    break;
+
+                case CtrlID::BUTTON_PAUSE: 
+                case MenuID::PAUSE_GAME:
+                    windowPresenter.tryTogglePause(); 
+                    break;
+
+                case MenuID::TILESET:
+                    onChangeTileset();
+                    break;
+
+                case MenuID::BOARD_3x3:
+                case MenuID::BOARD_4x4:
+                case MenuID::BOARD_5x5:
+                case MenuID::BOARD_5x9:
+                case MenuID::BOARD_10x10:
+                    onChangeBoardSize(wParam);
+                    break;
+
+                case MenuID::BOARD_CUSTOM:
+                    customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                    activeModalDialog = customSizeWindow.getHandle();
+                    break;
+                
+                case MenuID::HIGHSCORES:
+                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+                    activeModalDialog = highscoresWindow.getHandle();
+                    break;
+
+                case MenuID::ABOUT:
+                    aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                    activeModalDialog = aboutWindow.getHandle();
+                    break;
+
+                case MenuID::EXIT:
+                    onClose();
+                    break;
+                
+            }
+
+            break;
+
+        case UWM_TILE_SELECTED:
+            onTileSelected(wParam, lParam);
+            break;
+
+        case UWM_SCORE_ENTERED:
+            windowPresenter.tryAddScore(enterScoreWindow.getName(), 9001); // TODO: Index //, windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
+            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+            activeModalDialog = highscoresWindow.getHandle();
+            break;
+
+        case UWM_CUSTOM_SIZE_ENETERD:
+            windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
+            updateBoardSizeMenu(customSizeWindow.getNewWidth(), customSizeWindow.getNewHeight(), true);
+            break;
+
+        case UWM_DIALOG_CLOSED:
+            activeModalDialog = NULL;
+            break;
+
+        case WM_CLOSE:
+            onClose();
+            break;
+
+        case WM_DESTROY: 
+            PostQuitMessage(0);
+            break;
+
+    }
+    return 0;
+}
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// createMenuBar - Creates the menu bar
+//------------------------------------------------------------------------------
+
+__forceinline void MainWindowView::createMenuBar() {
+    menuBar     = CreateMenu();
+    fileMenu    = CreateMenu();
+    optionsMenu = CreateMenu();
+    helpMenu    = CreateMenu();
+
+    // File Menu
+
+    AppendMenu(fileMenu, MF_STRING, MenuID::NEW_GAME, GET_LANG_STR(LangID::MENU_NEW_GAME));
+    AppendMenu(fileMenu, MF_STRING | MF_DISABLED | MF_GRAYED, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuID::HIGHSCORES, GET_LANG_STR(LangID::MENU_HIGHSCORES));
+    AppendMenu(fileMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(fileMenu, MF_STRING, MenuID::EXIT, GET_LANG_STR(LangID::MENU_EXIT));
+
+    // Options Menu
+    AppendMenu(optionsMenu, MF_STRING, MenuID::TILESET, GET_LANG_STR(LangID::MENU_CHANGE_TILESET));
+    AppendMenu(optionsMenu, MF_STRING, MenuID::CHANGE_LANGUAGE, GET_LANG_STR(LangID::MENU_CHANGE_LANGUAGE));
+    AppendMenu(optionsMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_3x3, L"3x3");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_4x4, L"4x4");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x5, L"5x5");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_5x9, L"5x9");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_10x10, L"10x10");
+    AppendMenu(optionsMenu, MF_STRING, MenuID::BOARD_CUSTOM, GET_LANG_STR(LangID::MENU_CUSTOM_SIZE));
+
+    // Help Meun
+    AppendMenu(helpMenu, MF_STRING, MenuID::HELP_FILE, GET_LANG_STR(LangID::MENU_HELP_ITEM));
+    AppendMenu(helpMenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(helpMenu, MF_STRING, MenuID::ABOUT, GET_LANG_STR(LangID::MENU_ABOUT));
+
+    // Now attach each menu to the menu bar
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(fileMenu), GET_LANG_STR(LangID::MENU_FILE));
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(optionsMenu), GET_LANG_STR(LangID::MENU_OPTIONS));
+    AppendMenu(menuBar, MF_STRING | MF_POPUP, reinterpret_cast<UINT_PTR>(helpMenu), GET_LANG_STR(LangID::MENU_HELP));
+
+    SetMenu(hWnd, menuBar);
 }
 
 //------------------------------------------------------------------------------
@@ -440,141 +790,9 @@ void MainWindowView::moveControls() {
 }
 
 //------------------------------------------------------------------------------
-// onTileSelected - Processes the UWM_TILE_SELECTED message
+// updateBoardSizeMenu - Update which menu item is checked in the board size
+// menu from the width/height given.
 //------------------------------------------------------------------------------
-
-void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
-    
-    unsigned int xPos = wParam / gamePanel.getTilesetHeight();
-    unsigned int yPos = lParam / gamePanel.getTilesetHeight();
-
-    const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
-
-    if(retVal > GameBoardFlipErrors::WasSuccessful) {
-        
-        InvalidateRect(gamePanel.getHandle(), NULL, TRUE);
-
-        if(retVal == GameBoardFlipErrors::TilesNotMatched) {
-            // Set/Reset timer
-            SetTimer(hWnd, MainWindowViewConstants::FLIP_TIMER_ID, 1000, NULL);
-            shouldUnflip = true;
-
-        }
-        else if(retVal == GameBoardFlipErrors::TilesMatched) {
-
-            const MainWindowData& windowData = windowPresenter.getMainWindowData();
-
-            updateScore(scoreLabel.getHandle(), windowData.score);
-            updatePoints(pointsLabel.getHandle(), windowData.points);
-
-        }
-
-    }
-}
-
-//------------------------------------------------------------------------------
-// onClose - User wants to quit the program
-//------------------------------------------------------------------------------
-
-// The while loops are fine, so we can disable this
-#pragma warning (push) 
-#pragma warning (disable: 4127)
-
-void MainWindowView::onClose() {
-
-    if(windowPresenter.getGameState() != GameState::STATE_GAMEWON) {
-        if(implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TITLE)) != MainWindowInterfaceResponses::YES) {
-            return;
-        }
-    }
-
-    while (true) {
-        
-        if(windowPresenter.writeSettings()) {
-            break;
-        }
-
-        // TODO: Language String
-        if(MessageBox(hWnd, L"Error writing settings file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
-            break;
-        }
-
-    }
-
-    while (true) {
-        
-        if(windowPresenter.writeScores()) {
-            break;
-        }
-
-        // TODO: Language String
-        if(MessageBox(hWnd, L"Error writing scores file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
-            break;
-        }
-
-    }
-
-
-    KillTimer(hWnd, 1);
-    DestroyWindow(hWnd);
-}
-
-#pragma warning (pop) 
-
-//------------------------------------------------------------------------------
-// onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
-// ID.
-//------------------------------------------------------------------------------
-
-void MainWindowView::onElapsedTimeTimer() {
-    
-    // TODO: tidy this up
-    DWORD elapsedTime = windowPresenter.getElapsedTime();
-
-    DWORD seconds = elapsedTime / 1000;
-    DWORD minutes = seconds / 60;
-    seconds = seconds - (minutes * 60);
-
-    wchar_t timeStr[32] = {0};
-    wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
-    SetWindowText(timeLabel.getHandle(), timeStr);
-
-    updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
-
-}
-
-//------------------------------------------------------------------------------
-// onChangeBoardSize - User wants to change the size of the game board
-//------------------------------------------------------------------------------
-
-void MainWindowView::onChangeBoardSize(const int& menuID) {
-
-    bool retVal = false;
-
-    switch(menuID) {
-        case MenuID::BOARD_3x3:
-            retVal = windowPresenter.tryUpdateGameBoard(3, 3, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(3,3,true);
-            break;
-        case MenuID::BOARD_4x4:
-            retVal = windowPresenter.tryUpdateGameBoard(4, 4, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(4,4,true);
-            break;
-        case MenuID::BOARD_5x5:
-            retVal = windowPresenter.tryUpdateGameBoard(5, 5, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(5,5,true);
-            break;
-        case MenuID::BOARD_5x9:
-            retVal = windowPresenter.tryUpdateGameBoard(5, 9, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(5,9,true);
-            break;
-        case MenuID::BOARD_10x10:
-            retVal = windowPresenter.tryUpdateGameBoard(10, 10, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(10,10,true);
-            break;
-    }    
-
-}
 
 void MainWindowView::updateBoardSizeMenu(const uint8_t& width, const uint8_t& height, bool clearChecks) {
 
@@ -601,200 +819,6 @@ void MainWindowView::updateBoardSizeMenu(const uint8_t& width, const uint8_t& he
     }
     else {
         CheckMenuItem(optionsMenu, MenuID::BOARD_CUSTOM, MainWindowViewConstants::MENU_CHECKED_FLAGS);
-    }
-
-}
-
-void MainWindowView::onChangeTileset() {
-    
-    // TODO: Warn user about this action starting a new game
-    
-    OPENFILENAME ofnTileset = {0};
-    wchar_t filePath[MAX_PATH] = L"";
-
-    ofnTileset.lStructSize = sizeof(ofnTileset);
-    ofnTileset.hwndOwner = hWnd;
-
-    // TODO: LANG ID for this
-    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0";
-    ofnTileset.nMaxFile = MAX_PATH;
-    ofnTileset.lpstrFile = filePath;
-    ofnTileset.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-    ofnTileset.lpstrDefExt = L"bmp";
-
-    if(GetOpenFileName(&ofnTileset)) {
-
-        if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
-            // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
-            // It could also pose a problem and needs to have proper error checking.
-            windowPresenter.tryUpdateGameBoard(WindowPresenterConstants::IGNORE_WIDTH, WindowPresenterConstants::IGNORE_HEIGHT, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
-        }
-
-    }
-
-}
-
-//------------------------------------------------------------------------------
-// windowProc - Standard window procedure for a window
-//------------------------------------------------------------------------------
-
-LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-
-    switch(msg) {
-        default:
-            return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_TIMER:
-            if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
-                onElapsedTimeTimer();
-            }
-            else if(wParam == MainWindowViewConstants::FLIP_TIMER_ID) {
-                if(shouldUnflip) {
-                    windowPresenter.unflipTiles();
-                    shouldUnflip = false;
-                    InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
-                }
-            }
-            break;
-        case WM_EXITSIZEMOVE:
-            onWindowMoved(); 
-            break;
-        case WM_CREATE:
-            onCreate();
-            break;
-
-        case WM_COMMAND:
-
-            switch (wParam) {
-
-                case MenuID::NEW_GAME:
-                    if(windowPresenter.requestNewGame()) {
-                        // TODO: Put in function
-                        onElapsedTimeTimer();
-                        updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
-                        updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
-                    }
-                    break;
-
-                case CtrlID::BUTTON_PAUSE: 
-                case MenuID::PAUSE_GAME:
-                    windowPresenter.tryTogglePause(); 
-                    break;
-
-                case MenuID::TILESET:
-                    onChangeTileset();
-                    break;
-
-                case MenuID::BOARD_3x3:
-                case MenuID::BOARD_4x4:
-                case MenuID::BOARD_5x5:
-                case MenuID::BOARD_5x9:
-                case MenuID::BOARD_10x10:
-                    onChangeBoardSize(wParam);
-                    break;
-
-                case MenuID::BOARD_CUSTOM:
-                    customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
-                    activeModalDialog = customSizeWindow.getHandle();
-                    break;
-                
-                case MenuID::HIGHSCORES:
-                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
-                    activeModalDialog = highscoresWindow.getHandle();
-                    break;
-
-                case MenuID::ABOUT:
-                    aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
-                    activeModalDialog = aboutWindow.getHandle();
-                    break;
-
-                case MenuID::EXIT:
-                    onClose();
-                    break;
-                
-            }
-
-            break;
-
-        case UWM_TILE_SELECTED:
-            onTileSelected(wParam, lParam);
-            break;
-
-        case UWM_SCORE_ENTERED:
-            windowPresenter.tryAddScore(enterScoreWindow.getName(), 9001); // TODO: Index //, windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
-            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
-            activeModalDialog = highscoresWindow.getHandle();
-            break;
-
-        case UWM_CUSTOM_SIZE_ENETERD:
-            windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(customSizeWindow.getNewWidth(), customSizeWindow.getNewHeight(), true);
-            break;
-
-        case UWM_DIALOG_CLOSED:
-            activeModalDialog = NULL;
-            break;
-
-        case WM_CLOSE:
-            onClose();
-            break;
-
-        case WM_DESTROY: 
-            PostQuitMessage(0);
-            break;
-
-    }
-    return 0;
-}
-
-//==============================================================================
-// Interface Functions
-//==============================================================================
-
-//-----------------------------------------------------------------------------
-// implAskYesNoQuestion - Ask the user for a yes, or a no
-//-----------------------------------------------------------------------------
-
-int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* title) {
-    return MessageBox(hWnd, message, title, MB_YESNOCANCEL | MB_ICONQUESTION);
-}
-
-//-----------------------------------------------------------------------------
-// implGameStateChanged - Game state was changed
-//-----------------------------------------------------------------------------
-
-void MainWindowView::implGameStateChanged(const int& newState) {
-
-    if(newState == GameState::STATE_PLAYING) {
-        EnableWindow(buttonPause, TRUE);
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
-        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
-    }
-    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
-        EnableWindow(buttonPause, FALSE);
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
-        InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
-
-        if(newState == GameState::STATE_GAMEWON) {
-
-            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getMainWindowData().score);
-
-            if(isNewScore < 10) {
-                enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);
-            }
-
-        }
-        else {
-            const GameBoard& gameBoard = windowPresenter.getGameBoard();
-            // TODO: Stop this from running the first time, the window is already moved.
-            moveControls();
-            const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
-            gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
-        }
-
-    }
-    else if(newState == GameState::STATE_PAUSED) {
-        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_UNPAUSE));
     }
 
 }

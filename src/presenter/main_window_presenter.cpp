@@ -34,7 +34,7 @@
 // Constructors
 //==============================================================================
 
-MainWindowPresenter::MainWindowPresenter() : gameBoard(5, 9, 16) {
+MainWindowPresenter::MainWindowPresenter(MainWindowInterface& inMWI) : mainWindow(inMWI), gameBoard(5, 9, 16) {
     reset(); // Just to reduce code reuse.
 }
 
@@ -122,7 +122,7 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
             if(matchesMade == gameBoard.getMatchesNeeded()) {
                 updateElapsedTime();
                 windowData.gameState = GameState::STATE_GAMEWON;
-                mainWindow->implGameStateChanged(windowData.gameState);
+                mainWindow.implGameStateChanged(windowData.gameState);
             }
 
             return GameBoardFlipErrors::TilesMatched;
@@ -201,7 +201,7 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes) {
     
     if(windowData.gameState != GameState::STATE_GAMEWON) {
-        const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
 
         if(retVal != MainWindowInterfaceResponses::YES) {
             return false;
@@ -239,7 +239,7 @@ bool MainWindowPresenter::requestNewGame() {
     
     if(windowData.gameState != GameState::STATE_GAMEWON) {
 
-        const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
 
         if(retVal != MainWindowInterfaceResponses::YES) {
             return false;
@@ -432,7 +432,7 @@ bool MainWindowPresenter::tryNewGame() {
     gameBoard.tryNewGame();
 
     windowData.gameState = GameState::STATE_NOT_STARTED;
-    mainWindow->implGameStateChanged(windowData.gameState);
+    mainWindow.implGameStateChanged(windowData.gameState);
     
     return true;
 
@@ -452,7 +452,7 @@ bool MainWindowPresenter::tryPause() {
 
     updateElapsedTime();
     windowData.gameState = GameState::STATE_PAUSED;
-    mainWindow->implGameStateChanged(windowData.gameState);
+    mainWindow.implGameStateChanged(windowData.gameState);
 
     return true;
 
@@ -472,7 +472,7 @@ bool MainWindowPresenter::tryUnpause() {
    
     milliStartTime = GET_MILLI_COUNT();
     windowData.gameState = GameState::STATE_PLAYING;
-    mainWindow->implGameStateChanged(windowData.gameState);
+    mainWindow.implGameStateChanged(windowData.gameState);
 
     return true;
 }

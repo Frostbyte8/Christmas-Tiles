@@ -42,7 +42,7 @@ class MainWindowPresenter {
 
     public:
 
-        MainWindowPresenter();
+        MainWindowPresenter(MainWindowInterface& inMWI);
 
         const uint32_t& getElapsedTime();
         //const uint32_t& getScore() const { return windowData.score; }
@@ -61,9 +61,11 @@ class MainWindowPresenter {
         bool tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes);
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
 
+        /*
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }
+        */
 
         // TODO: At some point this will all be moved in to the models they
         // belong in.
@@ -95,8 +97,8 @@ class MainWindowPresenter {
         uint32_t            milliElapsedTime;
         uint32_t            milliPointDelta;      
 
-        MainWindowData      windowData;
-        GameBoard           gameBoard;
-        ScoreTable          scoreTable;
-        MainWindowInterface *mainWindow;
+        MainWindowData          windowData;
+        GameBoard               gameBoard;
+        ScoreTable              scoreTable;
+        MainWindowInterface&    mainWindow;
 };
