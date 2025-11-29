@@ -44,31 +44,26 @@ class MainWindowPresenter {
 
         MainWindowPresenter(MainWindowInterface& inMWI);
 
+        // Accessors
+
         const uint32_t& getElapsedTime();
-        //const uint32_t& getScore() const { return windowData.score; }
-        //const int& getPoints() const { return windowData.points; }
-        const MainWindowData& getMainWindowData() const { return windowData; }
-
-        int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
-        bool tryAddScore(wchar_t* name, const size_t& index);
-        inline void unflipTiles();
-
-        inline const GameBoard& getGameBoard() const { return gameBoard; }
-        inline const int& getGameState() const { return windowData.gameState; }
-
+        __forceinline const GameBoard& getGameBoard() const { return gameBoard; }
+        __forceinline const int& getGameState() const { return windowData.gameState; }
+        __forceinline const MainWindowData& getMainWindowData() const { return windowData; }
+        __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
+        
+        // Public Functions
+        
         bool requestNewGame();
+        bool tryAddScore(wchar_t* name, const size_t& index);
+        int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
         bool tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes);
-        __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
-
-        /*
-        void setMainWindow(MainWindowInterface* mwi) {
-            mainWindow = mwi;
-        }
-        */
+        inline void unflipTiles();
 
         // TODO: At some point this will all be moved in to the models they
         // belong in.
+
         bool readScores();
         bool writeSettings();
         bool writeScores();
@@ -77,18 +72,11 @@ class MainWindowPresenter {
 
         __forceinline void reset();
 
+        bool createNewGameBoard();
         bool tryNewGame();
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();
-
-        
-        /*
-        uint8_t     points;
-        uint32_t    score;
-        uint32_t    milliElapsedTime;
-        int         gameState;
-        */
 
         int                 selectedIndex1;
         int                 selectedIndex2;

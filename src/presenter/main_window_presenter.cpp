@@ -54,11 +54,67 @@ __forceinline void MainWindowPresenter::reset() {
 }
 
 //==============================================================================
+// Accessors
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// getElapsedTime - Get how much time has elapsed. This function will also
+// attempt to update how much time has elapsed.
+//------------------------------------------------------------------------------
+
+const uint32_t& MainWindowPresenter::getElapsedTime() {
+
+    if(windowData.gameState == GameState::STATE_PLAYING) {
+        updateElapsedTime();
+    }
+
+    return milliElapsedTime;
+}
+
+//==============================================================================
 // Public Functions
 //==============================================================================
-    
+
 //------------------------------------------------------------------------------
-// onClickTile - Call when the tile is clicked
+// requestNewGame - The user has requested a new game
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::requestNewGame() {
+    
+    if(windowData.gameState != GameState::STATE_GAMEWON) {
+
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
+    }
+
+    return tryNewGame();
+}
+
+//------------------------------------------------------------------------------
+// tryAddScore - Attempt to add an entry to the score table
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
+
+    time_t currentTime;
+    tm timeInfo;
+
+    time(&currentTime);
+    localtime_s(&timeInfo, &currentTime);
+    
+    
+    scoreTable.tryAddScore(name, windowData.score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
+                                                   static_cast<uint8_t>(timeInfo.tm_mon + 1), 
+                                                   static_cast<uint8_t>(timeInfo.tm_mday));
+    return true; 
+}
+
+//------------------------------------------------------------------------------
+// tryFlipTileAtCoodinates - Call when the tile is clicked.
 // Note that yIndex is over written.
 //------------------------------------------------------------------------------
 
@@ -78,9 +134,6 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
     unflipTiles();
 
     const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
-
-    //const uint8_t MAX_X = gameBoard.getWidth() - 1;
-    //const uint8_t MAX_Y = gameBoard.getHeight() - 1;
 
     // Validate indices
 
@@ -143,25 +196,6 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
 }
 
 //------------------------------------------------------------------------------
-// tryAddScore - Attempt to add an entry to the score table
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
-
-    time_t currentTime;
-    tm timeInfo;
-
-    time(&currentTime);
-    localtime_s(&timeInfo, &currentTime);
-    
-    
-    scoreTable.tryAddScore(name, windowData.score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
-                                                   static_cast<uint8_t>(timeInfo.tm_mon + 1), 
-                                                   static_cast<uint8_t>(timeInfo.tm_mday));
-    return true; 
-}
-
-//------------------------------------------------------------------------------
 // tryTogglePause - Attempt to Pause/Unpause the game
 //------------------------------------------------------------------------------
 
@@ -176,20 +210,6 @@ bool MainWindowPresenter::tryTogglePause() {
 
     return false;
 
-}
-
-//------------------------------------------------------------------------------
-// getElapsedTime - Get how much time has elapsed. This function will also
-// attempt to update how much time has elapsed.
-//------------------------------------------------------------------------------
-
-const uint32_t& MainWindowPresenter::getElapsedTime() {
-
-    if(windowData.gameState == GameState::STATE_PLAYING) {
-        updateElapsedTime();
-    }
-
-    return milliElapsedTime;
 }
 
 //------------------------------------------------------------------------------
@@ -224,30 +244,14 @@ bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int
     FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
     FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 
-    gameBoard = GameBoard(newWidth, newHeight, tileTypes);
+    // TODO: Gameboard should only replace itself if it was successful, and should be created entirely
+    // in the function below it.
 
+    gameBoard = GameBoard(newWidth, newHeight, tileTypes);
     tryNewGame();
+
     return true;
 
-}
-
-//------------------------------------------------------------------------------
-// RequestNewGame - The user has requested a new game
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::requestNewGame() {
-    
-    if(windowData.gameState != GameState::STATE_GAMEWON) {
-
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
-    }
-
-    return tryNewGame();
 }
 
 //------------------------------------------------------------------------------
@@ -267,6 +271,102 @@ inline void MainWindowPresenter::unflipTiles() {
     }
 
 }
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// tryNewGame - TODO: Bad name, and should take a reference to a Gameboard
+// instead, only updating if it succeeded.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryNewGame() {
+
+    if(!gameBoard.tryNewGame()) {
+        return false;
+    }
+    reset();
+
+    windowData.gameState = GameState::STATE_NOT_STARTED;
+    // TODO: Pointless. We Know it will be changed if this function succeedes.
+    mainWindow.implGameStateChanged(windowData.gameState);
+    
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// tryPause - Attempt to pause the game. If it does, it will also update how
+// much time the game has been played elapsed before the game was paused.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryPause() {
+
+    if(windowData.gameState != GameState::STATE_PLAYING) {
+        // You can only pause games that are being played.
+        return false;
+    }
+
+    updateElapsedTime();
+    windowData.gameState = GameState::STATE_PAUSED;
+    mainWindow.implGameStateChanged(windowData.gameState);
+
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// tryUnpause - Attempts to unpause the game and resume the how much time the
+// game has been played.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryUnpause() {
+
+    if(windowData.gameState > GameState::STATE_PAUSED) {
+        // Cannot Unpause if game is playing or won.
+        return false;
+    }
+   
+    milliStartTime = GET_MILLI_COUNT();
+    windowData.gameState = GameState::STATE_PLAYING;
+    mainWindow.implGameStateChanged(windowData.gameState);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// updateElapsedTime - Updates how long the game has been played. You must
+// ensure that the game is not paused before calling this function.
+//------------------------------------------------------------------------------
+
+void MainWindowPresenter::updateElapsedTime() {
+
+    assert(windowData.gameState == GameState::STATE_PLAYING);
+
+    const uint32_t timeNow = GET_MILLI_COUNT();
+    milliElapsedTime += (timeNow - milliStartTime);
+    milliStartTime = timeNow;
+
+    if(milliElapsedTime > milliPointDelta + 999) {
+        
+        uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
+        
+        if(windowData.points < seconds) {
+            windowData.points = 0;
+        }
+        else {
+            windowData.points -= static_cast<uint8_t>(seconds);
+        }
+
+        milliPointDelta += (seconds * 1000);
+    }
+
+}
+
+//==============================================================================
+// Things that really shouldn't be here and should be moved at some point.
+//==============================================================================
 
 //------------------------------------------------------------------------------
 // writeSettings - Writes to an ini file.
@@ -414,94 +514,5 @@ bool MainWindowPresenter::writeScores() {
     }
 
     return true;
-
-}
-
-//==============================================================================
-// Private Functions
-//==============================================================================
-
-
-//------------------------------------------------------------------------------
-// tryNewGame - Attempts to start a new game
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryNewGame() {
-
-    reset();
-    gameBoard.tryNewGame();
-
-    windowData.gameState = GameState::STATE_NOT_STARTED;
-    mainWindow.implGameStateChanged(windowData.gameState);
-    
-    return true;
-
-}
-
-//------------------------------------------------------------------------------
-// tryPause - Attempt to pause the game. If it does, it will also update how
-// much time the game has been played elapsed before the game was paused.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryPause() {
-
-    if(windowData.gameState != GameState::STATE_PLAYING) {
-        // You can only pause games that are being played.
-        return false;
-    }
-
-    updateElapsedTime();
-    windowData.gameState = GameState::STATE_PAUSED;
-    mainWindow.implGameStateChanged(windowData.gameState);
-
-    return true;
-
-}
-
-//------------------------------------------------------------------------------
-// tryUnpause - Attempts to unpause the game and resume the how much time the
-// game has been played.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryUnpause() {
-
-    if(windowData.gameState > GameState::STATE_PAUSED) {
-        // Cannot Unpause if game is playing or won.
-        return false;
-    }
-   
-    milliStartTime = GET_MILLI_COUNT();
-    windowData.gameState = GameState::STATE_PLAYING;
-    mainWindow.implGameStateChanged(windowData.gameState);
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// updateElapsedTime - Updates how long the game has been played. You must
-// ensure that the game is not paused before calling this function.
-//------------------------------------------------------------------------------
-
-void MainWindowPresenter::updateElapsedTime() {
-
-    assert(windowData.gameState == GameState::STATE_PLAYING);
-
-    const uint32_t timeNow = GET_MILLI_COUNT();
-    milliElapsedTime += (timeNow - milliStartTime);
-    milliStartTime = timeNow;
-
-    if(milliElapsedTime > milliPointDelta + 999) {
-        
-        uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
-        
-        if(windowData.points < seconds) {
-            windowData.points = 0;
-        }
-        else {
-            windowData.points -= static_cast<uint8_t>(seconds);
-        }
-
-        milliPointDelta += (seconds * 1000);
-    }
 
 }
