@@ -80,16 +80,24 @@ About Christmas Tiles
 Version %s
 # Copyright
 Copyright %s
-# Custom Size Title
-Enter Custom Size
 # Custom Size Text
 Enter a custom game board size. Sizes can be no less than 2, and a maximum of 15.
-# Error Changing Size Title
-Cannot change size
+# Custom Size Title
+Enter Custom Size
 # Error Changing Size Text
 Unable to change board size.
-# New game error title
-Error starting game
+# Error Changing Size Title
+Cannot change size
 # New game error text
 Unable to to start a new game.
+# New game error title
+Error starting game
+# Write Scores Error Text
+Error writing settings file.
+# Write Settings Error Title
+File write error
+# Write Scores Error Text
+Error writing scores file.
+# Write Scores Error Title
+File write error
 # END STRINGS

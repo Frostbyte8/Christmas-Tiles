@@ -80,25 +80,19 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 // requestNewGame - The user has requested a new game
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::requestNewGame() {
+int MainWindowPresenter::requestNewGame() {
     
-    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
-
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
+    if(!shouldEndGameIfPlaying(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT)) {
+        return -1;
     }
 
     const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
 
     if(!createNewGameBoard(boardDimensions.width, boardDimensions.height, gameBoard.getNumTileTypes())) {
-        // TODO: Handle error.
+        return 0;
     }
 
-    return true;
+    return 1;
 }
 
 //------------------------------------------------------------------------------
@@ -143,6 +137,7 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
 
             case GameState::STATE_NO_GAME:
                 return GameBoardFlipErrors::GameNotCreated;
+
         }
         
     }
@@ -235,14 +230,10 @@ bool MainWindowPresenter::tryTogglePause() {
 // it assumes height is too.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes) {
+int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes) {
     
-    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
+    if(!shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
+        return -1;
     }
 
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
@@ -295,11 +286,11 @@ inline void MainWindowPresenter::unflipTiles() {
 // original GameBoard and GameState are still set.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes) {
+int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes) {
 
     GameBoard newBoard(newWidth, newHeight, newTileTypes);
     if(!newBoard.tryNewGame()) {
-        return false;
+        return 0;
     }
 
     reset();
@@ -309,6 +300,27 @@ bool MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const
 
     mainWindow.implGameStateChanged(windowData.gameState);
     
+    return 1;
+}
+
+
+//------------------------------------------------------------------------------
+// shouldEndGameIfPlaying - Check if the game is playing, and ask the player if
+// they want to end it to complete the action they requested
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
+
+    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
+
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
+    }
+
     return true;
 }
 

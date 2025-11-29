@@ -203,13 +203,14 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
     }
-    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED) {
+    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED || newState == GameState::STATE_NO_GAME) {
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
 
         if(newState == GameState::STATE_GAMEWON) {
 
+            // TODO: This should be in the controler + impl function
             size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getMainWindowData().score);
 
             if(isNewScore < 10) {
@@ -268,6 +269,11 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
         case MenuID::BOARD_10x10:
             newWidth = 10;
             newHeight = 10;
+            break;
+        case MenuID::BOARD_CUSTOM:
+            assert(customSizeWindow.getHandle());
+            newWidth = customSizeWindow.getNewWidth();
+            newHeight = customSizeWindow.getNewWidth();
             break;
         default:
             assert(false); // Good job! You somehow screwed up.
@@ -343,7 +349,7 @@ void MainWindowView::onClose() {
         }
 
         // TODO: Language String
-        if(MessageBox(hWnd, L"Error writing settings file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+        if(MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_WRITE_SETTINGS_TEXT), GET_LANG_STR(LangID::ERROR_WRITE_SETTINGS_TITLE), MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
             break;
         }
 
@@ -356,7 +362,7 @@ void MainWindowView::onClose() {
         }
 
         // TODO: Language String
-        if(MessageBox(hWnd, L"Error writing scores file.", L"Error", MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
+        if(MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_WRITE_SCORES_TEXT), GET_LANG_STR(LangID::ERROR_WRITE_SCORES_TITLE), MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
             break;
         }
 
@@ -624,12 +630,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             activeModalDialog = highscoresWindow.getHandle();
             break;
 
-        case UWM_CUSTOM_SIZE_ENETERD:
-            newWidth = customSizeWindow.getNewWidth();
-            newHeight = customSizeWindow.getNewHeight();
+        case UWM_CUSTOM_SIZE_ENTERED:
+            //newWidth = customSizeWindow.getNewWidth();
+            //newHeight = customSizeWindow.getNewHeight();
                 
-            windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
-            updateBoardSizeMenu(newWidth, newHeight, true);
+            //windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
+            //updateBoardSizeMenu(newWidth, newHeight, true);
+            onChangeBoardSize(MenuID::BOARD_CUSTOM);
             break;
 
         case UWM_DIALOG_CLOSED:

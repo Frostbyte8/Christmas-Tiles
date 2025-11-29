@@ -55,11 +55,11 @@ class MainWindowPresenter {
         
         // Public Functions
         
-        bool requestNewGame();
+        int requestNewGame();
         bool tryAddScore(wchar_t* name, const size_t& index);
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
-        bool tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes);
+        int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes);
         inline void unflipTiles();
 
         // TODO: At some point this will all be moved in to the models they
@@ -73,10 +73,12 @@ class MainWindowPresenter {
 
         __forceinline void reset();
 
-        bool createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes);
+        int createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes);
+        bool shouldEndGameIfPlaying(const int& LangIDTitle);
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();
+        
 
         int                 selectedIndex1;
         int                 selectedIndex2;

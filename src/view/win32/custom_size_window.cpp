@@ -216,10 +216,10 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
 
         case WM_CLOSE:
             SendMessage(parentHWnd, UWM_DIALOG_CLOSED, 0, 0);
+            SendMessage(parentHWnd, UWM_CUSTOM_SIZE_ENTERED, 0, 0);
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
             DestroyWindow(hWnd);
-            SendMessage(parentHWnd, UWM_CUSTOM_SIZE_ENETERD, 0, 0);
             hWnd = NULL;
             break;
 
