@@ -47,6 +47,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         void onClose();
         bool onCreate();
         void onElapsedTimeTimer();
+        void onNewGame();
         void onTileSelected(const WPARAM& wParam, const LPARAM& lParam);
         void onWindowMoved();
 

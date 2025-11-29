@@ -244,8 +244,6 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
 void MainWindowView::onChangeBoardSize(const int& menuID) {
 
-    bool retVal = false;
-
     unsigned int newWidth;
     unsigned int newHeight;
 
@@ -282,10 +280,13 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
     // Note that newWidth and newHeight can be altered by this function. This is fine because if they
     // are altered for whatever reason, we don't want to display the wrong menu as checked.
-    if(windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES)) {
+
+    const int retVal = windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
+
+    if(retVal == 1) {
         updateBoardSizeMenu(newWidth, newHeight, true);
     }
-    else {
+    else if(!retVal) {
         MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TEXT), GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TITLE), MB_ICONERROR | MB_OK);
     }
 }
@@ -477,6 +478,23 @@ void MainWindowView::onElapsedTimeTimer() {
 }
 
 //------------------------------------------------------------------------------
+// onNewGame - Called when the user selects the new game menu item
+//------------------------------------------------------------------------------
+void MainWindowView::onNewGame() {
+
+    const int retVal = windowPresenter.requestNewGame();
+
+    if(retVal == 1) {
+        onElapsedTimeTimer();
+        updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
+        updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
+    }
+    else if(!retVal) {
+        MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TEXT), GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TITLE), MB_ICONERROR | MB_OK);
+    }
+}
+
+//------------------------------------------------------------------------------
 // onTileSelected - Processes the UWM_TILE_SELECTED message
 //------------------------------------------------------------------------------
 
@@ -569,15 +587,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             switch (wParam) {
 
                 case MenuID::NEW_GAME:
-                    if(windowPresenter.requestNewGame()) {
-                        // TODO: Put in function
-                        onElapsedTimeTimer();
-                        updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
-                        updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
-                    }
-                    else {
-                        MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TEXT), GET_LANG_STR(LangID::ERROR_STARTING_NEWGAME_TITLE), MB_ICONERROR | MB_OK);
-                    }
+                    onNewGame();
                     break;
 
                 case CtrlID::BUTTON_PAUSE: 
@@ -631,11 +641,6 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_CUSTOM_SIZE_ENTERED:
-            //newWidth = customSizeWindow.getNewWidth();
-            //newHeight = customSizeWindow.getNewHeight();
-                
-            //windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
-            //updateBoardSizeMenu(newWidth, newHeight, true);
             onChangeBoardSize(MenuID::BOARD_CUSTOM);
             break;
 
