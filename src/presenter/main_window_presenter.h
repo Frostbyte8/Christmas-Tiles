@@ -32,6 +32,12 @@ namespace GameBoardFlipErrors {
     static const int TilesNotMatched = 3;
 }
 
+struct MainWindowData {
+    int             gameState;
+    unsigned int    points;
+    uint32_t        score;
+};
+
 class MainWindowPresenter {
 
     public:
@@ -39,22 +45,22 @@ class MainWindowPresenter {
         MainWindowPresenter();
 
         const uint32_t& getElapsedTime();
-        const uint32_t& getScore() const { return score; }
-        const uint8_t& getPoints() const { return points; }
+        //const uint32_t& getScore() const { return windowData.score; }
+        //const int& getPoints() const { return windowData.points; }
+        const MainWindowData& getMainWindowData() const { return windowData; }
 
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryAddScore(wchar_t* name, const size_t& index);
         inline void unflipTiles();
 
         inline const GameBoard& getGameBoard() const { return gameBoard; }
-        inline const int& getGameState() const { return gameState; }
+        inline const int& getGameState() const { return windowData.gameState; }
 
         bool requestNewGame();
         bool tryTogglePause();
         bool tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes);
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
 
-        // TODO: The constructor is the only thing that needs this?
         void setMainWindow(MainWindowInterface* mwi) {
             mainWindow = mwi;
         }
@@ -69,25 +75,28 @@ class MainWindowPresenter {
 
         __forceinline void reset();
 
-        MainWindowInterface *mainWindow;
-
         bool tryNewGame();
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();
 
-        uint8_t     points;
-        uint8_t     selectedIndex1;
-        uint8_t     selectedIndex2;
-        uint8_t     matchesMade;
         
-        uint32_t    milliStartTime;
-        uint32_t    milliElapsedTime;
-        uint32_t    milliPointDelta;
+        /*
+        uint8_t     points;
         uint32_t    score;
-
+        uint32_t    milliElapsedTime;
         int         gameState;
+        */
 
-        GameBoard   gameBoard;
-        ScoreTable  scoreTable;
+        int                 selectedIndex1;
+        int                 selectedIndex2;
+        unsigned int        matchesMade;
+        uint32_t            milliStartTime;
+        uint32_t            milliElapsedTime;
+        uint32_t            milliPointDelta;      
+
+        MainWindowData      windowData;
+        GameBoard           gameBoard;
+        ScoreTable          scoreTable;
+        MainWindowInterface *mainWindow;
 };

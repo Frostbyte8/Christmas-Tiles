@@ -18,8 +18,8 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
 
     public:
 
-        // TODO: These should not be public :/
-        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false) {
+        // TODO: These should not be public ?
+        MainWindowView(const HINSTANCE hIn) : hWnd(NULL), hInstance(hIn), shouldUnflip(false), activeModalDialog(0) {
             windowPresenter.setMainWindow(reinterpret_cast<MainWindowInterface*>(this));
         }
 
@@ -57,6 +57,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         bool shouldUnflip;
 
         HWND hWnd;
+        HWND activeModalDialog;
         AboutWindow aboutWindow;
         EnterScoreWindow enterScoreWindow;
         HighscoresWindow highscoresWindow;

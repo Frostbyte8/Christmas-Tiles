@@ -190,7 +190,7 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             // Fall through
 
         case WM_CLOSE:
-
+            SendMessage(parentHWnd, UWM_DIALOG_CLOSED, 0, 0);
             if(name) {
                 free(name);
                 name = NULL;

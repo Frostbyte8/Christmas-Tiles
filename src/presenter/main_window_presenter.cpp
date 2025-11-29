@@ -7,8 +7,6 @@
 
 #include <windows.h>
 
-// TODO: __forceline instead of Macro?
-
 // GET_MILLI_COUNT - Must return the number of seconds elapsed since the system
 // was started. On Win32 this just calls GetTickCount
 
@@ -41,15 +39,18 @@ MainWindowPresenter::MainWindowPresenter() : gameBoard(5, 9, 16) {
 }
 
 __forceinline void MainWindowPresenter::reset() {
+
     selectedIndex1      = 0;
     selectedIndex2      = 0;
-    points              = 50;
-    score               = 0;
     matchesMade         = 0;
     milliStartTime      = 0;
     milliElapsedTime    = 0;
     milliPointDelta     = 0;
-    gameState           = GameState::STATE_GAMEWON;
+
+    windowData.gameState        = GameState::STATE_GAMEWON;
+    windowData.points           = 50;
+    windowData.score            = 0;
+    
 }
 
 //==============================================================================
@@ -63,9 +64,9 @@ __forceinline void MainWindowPresenter::reset() {
 
 int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex) {
 
-    if(gameState != GameState::STATE_PLAYING) {
+    if(windowData.gameState != GameState::STATE_PLAYING) {
         
-        if(gameState == GameState::STATE_GAMEWON) {
+        if(windowData.gameState == GameState::STATE_GAMEWON) {
             return GameBoardFlipErrors::GameAlreadyWon;
         }
         else if(!tryUnpause()) {
@@ -111,16 +112,17 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
             
             matchesMade++;
 
-            score += points;
-            if(score > ChristmasTilesConstants::MAX_SCORE) {
-                score = ChristmasTilesConstants::MAX_SCORE;
+            windowData.score += windowData.points;
+            if(windowData.score > ChristmasTilesConstants::MAX_SCORE) {
+                windowData.score = ChristmasTilesConstants::MAX_SCORE;
             }
-            points = 50;
+            
+            windowData.points = 50;
 
             if(matchesMade == gameBoard.getMatchesNeeded()) {
                 updateElapsedTime();
-                gameState = GameState::STATE_GAMEWON;
-                mainWindow->implGameStateChanged(gameState);
+                windowData.gameState = GameState::STATE_GAMEWON;
+                mainWindow->implGameStateChanged(windowData.gameState);
             }
 
             return GameBoardFlipErrors::TilesMatched;
@@ -129,7 +131,7 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
 
         // Tiles do not match, but keep track of this until the next selection
 
-        points = points > 5 ? points - 5 : 0;
+        windowData.points = windowData.points > 5 ? windowData.points - 5 : 0;
 
         selectedIndex2 = yIndex;
         return GameBoardFlipErrors::TilesNotMatched;
@@ -153,9 +155,9 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
     localtime_s(&timeInfo, &currentTime);
     
     
-    scoreTable.tryAddScore(name, score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
-                                        static_cast<uint8_t>(timeInfo.tm_mon + 1), 
-                                        static_cast<uint8_t>(timeInfo.tm_mday));
+    scoreTable.tryAddScore(name, windowData.score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
+                                                   static_cast<uint8_t>(timeInfo.tm_mon + 1), 
+                                                   static_cast<uint8_t>(timeInfo.tm_mday));
     return true; 
 }
 
@@ -165,10 +167,10 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
 
 bool MainWindowPresenter::tryTogglePause() {
 
-    if(gameState == GameState::STATE_PLAYING) {
+    if(windowData.gameState == GameState::STATE_PLAYING) {
         return tryPause();
     }
-    else if(gameState == GameState::STATE_PAUSED) {
+    else if(windowData.gameState == GameState::STATE_PAUSED) {
         return tryUnpause();
     }
 
@@ -183,7 +185,7 @@ bool MainWindowPresenter::tryTogglePause() {
 
 const uint32_t& MainWindowPresenter::getElapsedTime() {
 
-    if(gameState == GameState::STATE_PLAYING) {
+    if(windowData.gameState == GameState::STATE_PLAYING) {
         updateElapsedTime();
     }
 
@@ -198,7 +200,7 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 
 bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes) {
     
-    if(gameState != GameState::STATE_GAMEWON) {
+    if(windowData.gameState != GameState::STATE_GAMEWON) {
         const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
 
         if(retVal != MainWindowInterfaceResponses::YES) {
@@ -235,7 +237,7 @@ bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int
 
 bool MainWindowPresenter::requestNewGame() {
     
-    if(gameState != GameState::STATE_GAMEWON) {
+    if(windowData.gameState != GameState::STATE_GAMEWON) {
 
         const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
 
@@ -429,8 +431,8 @@ bool MainWindowPresenter::tryNewGame() {
     reset();
     gameBoard.tryNewGame();
 
-    gameState = GameState::STATE_NOT_STARTED;
-    mainWindow->implGameStateChanged(gameState);
+    windowData.gameState = GameState::STATE_NOT_STARTED;
+    mainWindow->implGameStateChanged(windowData.gameState);
     
     return true;
 
@@ -443,34 +445,34 @@ bool MainWindowPresenter::tryNewGame() {
 
 bool MainWindowPresenter::tryPause() {
 
-    if(gameState != GameState::STATE_PLAYING) {
+    if(windowData.gameState != GameState::STATE_PLAYING) {
         // You can only pause games that are being played.
         return false;
     }
 
     updateElapsedTime();
-    gameState = GameState::STATE_PAUSED;
-    mainWindow->implGameStateChanged(gameState);
+    windowData.gameState = GameState::STATE_PAUSED;
+    mainWindow->implGameStateChanged(windowData.gameState);
 
     return true;
 
 }
 
 //------------------------------------------------------------------------------
-// tryUnpause - Attempts to un pause the game and resume the how much time the
+// tryUnpause - Attempts to unpause the game and resume the how much time the
 // game has been played.
 //------------------------------------------------------------------------------
 
 bool MainWindowPresenter::tryUnpause() {
 
-    if(gameState > GameState::STATE_PAUSED) {
+    if(windowData.gameState > GameState::STATE_PAUSED) {
         // Cannot Unpause if game is playing or won.
         return false;
     }
    
     milliStartTime = GET_MILLI_COUNT();
-    gameState = GameState::STATE_PLAYING;
-    mainWindow->implGameStateChanged(gameState);
+    windowData.gameState = GameState::STATE_PLAYING;
+    mainWindow->implGameStateChanged(windowData.gameState);
 
     return true;
 }
@@ -482,7 +484,7 @@ bool MainWindowPresenter::tryUnpause() {
 
 void MainWindowPresenter::updateElapsedTime() {
 
-    assert(gameState == GameState::STATE_PLAYING);
+    assert(windowData.gameState == GameState::STATE_PLAYING);
 
     const uint32_t timeNow = GET_MILLI_COUNT();
     milliElapsedTime += (timeNow - milliStartTime);
@@ -492,11 +494,11 @@ void MainWindowPresenter::updateElapsedTime() {
         
         uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
         
-        if(points < seconds) {
-            points = 0;
+        if(windowData.points < seconds) {
+            windowData.points = 0;
         }
         else {
-            points -= static_cast<uint8_t>(seconds);
+            windowData.points -= static_cast<uint8_t>(seconds);
         }
 
         milliPointDelta += (seconds * 1000);

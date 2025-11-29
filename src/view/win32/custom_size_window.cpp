@@ -11,8 +11,8 @@ __forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const i
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
-    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
+__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const DWORD& styles, const int& ID, const HINSTANCE& hInst) {
+    return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON | styles, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
@@ -73,10 +73,8 @@ void CustomSizeWindow::onCreate() {
     SendMessage(textCoord[0], EM_SETLIMITTEXT, 2, 0);
     SendMessage(textCoord[1], EM_SETLIMITTEXT, 2, 0);
 
-    // TODO: Button OK needs BS_DEFPUSHBUTTON
-    buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
-    buttonCancel = createButton(GET_LANG_STR(LangID::CANCEL_BUTTON_CAPTION), hWnd, CtrlID::CANCEL_BUTTON, hInst);
-
+    buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, BS_DEFPUSHBUTTON, CtrlID::OK_BUTTON, hInst);
+    buttonCancel = createButton(GET_LANG_STR(LangID::CANCEL_BUTTON_CAPTION), hWnd, 0, CtrlID::CANCEL_BUTTON, hInst);
 
     metrics.initWindowMetrics();
     HFONT dialogFont = metrics.GetCurrentFont();
@@ -208,20 +206,16 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
 
         case WM_COMMAND:
-            
-            if(wParam != CtrlID::OK_BUTTON) {
+
+            if(wParam == CtrlID::OK_BUTTON) {
+                saveData();
+            }
+            else if (wParam != CtrlID::CANCEL_BUTTON) {
                 return DefWindowProc(hWnd, msg, wParam, lParam);
             }
-            // Fall through
-            // TODO: Cancel Button
 
         case WM_CLOSE:
-
-            GetWindowText(textCoord[0], buffer, 4);
-            newWidth = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
-            GetWindowText(textCoord[1], buffer, 4);
-            newHeight = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
-
+            SendMessage(parentHWnd, UWM_DIALOG_CLOSED, 0, 0);
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
             DestroyWindow(hWnd);
@@ -233,4 +227,12 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
     }
 
     return 0;
+}
+
+void CustomSizeWindow::saveData() {
+    wchar_t buffer[4] = {0};
+    GetWindowText(textCoord[0], buffer, 4);
+    newWidth = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
+    GetWindowText(textCoord[1], buffer, 4);
+    newHeight = static_cast<uint8_t>(wcstol(buffer, NULL, 10));
 }

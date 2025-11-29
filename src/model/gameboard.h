@@ -4,8 +4,6 @@
 #include "../stdint_compat.h"
 #include <vector>
 
-// TODO: look into fast int types and what they do
-
 namespace GameBoardConstants {
     static const uint8_t FREE_TILE_ID = 1; 
     static const uint8_t NO_SELECTED_INDEX = 255;

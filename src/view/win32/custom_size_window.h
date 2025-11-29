@@ -25,6 +25,7 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         void onWindowMoved();
+        void saveData();
 
         static bool isRegistered;
         HWND hWnd;

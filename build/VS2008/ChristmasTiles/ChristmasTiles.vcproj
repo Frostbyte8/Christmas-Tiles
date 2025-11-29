@@ -192,6 +192,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\..\src\model\mainWindowModel.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\src\model\scores.cpp"
 				>
 			</File>

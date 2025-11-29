@@ -5,6 +5,7 @@
 #include "shared_functions.h"
 #include "../../constants.h"
 #include "../../frost_util.h"
+#include <assert.h>
 
 //==============================================================================
 // Namespaces / Enums / Constants
@@ -68,15 +69,15 @@ __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline void updatePoints(const HWND& ctrl, const uint8_t& points) {
+__forceinline void updatePoints(const HWND& ctrl, const int& points) {
     wchar_t pointsStr[4] = {0};
-    wsprintf(pointsStr, L"%d", points);
+    swprintf_s(pointsStr, 3, L"%d", points);
     SetWindowText(ctrl, pointsStr);
 }
 
 __forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
     wchar_t scoreStr[16] = {0};
-    wsprintf(scoreStr, L"%09d", score);
+    swprintf_s(scoreStr, 15, L"%09d", score);
     SetWindowText(ctrl, scoreStr);
 }
 
@@ -128,13 +129,7 @@ UINT MainWindowView::doLoop() {
         
         // TODO: Cache which window is open instead
 
-        if(aboutWindow.getHandle() && IsDialogMessage(aboutWindow.getHandle(), &msg)) {
-        }
-        else if(enterScoreWindow.getHandle() && IsDialogMessage(enterScoreWindow.getHandle(), &msg)) {
-        }
-        else if(highscoresWindow.getHandle() && IsDialogMessage(highscoresWindow.getHandle(), &msg)) {
-        }
-        else if(customSizeWindow.getHandle() && IsDialogMessage(customSizeWindow.getHandle(), &msg)) {
+        if(activeModalDialog && IsDialogMessage(activeModalDialog, &msg)) {
         }
         else if (!IsDialogMessage(hWnd, &msg)) {
             TranslateMessage(&msg);
@@ -143,7 +138,7 @@ UINT MainWindowView::doLoop() {
  
     }
 
-    windowPresenter.~MainWindowPresenter();
+    //windowPresenter.~MainWindowPresenter();
 
     return msg.wParam;
 }
@@ -244,7 +239,7 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
-    // TODO: Retriving these settings should be in the presenter, not the view.
+    // TODO: Retrieving these settings should be in the presenter, not the view.
 
     uint8_t boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
     uint8_t boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
@@ -275,6 +270,7 @@ bool MainWindowView::onCreate() {
     }
 
     // TODO: gamePanel should get the presenter via it's constructor?
+    
     gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD), filePath);
     gamePanel.setWindowPresenter(&windowPresenter);
     // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2)
@@ -466,8 +462,10 @@ void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) 
         }
         else if(retVal == GameBoardFlipErrors::TilesMatched) {
 
-            updateScore(scoreLabel.getHandle(), windowPresenter.getScore());
-            updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
+            const MainWindowData& windowData = windowPresenter.getMainWindowData();
+
+            updateScore(scoreLabel.getHandle(), windowData.score);
+            updatePoints(pointsLabel.getHandle(), windowData.points);
 
         }
 
@@ -541,7 +539,7 @@ void MainWindowView::onElapsedTimeTimer() {
     wsprintf(timeStr, L"%02d:%02d", minutes, seconds);
     SetWindowText(timeLabel.getHandle(), timeStr);
 
-    updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
+    updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
 
 }
 
@@ -670,9 +668,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
                 case MenuID::NEW_GAME:
                     if(windowPresenter.requestNewGame()) {
+                        // TODO: Put in function
                         onElapsedTimeTimer();
-                        updatePoints(pointsLabel.getHandle(), windowPresenter.getPoints());
-                        updateScore(scoreLabel.getHandle(), windowPresenter.getScore());
+                        updatePoints(pointsLabel.getHandle(), windowPresenter.getMainWindowData().points);
+                        updateScore(scoreLabel.getHandle(), windowPresenter.getMainWindowData().score);
                     }
                     break;
 
@@ -695,14 +694,17 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
                 case MenuID::BOARD_CUSTOM:
                     customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                    activeModalDialog = customSizeWindow.getHandle();
                     break;
                 
                 case MenuID::HIGHSCORES:
                     highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+                    activeModalDialog = highscoresWindow.getHandle();
                     break;
 
                 case MenuID::ABOUT:
                     aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                    activeModalDialog = aboutWindow.getHandle();
                     break;
 
                 case MenuID::EXIT:
@@ -720,11 +722,16 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         case UWM_SCORE_ENTERED:
             windowPresenter.tryAddScore(enterScoreWindow.getName(), 9001); // TODO: Index //, windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
             highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+            activeModalDialog = highscoresWindow.getHandle();
             break;
 
         case UWM_CUSTOM_SIZE_ENETERD:
             windowPresenter.tryUpdateGameBoard(customSizeWindow.getNewWidth() , customSizeWindow.getNewHeight(), WindowPresenterConstants::IGNORE_NUMTILES);
             updateBoardSizeMenu(customSizeWindow.getNewWidth(), customSizeWindow.getNewHeight(), true);
+            break;
+
+        case UWM_DIALOG_CLOSED:
+            activeModalDialog = NULL;
             break;
 
         case WM_CLOSE:
@@ -769,7 +776,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
         if(newState == GameState::STATE_GAMEWON) {
 
-            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getScore());
+            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getMainWindowData().score);
 
             if(isNewScore < 10) {
                 enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);

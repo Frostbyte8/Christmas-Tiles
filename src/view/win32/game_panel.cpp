@@ -386,11 +386,11 @@ void GamePanel::onPaint() {
         const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
         const std::vector<TileData>& tiles = gameBoard.getTiles();
 
-        const int minXTile = static_cast<int>(floor(static_cast<float>(xOffset) / bmpHeight));
-        const int minYTile = static_cast<int>(floor(static_cast<float>(yOffset) / bmpHeight));
+        unsigned const int minXTile = static_cast<int>(floor(static_cast<float>(xOffset) / bmpHeight));
+        unsigned const int minYTile = static_cast<int>(floor(static_cast<float>(yOffset) / bmpHeight));
 
-        int maxXTile = minXTile + static_cast<int>(ceil(static_cast<float>(rc.right + xOffset) / bmpHeight));
-        int maxYTile = minYTile + static_cast<int>(ceil(static_cast<float>(rc.bottom + yOffset) / bmpHeight));
+        unsigned int maxXTile = minXTile + static_cast<int>(ceil(static_cast<float>(rc.right + xOffset) / bmpHeight));
+        unsigned int maxYTile = minYTile + static_cast<int>(ceil(static_cast<float>(rc.bottom + yOffset) / bmpHeight));
 
         if(maxXTile > boardDimensions.width) {
             maxXTile = boardDimensions.width;
@@ -407,15 +407,15 @@ void GamePanel::onPaint() {
         int srcY = (yOffset % bmpHeight);
 
         // Check and see if the last tile will go over the edge of the back buffer
-        const bool xOverDraw = (bmpHeight - (xOffset % bmpHeight)) + ((maxXTile - (minXTile + 1)) * bmpHeight) > rc.right ? true : false;
-        const bool yOverDraw = (bmpHeight - (yOffset % bmpHeight)) + ((maxYTile - (minYTile + 1)) * bmpHeight) > rc.bottom ? true : false;
+        const bool xOverDraw = (bmpHeight - (xOffset % bmpHeight)) + ((maxXTile - (minXTile + 1)) * bmpHeight) > static_cast<unsigned long>(rc.right) ? true : false;
+        const bool yOverDraw = (bmpHeight - (yOffset % bmpHeight)) + ((maxYTile - (minYTile + 1)) * bmpHeight) > static_cast<unsigned long>(rc.bottom) ? true : false;
 
-        for(int k = minYTile; k < maxYTile; ++k) {
+        for(unsigned int k = minYTile; k < maxYTile; ++k) {
 
             int srcX = (xOffset % bmpHeight);
             wDest = bmpHeight;
 
-            for(int i = minXTile; i < maxXTile; ++i) {
+            for(unsigned int i = minXTile; i < maxXTile; ++i) {
 
                 // Note to self: MSVC does in fact optimize this!
                 const int realIndex = DX2_TO_DX1(i, k, boardDimensions.width);
