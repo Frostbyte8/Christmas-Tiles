@@ -7,11 +7,14 @@
 namespace GameBoardConstants {
     static const uint8_t FREE_TILE_ID = 1; 
     static const uint8_t NO_SELECTED_INDEX = 255;
+    static const uint8_t MIN_TILE_TYPES = 3;
     static const uint8_t MAX_TILE_TYPES = 100;
     static const unsigned int MAX_WIDTH = 15;
     static const unsigned int MAX_HEIGHT = 15;
     static const unsigned int MIN_WIDTH = 2;
     static const unsigned int MIN_HEIGHT = 2;
+    static const unsigned int DEFAULT_WIDTH = 5;
+    static const unsigned int DEFAULT_HEIGHT = 9;
 }
 
 struct GameBoardDimensions {
@@ -32,7 +35,7 @@ class GameBoard {
         */
 
         GameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const uint8_t& newTileTypes);
-
+        GameBoard();
         // Accessors
 
         inline const uint8_t& getMatchesNeeded() const { return matchesNeeded; }

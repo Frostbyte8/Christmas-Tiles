@@ -7,11 +7,11 @@
 
 namespace GameState {
     enum GameState {
-        STATE_NOT_STARTED       = -1,
-        STATE_PAUSED            = 0,
-        STATE_GAMEWON           = 1,
-        STATE_PLAYING           = 2,
-        
+        STATE_NO_GAME           = 0,
+        STATE_NOT_STARTED       = 1,
+        STATE_PAUSED            = 2,
+        STATE_GAMEWON           = 3,
+        STATE_PLAYING           = 4,
     };
 }
 
@@ -22,6 +22,7 @@ namespace WindowPresenterConstants {
 }
 
 namespace GameBoardFlipErrors {
+    static const int GameNotCreated = -5;
     static const int GameAlreadyWon = -4;
     static const int CannotUnpause = -3;
     static const int AlreadyFlipped = -2;
@@ -72,8 +73,7 @@ class MainWindowPresenter {
 
         __forceinline void reset();
 
-        bool createNewGameBoard();
-        bool tryNewGame();
+        bool createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes);
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();

@@ -34,8 +34,9 @@
 // Constructors
 //==============================================================================
 
-MainWindowPresenter::MainWindowPresenter(MainWindowInterface& inMWI) : mainWindow(inMWI), gameBoard(5, 9, 16) {
+MainWindowPresenter::MainWindowPresenter(MainWindowInterface& inMWI) : mainWindow(inMWI) {
     reset(); // Just to reduce code reuse.
+    //windowData.gameState = GameState::STATE_NO_GAME;
 }
 
 __forceinline void MainWindowPresenter::reset() {
@@ -47,7 +48,7 @@ __forceinline void MainWindowPresenter::reset() {
     milliElapsedTime    = 0;
     milliPointDelta     = 0;
 
-    windowData.gameState        = GameState::STATE_GAMEWON;
+    windowData.gameState        = GameState::STATE_NO_GAME;
     windowData.points           = 50;
     windowData.score            = 0;
     
@@ -81,7 +82,7 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 
 bool MainWindowPresenter::requestNewGame() {
     
-    if(windowData.gameState != GameState::STATE_GAMEWON) {
+    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
 
         const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_NEWGAME_TITLE));
 
@@ -91,7 +92,13 @@ bool MainWindowPresenter::requestNewGame() {
 
     }
 
-    return tryNewGame();
+    const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
+
+    if(!createNewGameBoard(boardDimensions.width, boardDimensions.height, gameBoard.getNumTileTypes())) {
+        // TODO: Handle error.
+    }
+
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -121,13 +128,23 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
 int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex) {
 
     if(windowData.gameState != GameState::STATE_PLAYING) {
+
+        switch(windowData.gameState) {
+            
+            default:
+            
+                if(!tryUnpause()) {
+                    return GameBoardFlipErrors::CannotUnpause;
+                }
+                break;
+
+            case GameState::STATE_GAMEWON:
+                return GameBoardFlipErrors::GameAlreadyWon;
+
+            case GameState::STATE_NO_GAME:
+                return GameBoardFlipErrors::GameNotCreated;
+        }
         
-        if(windowData.gameState == GameState::STATE_GAMEWON) {
-            return GameBoardFlipErrors::GameAlreadyWon;
-        }
-        else if(!tryUnpause()) {
-            return GameBoardFlipErrors::CannotUnpause;
-        }
     }
 
     // Unflip tiles if necessary
@@ -220,7 +237,7 @@ bool MainWindowPresenter::tryTogglePause() {
 
 bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int newHeight, uint8_t tileTypes) {
     
-    if(windowData.gameState != GameState::STATE_GAMEWON) {
+    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
         const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TEXT), GET_LANG_STR(LangID::ACTION_STARTS_NEW_GAME_TITLE));
 
         if(retVal != MainWindowInterfaceResponses::YES) {
@@ -244,11 +261,9 @@ bool MainWindowPresenter::tryUpdateGameBoard(unsigned int newWidth, unsigned int
     FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
     FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 
-    // TODO: Gameboard should only replace itself if it was successful, and should be created entirely
-    // in the function below it.
-
-    gameBoard = GameBoard(newWidth, newHeight, tileTypes);
-    tryNewGame();
+    if(!createNewGameBoard(newWidth, newHeight, tileTypes)) {
+        // TODO: Handle error.
+    }
 
     return true;
 
@@ -277,23 +292,25 @@ inline void MainWindowPresenter::unflipTiles() {
 //==============================================================================
 
 //------------------------------------------------------------------------------
-// tryNewGame - TODO: Bad name, and should take a reference to a Gameboard
-// instead, only updating if it succeeded.
+// createNewGameBoard - Tries to create a new gameboard. If it cannot, the
+// original GameBoard and GameState are still set.
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::tryNewGame() {
+bool MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes) {
 
-    if(!gameBoard.tryNewGame()) {
+    GameBoard newBoard(newWidth, newHeight, newTileTypes);
+    if(!newBoard.tryNewGame()) {
         return false;
     }
-    reset();
 
+    reset();
+    
     windowData.gameState = GameState::STATE_NOT_STARTED;
-    // TODO: Pointless. We Know it will be changed if this function succeedes.
+    gameBoard = newBoard;
+
     mainWindow.implGameStateChanged(windowData.gameState);
     
     return true;
-
 }
 
 //------------------------------------------------------------------------------
@@ -323,8 +340,10 @@ bool MainWindowPresenter::tryPause() {
 
 bool MainWindowPresenter::tryUnpause() {
 
+    // Cannot Unpause if game is playing or won. (Which all states above PAUSED
+    // are.
     if(windowData.gameState > GameState::STATE_PAUSED) {
-        // Cannot Unpause if game is playing or won.
+        
         return false;
     }
    

@@ -7,14 +7,23 @@
 #include <windows.h>
 #endif // _DEBUG
 
+#include "../frost_util.h"
+
 GameBoard::GameBoard(const unsigned int& newWidth, const unsigned int& newHeight, 
 const uint8_t& newTileTypes) : matchesNeeded(0) {
 
-    boardDimensions.width = newWidth < GameBoardConstants::MAX_WIDTH ? newWidth : GameBoardConstants::MAX_WIDTH;
-    boardDimensions.height = newHeight < GameBoardConstants::MAX_HEIGHT ? newHeight : GameBoardConstants::MAX_HEIGHT;
-    numTileTypes = newTileTypes < GameBoardConstants::MAX_TILE_TYPES ? newTileTypes : GameBoardConstants::MAX_TILE_TYPES;
+    boardDimensions.width = FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
+    boardDimensions.height = FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
+
+    // TODO: Problem. A Gameboard can't be created with less than 3 types.
+    numTileTypes = FrostUtil::ClampInts(newTileTypes, GameBoardConstants::MIN_TILE_TYPES, GameBoardConstants::MAX_TILE_TYPES);
 
     tiles.resize(newWidth * newHeight);
+}
+
+GameBoard::GameBoard() : matchesNeeded(0), numTileTypes(0) {
+    boardDimensions.width = 0;
+    boardDimensions.height = 0;
 }
 
 //------------------------------------------------------------------------------
@@ -23,7 +32,7 @@ const uint8_t& newTileTypes) : matchesNeeded(0) {
 
 bool GameBoard::tryNewGame() {
 
-    if(numTileTypes == 0 || boardDimensions.width < 2 || boardDimensions.height < 2) {
+    if(numTileTypes == 0 || boardDimensions.width < GameBoardConstants::MIN_WIDTH || boardDimensions.height < GameBoardConstants::MIN_HEIGHT) {
         return false;
     }
     
