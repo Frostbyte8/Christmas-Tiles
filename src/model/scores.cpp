@@ -38,7 +38,7 @@ size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
         }
     }
 
-    return 10;
+    return -1;
 }
 
 void ScoreTable::insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index) {

@@ -77,6 +77,14 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 //==============================================================================
 
 //------------------------------------------------------------------------------
+// getScorePosition - Checks to see what position the score is in.
+//------------------------------------------------------------------------------
+
+const size_t& MainWindowPresenter::getScorePosition() const {
+    return getScoreTable().isNewHighscore(windowData.score);
+}
+
+//------------------------------------------------------------------------------
 // requestNewGame - The user has requested a new game
 //------------------------------------------------------------------------------
 

@@ -54,13 +54,14 @@ class MainWindowPresenter {
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
         
         // Public Functions
-        
+        const size_t& getScorePosition() const;
         int requestNewGame();
         bool tryAddScore(wchar_t* name, const size_t& index);
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
         int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes);
         inline void unflipTiles();
+        
 
         // TODO: At some point this will all be moved in to the models they
         // belong in.
@@ -68,6 +69,7 @@ class MainWindowPresenter {
         bool readScores();
         bool writeSettings();
         bool writeScores();
+        
 
     private:
 

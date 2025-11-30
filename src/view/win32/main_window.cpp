@@ -192,9 +192,9 @@ int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* 
     return MessageBox(hWnd, message, title, MB_YESNOCANCEL | MB_ICONQUESTION);
 }
 
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 // implGameStateChanged - Game state was changed
-//-----------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
 void MainWindowView::implGameStateChanged(const int& newState) {
 
@@ -203,7 +203,11 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
     }
-    else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED || newState == GameState::STATE_NO_GAME) {
+    else if(newState == GameState::STATE_PAUSED) {
+        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
+        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_UNPAUSE));
+    }
+    else { // STATE_GAMEWON || STATE_NOT_STARTED || STATE_NO_GAME)
         
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
@@ -211,28 +215,16 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
         if(newState == GameState::STATE_GAMEWON) {
 
-            // TODO: This should be in the controler + impl function
-            size_t isNewScore = windowPresenter.getScoreTable().isNewHighscore(windowPresenter.getMainWindowData().score);
+            size_t scorePosition = windowPresenter.getScorePosition();
 
-            if(isNewScore < 10) {
-                enterScoreWindow.createWindow(GetModuleHandle(NULL), hWnd, isNewScore);
+            if(scorePosition != -1) {
+                enterScoreWindow.createWindow(hInstance, hWnd, scorePosition);
             }
 
         }
-        else {
-            /*
-            const GameBoard& gameBoard = windowPresenter.getGameBoard();
-            moveControls();
-            const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
-            gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
-            */
-        }
 
     }
-    else if(newState == GameState::STATE_PAUSED) {
-        SetWindowTextW(buttonPause, GET_LANG_STR(LangID::UNPAUSE_BUTTON_CAPTION));
-        ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_ENABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_UNPAUSE));
-    }
+
 
 }
 
