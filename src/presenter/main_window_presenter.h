@@ -37,6 +37,7 @@ struct MainWindowData {
     int             gameState;
     unsigned int    points;
     uint32_t        score;
+    wchar_t*        pathToTileset;
 };
 
 class MainWindowPresenter {
@@ -67,8 +68,10 @@ class MainWindowPresenter {
         // belong in.
 
         bool readScores();
-        bool writeSettings();
+        bool readSettings(GameBoardDimensions& boardDimensions);
         bool writeScores();
+        bool writeSettings();
+        
         
 
     private:

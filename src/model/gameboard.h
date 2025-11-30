@@ -26,14 +26,6 @@ class GameBoard {
 
     public:
 
-        /*
-        GameBoard(const uint8_t& inTileTypes) : width(3), height(3), numTileTypes(inTileTypes), matchesNeeded(0) {
-            // 10x10 Grid. Even if we don't use 10x10 tiles, the struct is is small,
-            // and we might as well take advantage of that.
-            tiles.resize(width * height);
-        }
-        */
-
         GameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const uint8_t& newTileTypes);
         GameBoard();
         // Accessors
@@ -59,9 +51,9 @@ class GameBoard {
             tiles[index2].flags = TileFlags::UNFLIPPED;
         }
 
-        void setNumTileTypes(const uint8_t& inNumTypes) {
-            numTileTypes = inNumTypes;
-        }
+        // setInitalDimensions - When loading from the settings file.
+
+        void setInitalDimensions(const unsigned int& width, const unsigned int& height);
 
          // Public Functions
 

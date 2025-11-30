@@ -24,6 +24,15 @@
 
 #define READ_INI_STRINGW(SECTION, KEY_NAME, OUT_STRBUF_PTR, BUF_SIZE, PATH_TO_FILE) GetPrivateProfileStringW(SECTION, KEY_NAME, L"", OUT_STRBUF_PTR, BUF_SIZE, PATH_TO_FILE)
 
+// DoesFileExist - Checks if a File Exists
+
+__forceinline BOOL DoesFileExist(const wchar_t* path) {
+    const DWORD fileAttrib = GetFileAttributes(path);
+    return (fileAttrib != INVALID_FILE_ATTRIBUTES && !(fileAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
+
+static const unsigned int FILE_PATH_MAX = MAX_PATH;
+
 #endif // _WIN32
 
 #include "../language_table.h"
@@ -35,8 +44,8 @@
 //==============================================================================
 
 MainWindowPresenter::MainWindowPresenter(MainWindowInterface& inMWI) : mainWindow(inMWI) {
-    reset(); // Just to reduce code reuse.
-    //windowData.gameState = GameState::STATE_NO_GAME;
+    reset();
+    windowData.pathToTileset = NULL;
 }
 
 __forceinline void MainWindowPresenter::reset() {
@@ -430,6 +439,35 @@ bool MainWindowPresenter::writeSettings() {
 }
 
 //------------------------------------------------------------------------------
+// readSettings - Read settings from INI file
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
+
+    unsigned int boardWidth = ChristmasTilesConstants::DEFAULT_BOARD_WIDTH;
+    unsigned int boardHeight = ChristmasTilesConstants::DEFAULT_BOARD_HEIGHT;
+    wchar_t tilesetPath[FILE_PATH_MAX];
+
+    if(!DoesFileExist(L".\\ChristmasTiles.ini")) {
+        wsprintf(tilesetPath, L"tileset.bmp");
+    }
+    else {
+        boardWidth = READ_INI_UINT(L"settings", L"width", L".\\ChristmasTiles.ini");
+        boardHeight = READ_INI_UINT(L"settings", L"height", L".\\ChristmasTiles.ini");
+        READ_INI_STRINGW(L"settings", L"tileset", tilesetPath, FILE_PATH_MAX-1, L".\\ChristmasTiles.ini");
+    }
+
+    windowData.pathToTileset = tilesetPath;
+
+    gameBoard.setInitalDimensions(boardWidth, boardHeight);
+    boardDimensions.width = boardWidth;
+    boardDimensions.height = boardHeight;
+
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
 // readScores - Writes scores to an INI file
 //------------------------------------------------------------------------------
 
@@ -448,7 +486,7 @@ bool MainWindowPresenter::readScores() {
         bool defaultScore = false;
 
         wsprintf(keyName, L"date%d", i);
-        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
+        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH-1, L".\\scores.ini");
 
         if(wcslen(buffer) < 10) {
 
