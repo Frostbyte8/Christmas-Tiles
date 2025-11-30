@@ -32,9 +32,6 @@ GameBoard::GameBoard() : matchesNeeded(0), numTileTypes(0) {
 
 bool GameBoard::tryNewGame() {
 
-    // Don't try a new game if the sizes don't match.
-    assert(boardDimensions.width * boardDimensions.height == tiles.size());
-
     if(numTileTypes == 0 || boardDimensions.width < GameBoardConstants::MIN_WIDTH || boardDimensions.height < GameBoardConstants::MIN_HEIGHT) {
         return false;
     }

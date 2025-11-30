@@ -46,6 +46,13 @@ class MainWindowPresenter {
 
         MainWindowPresenter(MainWindowInterface& inMWI);
 
+        ~MainWindowPresenter() {
+            if(windowData.pathToTileset) {
+                free(windowData.pathToTileset);
+                windowData.pathToTileset = NULL;
+            }
+        }
+
         // Accessors
 
         const uint32_t& getElapsedTime();
@@ -55,12 +62,13 @@ class MainWindowPresenter {
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
         
         // Public Functions
+        bool changeTilesetPath(wchar_t* newPath);
         const size_t& getScorePosition() const;
         int requestNewGame();
         bool tryAddScore(wchar_t* name, const size_t& index);
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
-        int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes);
+        int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes);
         inline void unflipTiles();
         
 

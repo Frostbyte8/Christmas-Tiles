@@ -100,4 +100,8 @@ File write error
 Error writing scores file.
 # Write Scores Error Title
 File write error
+# Error Tileset Text
+Tileset.bmp was not found! If this error persists, reinstalling the program may fix this problem. The application will now close.
+# Error Tileset Title
+Error loading tileset
 # END STRINGS

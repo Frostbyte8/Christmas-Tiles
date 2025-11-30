@@ -86,6 +86,33 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 //==============================================================================
 
 //------------------------------------------------------------------------------
+// changeTilesetPath - Attempts to change the tileset path
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::changeTilesetPath(wchar_t* newPath) {
+    if(!DoesFileExist(newPath)) {
+        return false;
+    }
+
+    wchar_t* newTilesetPath = NULL;
+    const LONG strLength = wcsnlen(newPath, FILE_PATH_MAX) + 1;
+    newTilesetPath = (wchar_t*)malloc(sizeof(wchar_t) * (strLength+1));
+    
+    if(!newTilesetPath) {
+        return false;
+    }
+
+    newTilesetPath[strLength - 1] = 0;
+    wcscpy_s(newTilesetPath, strLength, newPath);
+
+    if(windowData.pathToTileset) {
+        free(windowData.pathToTileset);
+    }
+
+    windowData.pathToTileset = newTilesetPath;
+}
+
+//------------------------------------------------------------------------------
 // getScorePosition - Checks to see what position the score is in.
 //------------------------------------------------------------------------------
 
@@ -242,16 +269,22 @@ bool MainWindowPresenter::tryTogglePause() {
 }
 
 //------------------------------------------------------------------------------
-// tryUpdateGameBoard - Used when changing size, tile types, or both.
+// tryUpdateGameBoard - Used when changing size, tile types, or both. This
+// function also CLAMPS the integers if they go out of range.
 // Note: Method only checks IGNORE_WIDTH when ignoring sizes. If Width is valid,
 // it assumes height is too.
+// Note 2: Width and Height are altered so the final size is known after the
+// function completes.
 //------------------------------------------------------------------------------
 
-int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, uint8_t tileTypes) {
+int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes) {
     
     if(!shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
         return -1;
     }
+    
+    // The first two tiles are special and are not part of the calculation.
+    tileTypes -= 2;
 
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
 
@@ -433,13 +466,18 @@ bool MainWindowPresenter::writeSettings() {
     if(!WRITE_INI_STRING(L"settings", L"height", buffer, L".\\ChristmasTiles.ini")) {
         return false;
     }
-    // TODO: Tileset
+
+    if(!WRITE_INI_STRING(L"settings", L"tileset", windowData.pathToTileset, L".\\ChristmasTiles.ini")) {
+        return false;
+    }
+    
     return true;
 
 }
 
 //------------------------------------------------------------------------------
-// readSettings - Read settings from INI file
+// readSettings - Read settings from INI file. The dimensions are placed in
+// the parameter passed in, while the tileset is set in windowData.
 //------------------------------------------------------------------------------
 
 bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
@@ -457,10 +495,19 @@ bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
         READ_INI_STRINGW(L"settings", L"tileset", tilesetPath, FILE_PATH_MAX-1, L".\\ChristmasTiles.ini");
     }
 
-    windowData.pathToTileset = tilesetPath;
+    // Sanitize Input 
 
-    boardDimensions.width = boardWidth;
-    boardDimensions.height = boardHeight;
+    if(!DoesFileExist(tilesetPath)) {
+        
+        wsprintf(tilesetPath, L"tileset.bmp");
+        if(!DoesFileExist(tilesetPath)) {
+            return false;
+        }
+    }
+
+    changeTilesetPath(tilesetPath);
+    boardDimensions.width = FrostUtil::ClampInts(boardWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
+    boardDimensions.height = FrostUtil::ClampInts(boardHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 
     return true;
 

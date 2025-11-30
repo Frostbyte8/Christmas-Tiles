@@ -33,7 +33,7 @@ virtualWidth(0), virtualHeight(0) {
 // createWindow - Creates the panel that will contain the game board
 //------------------------------------------------------------------------------
 
-bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID, const wchar_t* tilesetPath) {
+bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID) {
 
     if(hWnd) {
         return true; // Already created.
@@ -49,20 +49,10 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
         return false;
     }
 
-    // TODO: This should be a function / adapted to work 100% with changeTileset
-    // it should also warn about incomplete sets (need at least 3 tiles: Unflipped, Free, and a single tile.
 
-    if(!DoesFileExist(tilesetPath)) {
-        tilesetBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
+    if(!changeTileset()) {
+        return false;
     }
-    else {
-        tilesetBMP = (HBITMAP)LoadImage(NULL, tilesetPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
-    }
-
-    BITMAP bmInfo = {0};
-    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
-    bmpWidth    = bmInfo.bmWidth;
-    bmpHeight   = bmInfo.bmHeight;
 
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
@@ -293,23 +283,10 @@ void GamePanel::onVScroll(const WORD& dir, const WORD& pos) {
 
 }
 
-bool GamePanel::changeTileset(const wchar_t* tilesetPath) {
+bool GamePanel::changeTileset() {
 
-    HBITMAP tempBMP; // TODO: load it as a tempBMP first to avoid destroying the original BMP incase we need it.
-
-    if(!DoesFileExist(tilesetPath)) {
-
-        if(tilesetBMP == NULL) {
-            // Load default
-            tempBMP = (HBITMAP)LoadImage(NULL, L"tileset.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
-        }
-        else {
-            return false; // Don't change anything.
-        }
-    }
-    else {
-        tempBMP =(HBITMAP)LoadImage(NULL, tilesetPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE); 
-    }
+    HBITMAP tempBMP;
+    tempBMP = (HBITMAP)LoadImage(NULL, windowPresenter->getMainWindowData().pathToTileset, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
     if(!tempBMP) {
         return false;
@@ -318,7 +295,6 @@ bool GamePanel::changeTileset(const wchar_t* tilesetPath) {
     if(tilesetBMP) {
         DeleteObject(tilesetBMP);
     }
-
 
     tilesetBMP = tempBMP;
 

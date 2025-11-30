@@ -112,9 +112,15 @@ bool MainWindowView::createWindow() {
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", GET_LANG_STR(LangID::APP_TITLE),
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         NULL, NULL, hInstance, this);
+    
+    const DWORD errorCode = GetLastError();
 
     if(hWnd == NULL) {
-        MessageBox(NULL, L"Window Creation Failed!", L"Error!", MB_ICONEXCLAMATION | MB_OK);
+        // Windows just kills the application anyway. So you can't really display an error.
+        return false;
+    }
+    else if(errorCode == ERROR_FILE_NOT_FOUND) {   
+        MessageBox(NULL, GET_LANG_STR(LangID::ERROR_TILESET_MISSING_TEXT), GET_LANG_STR(LangID::ERROR_TILESET_MISSING_TITLE), MB_ICONERROR | MB_OK);
         return false;
     }
 
@@ -144,8 +150,6 @@ UINT MainWindowView::doLoop() {
         }
  
     }
-
-    //windowPresenter.~MainWindowPresenter();
 
     return msg.wParam;
 }
@@ -311,12 +315,14 @@ void MainWindowView::onChangeTileset() {
 
     if(GetOpenFileName(&ofnTileset)) {
 
-        if(gamePanel.changeTileset(ofnTileset.lpstrFile)) {
-            // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2) is a bad way to do this.
-            // It could also pose a problem and needs to have proper error checking.
-            unsigned int tempWidth = WindowPresenterConstants::IGNORE_WIDTH;
-            unsigned int tempHeight = WindowPresenterConstants::IGNORE_WIDTH;
-            windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, static_cast<uint8_t>((gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+        if(windowPresenter.changeTilesetPath(ofnTileset.lpstrFile)) {
+
+            if(gamePanel.changeTileset()) {
+                unsigned int tempWidth = WindowPresenterConstants::IGNORE_WIDTH;
+                unsigned int tempHeight = WindowPresenterConstants::IGNORE_WIDTH;
+                windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, gamePanel.getNumTileTypes());
+                MainWindowView::moveControls();
+            }
         }
 
     }
@@ -377,6 +383,20 @@ void MainWindowView::onClose() {
 
 bool MainWindowView::onCreate() {
 
+    GameBoardDimensions boardDimensions;
+
+    // There is only one reason it can fail: Tileset not found.
+
+    if(!windowPresenter.readSettings(boardDimensions)) {
+        return false;
+    }
+
+    gamePanel.setWindowPresenter(&windowPresenter);
+
+    if(!gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD))) {
+        return false;
+    }
+
     createMenuBar();
 
     static const DWORD DEF_STYLE_FLAGS = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
@@ -391,17 +411,9 @@ bool MainWindowView::onCreate() {
 
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
-
-    GameBoardDimensions boardDimensions;
-
-    if(!windowPresenter.readSettings(boardDimensions)) {
-        // Error! Creation failed!
-    }
     
-    gamePanel.createWindow(hInstance, hWnd, reinterpret_cast<HMENU>(CtrlID::PANEL_GAMEBOARD), windowPresenter.getMainWindowData().pathToTileset);
-    gamePanel.setWindowPresenter(&windowPresenter);
-    // TODO: (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2)
-    windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, static_cast<uint8_t>( (gamePanel.getTilesetWidth() / gamePanel.getTilesetHeight()) - 2));
+
+    windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, gamePanel.getNumTileTypes());
     windowPresenter.readScores(); // TODO: This should be somewhere else.
 
     updateBoardSizeMenu(boardDimensions.width, boardDimensions.height, false);
@@ -468,8 +480,8 @@ void MainWindowView::onNewGame() {
 
 void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
     
-    unsigned int xPos = wParam / gamePanel.getTilesetHeight();
-    unsigned int yPos = lParam / gamePanel.getTilesetHeight();
+    unsigned int xPos = wParam / gamePanel.getTileSize();
+    unsigned int yPos = lParam / gamePanel.getTileSize();
 
     const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
 
@@ -547,7 +559,9 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case WM_CREATE:
-            onCreate();
+            if(!onCreate()) {
+               SetLastError(ERROR_FILE_NOT_FOUND);
+            }
             break;
 
         case WM_COMMAND:
@@ -685,8 +699,8 @@ LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    const long minHeight = gamePanel.getTilesetHeight() * 9;
-    const long boardheight = gamePanel.getTilesetHeight() * windowPresenter.getGameBoard().getBoardDimensions().height;
+    const long minHeight = gamePanel.getTileSize() * 9;
+    const long boardheight = gamePanel.getTileSize() * windowPresenter.getGameBoard().getBoardDimensions().height;
 
 
     LONG tallestPoint = (CD.YLABEL * 3) + (CS.YFIRST_GROUPBOX_MARGIN * 3) + (CS.YLAST_GROUPBOX_MARGIN * 3) +
@@ -749,7 +763,7 @@ void MainWindowView::moveControls() {
         horzTiles = 5;
     }
 
-    RECT rc = {0, 0, (gamePanel.getTilesetHeight() * horzTiles) + widestGroupBox, tallestPoint};
+    RECT rc = {0, 0, (gamePanel.getTileSize() * horzTiles) + widestGroupBox, tallestPoint};
 
     // TODO: This is just for testing scroll bars. set it to a tiny size to try it out
 

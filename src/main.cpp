@@ -56,16 +56,14 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     // Create Window and do the message loop
-
-    if(!mainWindowView.createWindow()) {
-        return 0;
+    UINT retVal = 0;
+    if(mainWindowView.createWindow()) {
+        retVal = mainWindowView.doLoop();
     }
 
 
 #if defined(_MSC_VER) && defined(_DEBUG)
     
-    UINT retVal = mainWindowView.doLoop();
-
     // In a release mode we don't need to release a bunch of this as the OS
     // cleans it up for us. For debug however, we'll make sure there are no
     // legitimate leaks.
