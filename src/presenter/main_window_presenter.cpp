@@ -459,7 +459,6 @@ bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
 
     windowData.pathToTileset = tilesetPath;
 
-    gameBoard.setInitalDimensions(boardWidth, boardHeight);
     boardDimensions.width = boardWidth;
     boardDimensions.height = boardHeight;
 

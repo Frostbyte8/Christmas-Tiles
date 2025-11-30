@@ -155,9 +155,3 @@ bool GameBoard::tryNewGame() {
     return true; // TODO: probably do not need this.
 
 }
-void GameBoard::setInitalDimensions(const unsigned int& width, const unsigned int& height) {
-    assert(boardDimensions.width == 0);
-    assert(boardDimensions.height == 0);
-    boardDimensions.width = width;
-    boardDimensions.height = height;
-}

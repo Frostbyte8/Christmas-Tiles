@@ -50,12 +50,8 @@ class GameBoard {
             tiles[index1].flags = TileFlags::UNFLIPPED;
             tiles[index2].flags = TileFlags::UNFLIPPED;
         }
-
-        // setInitalDimensions - When loading from the settings file.
-
-        void setInitalDimensions(const unsigned int& width, const unsigned int& height);
-
-         // Public Functions
+        
+        // Public Functions
 
         bool tryNewGame();
         
