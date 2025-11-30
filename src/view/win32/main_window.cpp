@@ -204,6 +204,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
         SetWindowTextW(buttonPause, GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION));
     }
     else if(newState == GameState::STATE_GAMEWON || newState == GameState::STATE_NOT_STARTED || newState == GameState::STATE_NO_GAME) {
+        
         EnableWindow(buttonPause, FALSE);
         ModifyMenu(fileMenu, MenuID::PAUSE_GAME, MainWindowViewConstants::MENU_DISABLED_FLAGS, MenuID::PAUSE_GAME, GET_LANG_STR(LangID::MENU_PAUSE));
         InvalidateRect(gamePanel.getHandle(), NULL, FALSE);
@@ -219,11 +220,12 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
         }
         else {
+            /*
             const GameBoard& gameBoard = windowPresenter.getGameBoard();
-            // TODO: Stop this from running the first time, the window is already moved.
             moveControls();
             const GameBoardDimensions& boardDimensions = gameBoard.getBoardDimensions();
             gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
+            */
         }
 
     }
@@ -285,6 +287,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
     if(retVal == 1) {
         updateBoardSizeMenu(newWidth, newHeight, true);
+        MainWindowView::moveControls();
     }
     else if(!retVal) {
         MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TEXT), GET_LANG_STR(LangID::ERROR_CHANGING_SIZE_TITLE), MB_ICONERROR | MB_OK);
@@ -337,7 +340,7 @@ void MainWindowView::onChangeTileset() {
 
 void MainWindowView::onClose() {
 
-    if(windowPresenter.getGameState() != GameState::STATE_GAMEWON) {
+    if(windowPresenter.getGameState() != GameState::STATE_GAMEWON && windowPresenter.getGameState() != GameState::STATE_NO_GAME) {
         if(implAskYesNoQuestion(GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TEXT), GET_LANG_STR(LangID::GAME_IN_PROGRESS_QUIT_TITLE)) != MainWindowInterfaceResponses::YES) {
             return;
         }
@@ -349,7 +352,6 @@ void MainWindowView::onClose() {
             break;
         }
 
-        // TODO: Language String
         if(MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_WRITE_SETTINGS_TEXT), GET_LANG_STR(LangID::ERROR_WRITE_SETTINGS_TITLE), MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
             break;
         }
@@ -362,7 +364,6 @@ void MainWindowView::onClose() {
             break;
         }
 
-        // TODO: Language String
         if(MessageBox(hWnd, GET_LANG_STR(LangID::ERROR_WRITE_SCORES_TEXT), GET_LANG_STR(LangID::ERROR_WRITE_SCORES_TITLE), MB_ICONERROR | MB_RETRYCANCEL) == IDCANCEL) {
             break;
         }
@@ -556,13 +557,11 @@ void MainWindowView::onWindowMoved() {
 
 LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
-    // move to new functon
-    unsigned int newWidth = 0;
-    unsigned int newHeight = 0;
-
     switch(msg) {
+
         default:
             return DefWindowProc(hWnd, msg, wParam, lParam);
+
         case WM_TIMER:
             if(wParam == MainWindowViewConstants::ELAPSED_TIMER_ID) {
                 onElapsedTimeTimer();
@@ -575,9 +574,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 }
             }
             break;
+
         case WM_EXITSIZEMOVE:
             onWindowMoved(); 
             break;
+
         case WM_CREATE:
             onCreate();
             break;
@@ -774,7 +775,9 @@ void MainWindowView::moveControls() {
     // Resize Window
     // TODO: Get Monitor Window is on?
 
-    int horzTiles = windowPresenter.getGameBoard().getBoardDimensions().width;
+    const GameBoardDimensions& boardDimensions = windowPresenter.getGameBoard().getBoardDimensions();
+
+    int horzTiles = boardDimensions.width;
     if(horzTiles < 5) {
         horzTiles = 5;
     }
@@ -819,6 +822,9 @@ void MainWindowView::moveControls() {
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
     // TODO: Prev monitor tracking
     CenterWindow(hWnd, rc, prevMonitor);
+
+    // Update Panel's virtual size so it is consistent.
+    gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
 
     // Revalidate Game Panel, but then invalidate it only to repaint, not erase it.
     GetClientRect(hWnd, &rc);
