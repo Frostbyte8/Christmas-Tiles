@@ -12,11 +12,6 @@ namespace ScrollType {
     static const int BOTH = HORZ | VERT;
 }
 
-__forceinline BOOL DoesFileExist(const wchar_t* path) {
-    const DWORD fileAttrib = GetFileAttributes(path);
-    return (fileAttrib != INVALID_FILE_ATTRIBUTES && !(fileAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
 //==============================================================================
 // Constructors
 //==============================================================================
@@ -96,73 +91,41 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
     return true;
 }
 
-void GamePanel::onSize() {
+//==============================================================================
+// Public Functions
+//==============================================================================
 
-    RECT rc;
-    ShowScrollBar(hWnd, SB_BOTH, FALSE); // Turn off scrollbars to get correct client size.
-    GetClientRect(hWnd, &rc);
+//------------------------------------------------------------------------------
+// changeTileset - Attempts to change the tileset to the new one provided.
+//------------------------------------------------------------------------------
 
-    if(rc.right == 0 || rc.bottom == 0) {
-        return;
-        // In the future, run an assert.
+bool GamePanel::changeTileset() {
+
+    HBITMAP tempBMP;
+    tempBMP = (HBITMAP)LoadImage(NULL, windowPresenter->getMainWindowData().pathToTileset, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+
+    if(!tempBMP) {
+        return false;
     }
 
-    // First, we need to figure out which scroll bars we need
-
-    const int ScrollSpanX = GetSystemMetrics(SM_CXHSCROLL);
-    const int ScrollSpanY = GetSystemMetrics(SM_CXVSCROLL);
-
-    int whichBars = 0;
-
-    if(rc.right < virtualWidth) {
-
-        // We might also need the other scrollbar if the span of the scrollbar
-        // makes the space small enough
-
-        if(rc.bottom - ScrollSpanX < virtualHeight) {
-            ShowScrollBar(hWnd, SB_BOTH, TRUE);
-            whichBars = ScrollType::BOTH;
-            rc.right -= ScrollSpanY;
-            rc.bottom -= ScrollSpanX;
-         }
-        else {
-            ShowScrollBar(hWnd, SB_HORZ, TRUE);
-            ShowScrollBar(hWnd, SB_VERT, FALSE);
-            whichBars = ScrollType::HORZ;
-            rc.bottom -= ScrollSpanX;
-        }
-
-    }
-    else if(rc.bottom < virtualHeight) {
-        
-        if(rc.right - ScrollSpanY < virtualWidth) {
-            ShowScrollBar(hWnd, SB_BOTH, TRUE);
-            whichBars = ScrollType::BOTH;
-            rc.right -= ScrollSpanY;
-            rc.bottom -= ScrollSpanX;
-        }
-        else {
-            ShowScrollBar(hWnd, SB_VERT, TRUE);
-            ShowScrollBar(hWnd, SB_HORZ, FALSE);
-            whichBars = ScrollType::VERT;
-            rc.right -= ScrollSpanY;
-        }
-
-    }
-    else {
-        ShowScrollBar(hWnd, SB_BOTH, FALSE);
-        return;
+    if(tilesetBMP) {
+        DeleteObject(tilesetBMP);
     }
 
-    if(whichBars & ScrollType::HORZ) {
-        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - rc.right, TRUE);
-    }
+    tilesetBMP = tempBMP;
 
-    if(whichBars & ScrollType::VERT) {
-        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - rc.bottom, TRUE);
-    }
+    BITMAP bmInfo = {0};
+    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
+    bmpWidth    = bmInfo.bmWidth;
+    bmpHeight   = bmInfo.bmHeight;
 
+    return true;
 }
+
+//------------------------------------------------------------------------------
+// updateVirtualSize - Update how big the Gameboard really is compared to how
+// much is visible.
+//------------------------------------------------------------------------------
 
 void GamePanel::updateVirtualSize(const WORD& newXTiles, const WORD& newYTiles) {
     virtualWidth = static_cast<WORD>(newXTiles * bmpHeight);
@@ -173,6 +136,14 @@ void GamePanel::updateVirtualSize(const WORD& newXTiles, const WORD& newYTiles) 
     SetScrollPos(hWnd, SB_VERT, 0, TRUE);
     onSize();
 }
+
+//==============================================================================
+// Window Messages
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// onHScroll - When the user scrolls the the game board horizontally
+//------------------------------------------------------------------------------
 
 void GamePanel::onHScroll(const WORD& dir, const WORD& pos) {
 
@@ -227,6 +198,10 @@ void GamePanel::onHScroll(const WORD& dir, const WORD& pos) {
     InvalidateRect(hWnd, NULL, TRUE);
 
 }
+
+//------------------------------------------------------------------------------
+// onVScroll - When the user scrolls the the game board vertically
+//------------------------------------------------------------------------------
 
 void GamePanel::onVScroll(const WORD& dir, const WORD& pos) {
 
@@ -283,54 +258,11 @@ void GamePanel::onVScroll(const WORD& dir, const WORD& pos) {
 
 }
 
-bool GamePanel::changeTileset() {
-
-    HBITMAP tempBMP;
-    tempBMP = (HBITMAP)LoadImage(NULL, windowPresenter->getMainWindowData().pathToTileset, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-
-    if(!tempBMP) {
-        return false;
-    }
-
-    if(tilesetBMP) {
-        DeleteObject(tilesetBMP);
-    }
-
-    tilesetBMP = tempBMP;
-
-    BITMAP bmInfo = {0};
-    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
-    bmpWidth    = bmInfo.bmWidth;
-    bmpHeight   = bmInfo.bmHeight;
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// windowProc - Standard window procedure for a window
-//------------------------------------------------------------------------------
-
-LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-
-    switch(msg) {
-        
-        default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_HSCROLL: onHScroll(LOWORD(wParam), HIWORD(wParam)); break;
-        case WM_VSCROLL: onVScroll(LOWORD(wParam), HIWORD(wParam)); break;
-        case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam) + xOffset, HIWORD(lParam) + yOffset); break;
-        case WM_PAINT:      onPaint(); break;
-        case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
-        case WM_CLOSE:      DestroyWindow(hWnd); break;
-    }
-    return 0;
-}
-
 //------------------------------------------------------------------------------
 // onPaint - Processing of the WM_PAINT message
 //------------------------------------------------------------------------------
 
 #define DX2_TO_DX1(i, k, width)    ( (k * width) + i)
-
 void GamePanel::onPaint() {
 
     RECT rc;
@@ -440,5 +372,101 @@ void GamePanel::onPaint() {
 
     EndPaint(hWnd, &ps);
 }
-
 #undef DX2_TO_DX1
+
+//------------------------------------------------------------------------------
+// onSize - Resizes the panel and adjusts things on it as needed.
+//------------------------------------------------------------------------------
+
+void GamePanel::onSize() {
+
+    RECT rc;
+    ShowScrollBar(hWnd, SB_BOTH, FALSE); // Turn off scrollbars to get correct client size.
+    GetClientRect(hWnd, &rc);
+
+    if(rc.right == 0 || rc.bottom == 0) {
+        return;
+        // In the future, run an assert.
+    }
+
+    // First, we need to figure out which scroll bars we need
+
+    const int ScrollSpanX = GetSystemMetrics(SM_CXHSCROLL);
+    const int ScrollSpanY = GetSystemMetrics(SM_CXVSCROLL);
+
+    int whichBars = 0;
+
+    if(rc.right < virtualWidth) {
+
+        // We might also need the other scrollbar if the span of the scrollbar
+        // makes the space small enough
+
+        if(rc.bottom - ScrollSpanX < virtualHeight) {
+            ShowScrollBar(hWnd, SB_BOTH, TRUE);
+            whichBars = ScrollType::BOTH;
+            rc.right -= ScrollSpanY;
+            rc.bottom -= ScrollSpanX;
+         }
+        else {
+            ShowScrollBar(hWnd, SB_HORZ, TRUE);
+            ShowScrollBar(hWnd, SB_VERT, FALSE);
+            whichBars = ScrollType::HORZ;
+            rc.bottom -= ScrollSpanX;
+        }
+
+    }
+    else if(rc.bottom < virtualHeight) {
+        
+        if(rc.right - ScrollSpanY < virtualWidth) {
+            ShowScrollBar(hWnd, SB_BOTH, TRUE);
+            whichBars = ScrollType::BOTH;
+            rc.right -= ScrollSpanY;
+            rc.bottom -= ScrollSpanX;
+        }
+        else {
+            ShowScrollBar(hWnd, SB_VERT, TRUE);
+            ShowScrollBar(hWnd, SB_HORZ, FALSE);
+            whichBars = ScrollType::VERT;
+            rc.right -= ScrollSpanY;
+        }
+
+    }
+    else {
+        ShowScrollBar(hWnd, SB_BOTH, FALSE);
+        return;
+    }
+
+    if(whichBars & ScrollType::HORZ) {
+        SetScrollRange(hWnd, SB_HORZ, 0, virtualWidth - rc.right, TRUE);
+    }
+
+    if(whichBars & ScrollType::VERT) {
+        SetScrollRange(hWnd, SB_VERT, 0, virtualHeight - rc.bottom, TRUE);
+    }
+
+}
+
+
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// windowProc - Standard window procedure for a window
+//------------------------------------------------------------------------------
+
+LRESULT GamePanel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
+
+    switch(msg) {
+        
+        default: return DefWindowProc(hWnd, msg, wParam, lParam);
+        case WM_HSCROLL: onHScroll(LOWORD(wParam), HIWORD(wParam)); break;
+        case WM_VSCROLL: onVScroll(LOWORD(wParam), HIWORD(wParam)); break;
+        case WM_LBUTTONDOWN: SendMessage(GetParent(hWnd), UWM_TILE_SELECTED, LOWORD(lParam) + xOffset, HIWORD(lParam) + yOffset); break;
+        case WM_PAINT:      onPaint(); break;
+        case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
+        case WM_CLOSE:      DestroyWindow(hWnd); break;
+    }
+    return 0;
+}

@@ -1,6 +1,12 @@
 #pragma once
 #include "stdint_compat.h"
 
+#ifdef _DEBUG
+#define NODEFAULT assert(0)
+#else
+#define NODEFAULT __assume(0)
+#endif // DEBUG
+
 namespace FrostUtil {
 
     // At some point, I'll template this

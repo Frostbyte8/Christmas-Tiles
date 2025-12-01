@@ -193,7 +193,7 @@ void CustomSizeWindow::onWindowMoved() {
 //-----------------------------------------------------------------------------
 
 LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-    wchar_t buffer[4] = {0}; // TODO: own function.
+
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);

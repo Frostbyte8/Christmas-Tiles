@@ -21,6 +21,7 @@ namespace MainWindowViewConstants {
     static const UINT MENU_DISABLED_FLAGS = MF_BYCOMMAND | MF_DISABLED | MF_GRAYED | MF_STRING;
     static const UINT MENU_CHECKED_FLAGS = MF_BYCOMMAND | MF_CHECKED;
     static const UINT MENU_UNCHECKED_FLAGS = MF_BYCOMMAND;
+    static const wchar_t BITMAP_FILTER[] = L" (*.bmp)\0*.bmp\0";
 }
 
 namespace CtrlID {
@@ -126,7 +127,6 @@ bool MainWindowView::createWindow() {
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-    // TODO: This should be set for the first time when the game starts?
     SetTimer(hWnd, MainWindowViewConstants::ELAPSED_TIMER_ID, 100, 0);
 
     return true;
@@ -273,8 +273,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
             newHeight = customSizeWindow.getNewWidth();
             break;
         default:
-            assert(false); // Good job! You somehow screwed up.
-            break;
+            NODEFAULT;
     }
 
     // Note that newWidth and newHeight can be altered by this function. This is fine because if they
@@ -306,14 +305,27 @@ void MainWindowView::onChangeTileset() {
     ofnTileset.lStructSize = sizeof(ofnTileset);
     ofnTileset.hwndOwner = hWnd;
 
-    // TODO: LANG ID for this
-    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0";
+    wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
+    // The +1 is for an extra null terminator required by OPENFILENAME
+    const LONG fullTextLen = wcslen(MainWindowViewConstants::BITMAP_FILTER) + wcslen(filterText) + 1;
+
+    wchar_t* fullText = (wchar_t*)malloc(sizeof(wchar_t) * (fullTextLen));
+    memset(fullText, 0, fullTextLen * sizeof(wchar_t));
+    wcscpy_s(fullText, fullTextLen, filterText);
+    wcscat_s(fullText, fullTextLen, MainWindowViewConstants::BITMAP_FILTER);
+
+    ofnTileset.lpstrFilter = fullText;
+    ofnTileset.hInstance = hInstance;
     ofnTileset.nMaxFile = MAX_PATH;
     ofnTileset.lpstrFile = filePath;
+    ofnTileset.lpstrTitle = GET_LANG_STR(LangID::SELECT_TILESET_TITLE);
     ofnTileset.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
     ofnTileset.lpstrDefExt = L"bmp";
+    ofnTileset.hwndOwner = hWnd;
 
     if(GetOpenFileName(&ofnTileset)) {
+
+        // TODO: the tileset provided could actually be invalid!
 
         if(windowPresenter.changeTilesetPath(ofnTileset.lpstrFile)) {
 
@@ -326,6 +338,8 @@ void MainWindowView::onChangeTileset() {
         }
 
     }
+
+    free(fullText);
 
 }
 
@@ -751,10 +765,7 @@ void MainWindowView::moveControls() {
     const LONG tallestPoint = getTallestPoint();
     const LONG widestGroupBox = getWidestGroupBox();
 
-    // TODO: This may not need to actually be here
-
     // Resize Window
-    // TODO: Get Monitor Window is on?
 
     const GameBoardDimensions& boardDimensions = windowPresenter.getGameBoard().getBoardDimensions();
 

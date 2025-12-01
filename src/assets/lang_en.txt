@@ -104,4 +104,8 @@ File write error
 Tileset.bmp was not found! If this error persists, reinstalling the program may fix this problem. The application will now close.
 # Error Tileset Title
 Error loading tileset
+# Select Tileset Dialog Title
+Select Tileset 
+# Bitmap Files Filter Text
+Bitmap Files
 # END STRINGS

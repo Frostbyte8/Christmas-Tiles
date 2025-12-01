@@ -12,41 +12,48 @@ class GamePanel : public WndAsClass<GamePanel> {
 
     public:
         GamePanel();
-        static bool registerSelf(HINSTANCE hInst);
+        
         bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMENU& ID);
-        UINT doLoop();
+        static bool registerSelf(HINSTANCE hInst);
+
+        // Accessors
 
         inline const HWND& getHandle() const { return hWnd; }
+        LONG getNumTileTypes() const { return bmpWidth / bmpHeight; }
+        const LONG& getTileSize() const { return bmpHeight; }
+
+        // Mutators
+
         void setWindowPresenter(MainWindowPresenter* mwp) {
             windowPresenter = mwp;
         }
 
-        LONG getNumTileTypes() const { return bmpWidth / bmpHeight; }
-        const LONG& getTileSize() const { return bmpHeight; }
+        // Public Functions
 
         bool changeTileset();
-
         void updateVirtualSize(const WORD& numXTiles, const WORD& numYTiles);
 
     private:
 
         void onHScroll(const WORD& dir, const WORD& pos);
         void onVScroll(const WORD& dir, const WORD& pos);
-        void onSize();
-        void onClick(WORD xPos, WORD yPos);
         void onPaint();
+        void onSize();
+
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
         MainWindowPresenter const *windowPresenter;
 
-        HWND hWnd;
+        HWND        hWnd;
         static bool isRegistered;
         
         HBITMAP tilesetBMP;
-        LONG bmpWidth;
-        LONG bmpHeight;
-        int xOffset;
-        int yOffset;
-        WORD virtualWidth;
-        WORD virtualHeight;
+
+        LONG    bmpWidth;
+        LONG    bmpHeight;
+        int     xOffset;
+        int     yOffset;
+        WORD    virtualWidth;
+        WORD    virtualHeight;
+        
 };
