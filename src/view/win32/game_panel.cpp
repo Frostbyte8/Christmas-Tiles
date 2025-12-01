@@ -278,7 +278,7 @@ void GamePanel::onPaint() {
     HDC         tilesetHDC;
 
     // Create a back buffer
-    // TODO: Only need to recreate after WM_DISPLAYCHANGE, and maybe WM_FONTCHANGE 
+    // TODO: Only need to recreate after WM_DISPLAYCHANGE, and maybe WM_FONTCHANGE, as well as when the RC doesn't match
     // Also we only need to draw to the screen, that which has been invalidated, and we don't need
     // to erase the background every time
     createBackBuffer(ps.hdc, backBuffer, backBitmap, prevBitmap, rc);

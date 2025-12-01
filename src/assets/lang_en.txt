@@ -4,7 +4,7 @@ Christmas Tiles
 OK
 # Cancel Button Text
 Cancel
-# Score Groupbox Caption
+# Score Groupbox Caption (This is reused on the highscore dialog)
 Score
 # Points Groupbox Caption
 Points
@@ -108,4 +108,8 @@ Error loading tileset
 Select Tileset 
 # Bitmap Files Filter Text
 Bitmap Files
+# Name Header (Highscores)
+Name
+# Date Header (Highscores)
+Date
 # END STRINGS

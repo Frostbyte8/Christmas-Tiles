@@ -62,6 +62,8 @@ namespace LangID {
         ERROR_TILESET_MISSING_TITLE,
         SELECT_TILESET_TITLE,
         BITMAP_FILES_FILTER_TEXT,
+        NAME_HEADER,
+        DATE_HEADER,
         LANG_ID_COUNT
     };
 }

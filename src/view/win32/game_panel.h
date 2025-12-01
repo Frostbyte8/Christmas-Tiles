@@ -5,8 +5,6 @@
 #include "../../model/gameboard.h"
 #include "../../presenter/main_window_presenter.h"
 
-// TODO: MainWindowInterface
-
 class GamePanel : public WndAsClass<GamePanel> {
     friend WndAsClass;
 
