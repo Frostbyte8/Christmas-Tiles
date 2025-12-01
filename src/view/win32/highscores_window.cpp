@@ -97,6 +97,8 @@ void HighscoresWindow::onCreate() {
 
     labelCaption = createLabel(GET_LANG_STR(LangID::HIGHSCORES_TEXT), SS_CENTER, hWnd, 100, hInst);
 
+    // TODO: Lang Strs
+
     labelHeader[0] = createLabel(L"Name", SS_CENTER, hWnd, 100, hInst);
     labelHeader[1] = createLabel(L"Score", SS_CENTER, hWnd, 100, hInst);
     labelHeader[2] = createLabel(L"Date", SS_CENTER, hWnd, 100, hInst);
@@ -130,13 +132,32 @@ void HighscoresWindow::onCreate() {
 
 }
 
+LONG HighscoresWindow::findWidestName() {
+
+    LONG retVal = 0;
+    const std::vector<ScoreT>& scores = scoreTable->getScores();
+    wchar_t name[ScoreTableConstants::MAX_NAME_LENGTH] = {0};
+
+    for(size_t i = 0; i < scores.size(); ++i) {
+        GetWindowText(labelName[i], name, ScoreTableConstants::MAX_NAME_LENGTH);
+        retVal = max(metrics.calculateStringWidth(name), retVal);
+    }
+
+    // Were going to make an assumption that the name label caption can never be bigger than an actualy name,
+    // surely there isn't a language like that, right?
+
+    GetWindowText(labelHeader[0], name, ScoreTableConstants::MAX_NAME_LENGTH);
+    retVal = max(metrics.calculateStringWidth(name), retVal);
+
+    return retVal;
+}
+
 void HighscoresWindow::moveControls() {
     
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    // TODO: Optionally, we could figure out the longest name and use that to shrink the size of the Window.
-    const LONG NAME_WIDTH   = metrics.calculateStringWidth(L"WWWWWWWWWWWWWWWWWWWWWWWWW");
+    const LONG NAME_WIDTH   = findWidestName(); //metrics.calculateStringWidth(L"WWWWWWWWWWWWWWWWWWWWWWWWW");
     const LONG SCORE_WIDTH  = metrics.calculateStringWidth(L"000000000");
     const LONG DATE_WIDTH   = metrics.calculateStringWidth(L"1900/01/01");
 

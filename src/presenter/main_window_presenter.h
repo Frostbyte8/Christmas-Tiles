@@ -71,16 +71,12 @@ class MainWindowPresenter {
         int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes);
         inline void unflipTiles();
         
-
-        // TODO: At some point this will all be moved in to the models they
-        // belong in.
+        // Public File I/O
 
         bool readScores();
         bool readSettings(GameBoardDimensions& boardDimensions);
         bool writeScores();
         bool writeSettings();
-        
-        
 
     private:
 

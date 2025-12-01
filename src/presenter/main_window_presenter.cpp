@@ -328,124 +328,7 @@ inline void MainWindowPresenter::unflipTiles() {
 }
 
 //==============================================================================
-// Private Functions
-//==============================================================================
-
-//------------------------------------------------------------------------------
-// createNewGameBoard - Tries to create a new gameboard. If it cannot, the
-// original GameBoard and GameState are still set.
-//------------------------------------------------------------------------------
-
-int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes) {
-
-    GameBoard newBoard(newWidth, newHeight, newTileTypes);
-    if(!newBoard.tryNewGame()) {
-        return 0;
-    }
-
-    reset();
-    
-    windowData.gameState = GameState::STATE_NOT_STARTED;
-    gameBoard = newBoard;
-
-    mainWindow.implGameStateChanged(windowData.gameState);
-    
-    return 1;
-}
-
-
-//------------------------------------------------------------------------------
-// shouldEndGameIfPlaying - Check if the game is playing, and ask the player if
-// they want to end it to complete the action they requested
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
-
-    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
-
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
-    }
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// tryPause - Attempt to pause the game. If it does, it will also update how
-// much time the game has been played elapsed before the game was paused.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryPause() {
-
-    if(windowData.gameState != GameState::STATE_PLAYING) {
-        // You can only pause games that are being played.
-        return false;
-    }
-
-    updateElapsedTime();
-    windowData.gameState = GameState::STATE_PAUSED;
-    mainWindow.implGameStateChanged(windowData.gameState);
-
-    return true;
-
-}
-
-//------------------------------------------------------------------------------
-// tryUnpause - Attempts to unpause the game and resume the how much time the
-// game has been played.
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::tryUnpause() {
-
-    // Cannot Unpause if game is playing or won. (Which all states above PAUSED
-    // are.
-    if(windowData.gameState > GameState::STATE_PAUSED) {
-        
-        return false;
-    }
-   
-    milliStartTime = GET_MILLI_COUNT();
-    windowData.gameState = GameState::STATE_PLAYING;
-    mainWindow.implGameStateChanged(windowData.gameState);
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
-// updateElapsedTime - Updates how long the game has been played. You must
-// ensure that the game is not paused before calling this function.
-//------------------------------------------------------------------------------
-
-void MainWindowPresenter::updateElapsedTime() {
-
-    assert(windowData.gameState == GameState::STATE_PLAYING);
-
-    const uint32_t timeNow = GET_MILLI_COUNT();
-    milliElapsedTime += (timeNow - milliStartTime);
-    milliStartTime = timeNow;
-
-    if(milliElapsedTime > milliPointDelta + 999) {
-        
-        uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
-        
-        if(windowData.points < seconds) {
-            windowData.points = 0;
-        }
-        else {
-            windowData.points -= static_cast<uint8_t>(seconds);
-        }
-
-        milliPointDelta += (seconds * 1000);
-    }
-
-}
-
-//==============================================================================
-// Things that really shouldn't be here and should be moved at some point.
+// Public File I/O
 //==============================================================================
 
 //------------------------------------------------------------------------------
@@ -611,7 +494,7 @@ bool MainWindowPresenter::writeScores() {
     wchar_t keyName[16] = {0};
     const std::vector<ScoreT>& scores = scoreTable.getScores();
 
-    // TODO: Clear old scores ini first before writing a new one.
+    fclose(_wfopen(L".\\scores.ini", L"w"));
     
     for(size_t i = 0; i < scores.size(); ++i) {
 
@@ -636,5 +519,122 @@ bool MainWindowPresenter::writeScores() {
     }
 
     return true;
+
+}
+
+//==============================================================================
+// Private Functions
+//==============================================================================
+
+//------------------------------------------------------------------------------
+// createNewGameBoard - Tries to create a new gameboard. If it cannot, the
+// original GameBoard and GameState are still set.
+//------------------------------------------------------------------------------
+
+int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes) {
+
+    GameBoard newBoard(newWidth, newHeight, newTileTypes);
+    if(!newBoard.tryNewGame()) {
+        return 0;
+    }
+
+    reset();
+    
+    windowData.gameState = GameState::STATE_NOT_STARTED;
+    gameBoard = newBoard;
+
+    mainWindow.implGameStateChanged(windowData.gameState);
+    
+    return 1;
+}
+
+
+//------------------------------------------------------------------------------
+// shouldEndGameIfPlaying - Check if the game is playing, and ask the player if
+// they want to end it to complete the action they requested
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
+
+    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
+
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// tryPause - Attempt to pause the game. If it does, it will also update how
+// much time the game has been played elapsed before the game was paused.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryPause() {
+
+    if(windowData.gameState != GameState::STATE_PLAYING) {
+        // You can only pause games that are being played.
+        return false;
+    }
+
+    updateElapsedTime();
+    windowData.gameState = GameState::STATE_PAUSED;
+    mainWindow.implGameStateChanged(windowData.gameState);
+
+    return true;
+
+}
+
+//------------------------------------------------------------------------------
+// tryUnpause - Attempts to unpause the game and resume the how much time the
+// game has been played.
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::tryUnpause() {
+
+    // Cannot Unpause if game is playing or won. (Which all states above PAUSED
+    // are.
+    if(windowData.gameState > GameState::STATE_PAUSED) {
+        
+        return false;
+    }
+   
+    milliStartTime = GET_MILLI_COUNT();
+    windowData.gameState = GameState::STATE_PLAYING;
+    mainWindow.implGameStateChanged(windowData.gameState);
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
+// updateElapsedTime - Updates how long the game has been played. You must
+// ensure that the game is not paused before calling this function.
+//------------------------------------------------------------------------------
+
+void MainWindowPresenter::updateElapsedTime() {
+
+    assert(windowData.gameState == GameState::STATE_PLAYING);
+
+    const uint32_t timeNow = GET_MILLI_COUNT();
+    milliElapsedTime += (timeNow - milliStartTime);
+    milliStartTime = timeNow;
+
+    if(milliElapsedTime > milliPointDelta + 999) {
+        
+        uint32_t seconds = (milliElapsedTime - milliPointDelta) / 1000;
+        
+        if(windowData.points < seconds) {
+            windowData.points = 0;
+        }
+        else {
+            windowData.points -= static_cast<uint8_t>(seconds);
+        }
+
+        milliPointDelta += (seconds * 1000);
+    }
 
 }

@@ -126,8 +126,10 @@ bool MainWindowView::createWindow() {
     }
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-
     SetTimer(hWnd, MainWindowViewConstants::ELAPSED_TIMER_ID, 100, 0);
+
+
+    windowPresenter.readScores();
 
     return true;
 }
@@ -425,10 +427,8 @@ bool MainWindowView::onCreate() {
 
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
-    
 
     windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, gamePanel.getNumTileTypes());
-    windowPresenter.readScores(); // TODO: This should be somewhere else.
 
     updateBoardSizeMenu(boardDimensions.width, boardDimensions.height, false);
 
@@ -451,12 +451,12 @@ bool MainWindowView::onCreate() {
 
 //------------------------------------------------------------------------------
 // onElapsedTimeTimer - Processes the WM_TIMER event with the ELAPSED_TIMER_ID
-// ID.
+// ID. It does so by updating the time and points label to reflect their
+// current values.
 //------------------------------------------------------------------------------
 
 void MainWindowView::onElapsedTimeTimer() {
     
-    // TODO: tidy this up
     DWORD elapsedTime = windowPresenter.getElapsedTime();
 
     DWORD seconds = elapsedTime / 1000;
@@ -631,7 +631,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             break;
 
         case UWM_SCORE_ENTERED:
-            windowPresenter.tryAddScore(enterScoreWindow.getName(), 9001); // TODO: Index //, windowPresenter.getScore(), 2025, 11, 01, 9001); // TODO: Index
+            windowPresenter.tryAddScore(enterScoreWindow.getName(), enterScoreWindow.getScoreIndex());
             highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
             activeModalDialog = highscoresWindow.getHandle();
             break;
@@ -750,8 +750,6 @@ LONG MainWindowView::getWidestGroupBox() const {
 
 void MainWindowView::moveControls() {
 
-    // TODO: This for some reason is called twice, figure out why.
-
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
@@ -761,7 +759,6 @@ void MainWindowView::moveControls() {
     // Min Width: GroupBox + at least 5 tiles
     // Min Height: No less than 9 tiles tall.
 
-    // TODO: Scroll Bars when the width/height gets too wide.
     const LONG tallestPoint = getTallestPoint();
     const LONG widestGroupBox = getWidestGroupBox();
 

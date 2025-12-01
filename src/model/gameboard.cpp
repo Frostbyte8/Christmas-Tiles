@@ -149,6 +149,6 @@ bool GameBoard::tryNewGame() {
 
 #endif // _DEBUG
 
-    return true; // TODO: probably do not need this.
+    return true;
 
 }

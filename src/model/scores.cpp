@@ -9,7 +9,7 @@ ScoreTable::ScoreTable() {
     for(size_t i = 0; i < ScoreTableConstants::MAX_SCORES; ++i) {
 
         wchar_t* defaultName = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
-        wcscpy_s(defaultName, ScoreTableConstants::MAX_NAME_LENGTH, L"Player");
+        wcscpy_s(defaultName, ScoreTableConstants::MAX_NAME_LENGTH, L"");
         defaultName[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
         
         tempScore.name = defaultName;
@@ -40,6 +40,8 @@ size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
 
     return -1;
 }
+
+/// TODO: It's probably possible to merge both score adding functions into one
 
 void ScoreTable::insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index) {
     ScoreT newScore;
@@ -76,7 +78,7 @@ bool ScoreTable::tryAddScore(wchar_t* name, const uint32_t& score, const uint16_
                 wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, name);
             }
             else {
-                wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, L"Player");
+                wcscpy_s(newScore.name, ScoreTableConstants::MAX_NAME_LENGTH, L"");
             }
 
             free(scores[scores.size()-1].name);

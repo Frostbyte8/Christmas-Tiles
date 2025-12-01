@@ -18,6 +18,8 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
 
     private:
 
+        LONG findWidestName();
+
         void onCreate();
         void moveControls();
         void onWindowMoved();
