@@ -151,17 +151,22 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
     time(&currentTime);
     localtime_s(&timeInfo, &currentTime);
 
-    //ScoreT newScore = { windowData.score, 1900 + timeInfo.tm_year, timeInfo.tm_mon + 1, timeInfo.tm_mday, name };
+    ScoreT newScore = { windowData.score, 
+                        timeInfo.tm_year, 
+                        timeInfo.tm_mon, 
+                        timeInfo.tm_mday, 
+                        name };
 
-    ScoreT newScore;
 
     // Use the same format as the TM structure, the score table will verify and sanitize it for us.
 
+    /*
     newScore.score = windowData.score;
     newScore.year = timeInfo.tm_year;
     newScore.month = timeInfo.tm_mon;
     newScore.day = timeInfo.tm_mday;
     newScore.name = name;
+    */
 
     scoreTable.insertScore(newScore, index);
     

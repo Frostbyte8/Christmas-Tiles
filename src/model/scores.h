@@ -15,7 +15,6 @@ struct ScoreT {
     unsigned int month;
     unsigned int day;
     wchar_t* name;
-    ScoreT() : name(NULL), score(0), year(1995), month(12), day(25) {}
 };
 
 class ScoreTable {
@@ -23,12 +22,20 @@ class ScoreTable {
     public:
         ScoreTable();
         ~ScoreTable();
-        size_t isNewHighscore(const uint32_t& score) const;
 
-        bool insertScore(ScoreT& newScore, size_t index = -1);
+        // Accessors
 
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }
 
+        // Public Functions
+
+        bool insertScore(ScoreT& newScore, size_t index = -1);
+        size_t isNewHighscore(const uint32_t& score) const;
+
     private:
+
+        // Private Functions
+        __forceinline bool tryInsertAndPop(ScoreT& newScore, size_t& index);
+
         std::vector<ScoreT> scores;
 };
