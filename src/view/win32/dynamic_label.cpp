@@ -4,6 +4,8 @@
 
 bool DynamicLabel::isRegistered = false;
 
+const static int MAX_CAPTION_SIZE = 16;
+
 //-----------------------------------------------------------------------------
 // registerSelf - Registers the Window class.
 //-----------------------------------------------------------------------------
@@ -44,7 +46,7 @@ bool DynamicLabel::registerSelf(HINSTANCE hInst) {
 // createWindow - Creates the main Window.
 //-----------------------------------------------------------------------------
 
-bool DynamicLabel::createWindow(const HINSTANCE& hInst, wchar_t inCaption[], const HWND& parent, const HMENU& ID) {
+bool DynamicLabel::createWindow(const HINSTANCE& hInst, const wchar_t* inCaption, const HWND& parent, const HMENU& ID) {
 
     // Future Ideas:
     // Being able to set style flags
@@ -72,6 +74,42 @@ bool DynamicLabel::createWindow(const HINSTANCE& hInst, wchar_t inCaption[], con
     return true;
 }
 
+void DynamicLabel::setText(const wchar_t* inCaption) {
+
+    // It's safe to store our own string, so long as we follow what is
+    // outlined by Raymond Chen's Post on 2003-08-21.
+
+    if(!inCaption) {
+        if(caption) {
+            free(caption);
+            caption = NULL;
+        }
+
+        return;
+    }
+
+    const size_t strLen = wcsnlen_s(inCaption, MAX_CAPTION_SIZE);
+    
+    // We will use the very first wchar_t to store the contents of our size_t.
+    // So kind of like a Fatty Struct/Pointer.
+
+    wchar_t* newCaption = (wchar_t*)malloc((sizeof(wchar_t) * (strLen+2)));
+    newCaption[strLen] = 0;
+    newCaption[0] = static_cast<wchar_t>(strLen);
+
+    if(strLen != 0) {
+        wcscpy_s(&newCaption[1], strLen+1, inCaption);
+    }
+
+    if(caption) {
+        free(caption);
+        caption = NULL;
+    }
+
+    caption = newCaption;
+    
+}
+
 //-----------------------------------------------------------------------------
 // windowProc - Standard window procedure for a window
 //-----------------------------------------------------------------------------
@@ -85,13 +123,16 @@ LRESULT DynamicLabel::windowProc(const UINT& msg, const WPARAM wParam, const LPA
         case WM_PAINT:      onPaint(); break;
         case WM_ERASEBKGND: return -1; break; // We will redraw everything in WM_PAINT
         case WM_CLOSE:      DestroyWindow(hWnd); break;
+        
+        case WM_CREATE:
+            setText( (reinterpret_cast<CREATESTRUCT*>(lParam))->lpszName);
+            break;
         case WM_SETTEXT:
-            retVal = DefWindowProc(hWnd, msg, wParam, lParam);
+            setText(reinterpret_cast<wchar_t*>(lParam));
             InvalidateRect(hWnd, NULL, FALSE);
-            return retVal;
             break;
 
-        case WM_SETFONT:    
+        case WM_SETFONT: 
             currentFont = (HFONT)wParam;
             InvalidateRect(hWnd, NULL, FALSE);
             break;
@@ -99,22 +140,16 @@ LRESULT DynamicLabel::windowProc(const UINT& msg, const WPARAM wParam, const LPA
     }
     return 0;
 
+}
+
 //-----------------------------------------------------------------------------
 // onPaint - Processes the WM_PAINT message.
 //-----------------------------------------------------------------------------
-}
 
 void DynamicLabel::onPaint() {
 
     RECT rc;
     GetClientRect(hWnd, &rc);
-
-    // TODO: It's safe to store our own string, so long as we follow what is
-    // outlined by Raymond Chen's Post on 2003-08-21.
-
-    const static int MAX_CAPTION_SIZE = 16;
-    wchar_t caption[MAX_CAPTION_SIZE] = {0};
-    GetWindowText(hWnd, caption, MAX_CAPTION_SIZE);
 
     PAINTSTRUCT ps;
     if(!BeginPaint(hWnd, &ps)) {
@@ -132,10 +167,19 @@ void DynamicLabel::onPaint() {
 
     SetBkMode(backBuffer, TRANSPARENT);
 
-    HFONT oldFont = (HFONT)SelectObject(backBuffer, currentFont);
-    SetTextColor(backBuffer, GetSysColor(COLOR_WINDOWTEXT));
-    DrawText(backBuffer, caption, -1, &rc, DT_CENTER);
-    SelectObject(backBuffer, oldFont);
+    if(caption) {
+
+        const size_t strLen = static_cast<size_t>(caption[0]);
+
+        if(strLen != 0) {
+
+            HFONT oldFont = (HFONT)SelectObject(backBuffer, currentFont);
+            SetTextColor(backBuffer, GetSysColor(COLOR_WINDOWTEXT));
+            DrawText(backBuffer, &caption[1], strLen, &rc, DT_CENTER);
+            SelectObject(backBuffer, oldFont);
+
+        }
+    }
 
     // Finalize drawing by Copying back buffer to DC
     BitBlt(ps.hdc, rc.left, rc.top, rc.right-rc.left, rc.bottom-rc.top, backBuffer, 0, 0, SRCCOPY);

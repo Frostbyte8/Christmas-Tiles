@@ -10,14 +10,22 @@ class DynamicLabel : public WndAsClass<DynamicLabel> {
     friend WndAsClass;
 
     public:
-        DynamicLabel() : hWnd(0) {}
+        DynamicLabel() : hWnd(0), caption(NULL) {}
+        ~DynamicLabel() {
+            if(caption) {
+                free(caption);
+                caption = NULL;
+            }
+        }
         static bool registerSelf(HINSTANCE hInst);
-        bool createWindow(const HINSTANCE& hInst, wchar_t inCaption[], const HWND& parent, const HMENU& ID);
+        bool createWindow(const HINSTANCE& hInst, const wchar_t* inCaption, const HWND& parent, const HMENU& ID);
+        void setText(const wchar_t* inCaption);
         UINT doLoop();
         inline const HWND getHandle() const { return hWnd; }
 
     private:
         void onPaint();
+        wchar_t* caption;
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         HWND hWnd;
         static bool isRegistered;
