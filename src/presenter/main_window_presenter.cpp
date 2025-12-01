@@ -150,11 +150,24 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
 
     time(&currentTime);
     localtime_s(&timeInfo, &currentTime);
+
+    //ScoreT newScore = { windowData.score, 1900 + timeInfo.tm_year, timeInfo.tm_mon + 1, timeInfo.tm_mday, name };
+
+    ScoreT newScore;
+    newScore.score = windowData.score;
+    newScore.year = 1900 + timeInfo.tm_year;
+    newScore.month = timeInfo.tm_mon + 1;
+    newScore.day = timeInfo.tm_mday;
+    newScore.name = name;
+
+    scoreTable.insertScore(newScore, index);
     
     
-    scoreTable.tryAddScore(name, windowData.score, static_cast<uint16_t>(1900 + timeInfo.tm_year), 
-                                                   static_cast<uint8_t>(timeInfo.tm_mon + 1), 
-                                                   static_cast<uint8_t>(timeInfo.tm_mday));
+    /*
+    scoreTable.tryAddScore(name, windowData.score, 1900 + timeInfo.tm_year, 
+                                                   timeInfo.tm_mon + 1, 
+                                                   timeInfo.tm_mday);
+    */
     return true; 
 }
 
@@ -510,7 +523,7 @@ bool MainWindowPresenter::writeScores() {
             return false;
         }
 
-        wsprintf(buffer, L"%d/%0d/%0d", scores[i].year, scores[i].month, scores[i].day);
+        wsprintf(buffer, L"%d/%02d/%02d", scores[i].year, scores[i].month, scores[i].day);
         wsprintf(keyName, L"date%d", i);
         if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
             return false;

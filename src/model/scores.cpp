@@ -1,10 +1,14 @@
 #include "scores.h"
 #include "../constants.h"
+#include "../frost_util.h"
 
 ScoreTable::ScoreTable() {
     ScoreT tempScore;
 
-    scores.reserve(ScoreTableConstants::MAX_SCORES);
+    // We need one more so that we can pop the 11th score off during insertion,
+    // this way we don't pop, insert, and cause an exception that leaves the
+    // container in an invalid state.    
+    scores.reserve(ScoreTableConstants::MAX_SCORES + 1);
 
     for(size_t i = 0; i < ScoreTableConstants::MAX_SCORES; ++i) {
 
@@ -39,6 +43,63 @@ size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
     }
 
     return -1;
+}
+
+bool ScoreTable::insertScore(ScoreT& newScore, size_t index) {
+
+    newScore.score = FrostUtil::ClampInts(newScore.score, static_cast<unsigned int>(0), ChristmasTilesConstants::MAX_SCORE);
+    wchar_t* name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
+    
+    if(!name) {
+        return false;
+    }
+
+    if(newScore.name) {
+        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH, newScore.name);
+    }
+    else {
+        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH, L"Player");
+    }
+
+    newScore.name = name;
+        
+    if(index != -1) {
+
+        try { 
+            scores.insert(scores.begin()+index, newScore);
+        }
+        catch(std::exception) {
+            free(newScore.name);
+            return false;
+        }
+        free(scores[ScoreTableConstants::MAX_SCORES].name);
+        scores[ScoreTableConstants::MAX_SCORES].name = NULL;
+        scores.pop_back();
+        return true;
+    }
+
+    for(index = 0; index < scores.size(); ++index) {
+        if(newScore.score > scores[index].score) {
+
+            try { 
+                scores.insert(scores.begin()+index, newScore);
+            }
+            catch(std::exception) {
+                free(newScore.name);
+                return false;
+            }
+
+            free(scores[ScoreTableConstants::MAX_SCORES].name);
+            scores[ScoreTableConstants::MAX_SCORES].name = NULL;
+            scores.pop_back();
+
+            return true;
+        }
+    }
+
+    free(newScore.name);
+    newScore.name = NULL;
+    return false;
 }
 
 /// TODO: It's probably possible to merge both score adding functions into one

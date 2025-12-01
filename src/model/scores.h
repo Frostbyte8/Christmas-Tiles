@@ -17,10 +17,10 @@ namespace ScoreTableConstants {
 }
 
 struct ScoreT {
-    uint32_t score;
-    uint16_t year;
-    uint8_t month;
-    uint8_t day;
+    unsigned int score;
+    unsigned int year;
+    unsigned int month;
+    unsigned int day;
     wchar_t* name;
     ScoreT() : name(NULL), score(0), year(1995), month(12), day(25) {}
 };
@@ -31,6 +31,9 @@ class ScoreTable {
         ScoreTable();
         ~ScoreTable();
         size_t isNewHighscore(const uint32_t& score) const;
+
+        bool insertScore(ScoreT& newScore, size_t index);
+
         void insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
         bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day);
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }
