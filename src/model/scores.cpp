@@ -48,22 +48,60 @@ size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
 bool ScoreTable::insertScore(ScoreT& newScore, size_t index) {
 
     newScore.score = FrostUtil::ClampInts(newScore.score, static_cast<unsigned int>(0), ChristmasTilesConstants::MAX_SCORE);
-    wchar_t* name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
     
-    // TODO: Make sure date is a valid date and remove that code from readScores();
+    // Since we don't own the name, we need to make a copy of it.
+
+    wchar_t* name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
 
     if(!name) {
         return false;
     }
 
+    name[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
+
     if(newScore.name) {
-        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH, newScore.name);
+        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH+1, newScore.name);
     }
     else {
-        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH, L"Player");
+        wcscpy_s(name, ScoreTableConstants::MAX_NAME_LENGTH+1, L"Player");
     }
 
     newScore.name = name;
+
+    // Make sure the date is a valid date
+    bool isDateValid = true;
+
+    if(newScore.year > 8099) {
+        // Years beyond 10000 aren't valid, not to mention, it might mean the score
+        // was read as earlier than 1900.
+        isDateValid = false; 
+    }
+    else if(newScore.day > 31) {
+        isDateValid = false;
+    }
+    else if(newScore.day > 30) {
+        // These months can only have 30 days.
+        if(newScore.month == 1 || newScore.month == 3 || newScore.month == 5 || newScore.month == 8 || newScore.month == 10) {
+            isDateValid = false;
+        }
+    }
+    else if(newScore.day > 28 && newScore.month == 1) {
+        // Leap year check
+        if(newScore.year % 4 != 0) {
+            isDateValid = false;
+        }
+    }
+
+    if(!isDateValid) {
+        newScore.year = 1995;
+        newScore.month = 12;
+        newScore.day = 25;
+    }
+    else {
+        newScore.year += 1900;
+        newScore.month += 1;
+        // Day is already valid
+    }
         
     if(index != -1) {
 

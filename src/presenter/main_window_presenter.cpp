@@ -154,20 +154,17 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
     //ScoreT newScore = { windowData.score, 1900 + timeInfo.tm_year, timeInfo.tm_mon + 1, timeInfo.tm_mday, name };
 
     ScoreT newScore;
+
+    // Use the same format as the TM structure, the score table will verify and sanitize it for us.
+
     newScore.score = windowData.score;
-    newScore.year = 1900 + timeInfo.tm_year;
-    newScore.month = timeInfo.tm_mon + 1;
+    newScore.year = timeInfo.tm_year;
+    newScore.month = timeInfo.tm_mon;
     newScore.day = timeInfo.tm_mday;
     newScore.name = name;
 
     scoreTable.insertScore(newScore, index);
     
-    
-    /*
-    scoreTable.tryAddScore(name, windowData.score, 1900 + timeInfo.tm_year, 
-                                                   timeInfo.tm_mon + 1, 
-                                                   timeInfo.tm_mday);
-    */
     return true; 
 }
 
@@ -430,67 +427,42 @@ bool MainWindowPresenter::readScores() {
         wsprintf(keyName, L"date%d", i);
         READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH-1, L".\\scores.ini");
 
-        if(wcslen(buffer) < 10) {
+        if(wcslen(buffer) == 10) {
 
-            defaultScore = true;
-
-
-        }
-        else {
-
-            // TODO: This could be much better.
-
-            tm dayOfScore = {0};
-
-
-            wchar_t* token = wcstok(buffer, L"/");
-            if(!token) {
-                defaultScore = true;
-            }
+            // Try to Extract YYYY/MM/DD from buffer.
+            // We need to put this into the format TM struct expect since
+            // insertScore uses that.
             
-            dayOfScore.tm_year =  _wtoi(token) - 1900;
-            score.year = _wtoi(token);
+            wchar_t* token = wcstok(buffer, L"/");
 
-            token = wcstok(NULL, L"/");
-            if(!token) {
-                defaultScore = true;
-            }
+            if(token) {
 
-            dayOfScore.tm_mon =  _wtoi(token) - 1;
-            score.month = _wtoi(token);
+                score.year = _wtoi(token) - 1900;
+                
+                token = wcstok(NULL, L"/");
+                if(token) {
+                    
+                    score.month = _wtoi(token) - 1;
 
-            token = wcstok(NULL, L"/");
-            if(!token) {
-                defaultScore = true;
-            }
-            dayOfScore.tm_mday =  _wtoi(token);
-            score.day = _wtoi(token);
+                    token = wcstok(NULL, L"/");
+                    if(token) {
+                        score.day = _wtoi(token);
+                    }
 
-            if(mktime(&dayOfScore) == -1) {
-                defaultScore = true;
+                }
+
             }
 
         }
 
-        if(defaultScore) {
-            score.year = 1995;
-            score.month = 12;
-            score.day = 25;
-            score.name = NULL;
-            score.score = 0;
-        }
-        else {
+        wsprintf(keyName, L"score%d", i);
+        score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
 
-            wsprintf(keyName, L"score%d", i);
-            score.score = READ_INI_UINT(L"scores", keyName, L".\\scores.ini");
+        wsprintf(keyName, L"name%d", i);
+        READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH+1, L".\\scores.ini");
+        score.name = buffer;
 
-            wsprintf(keyName, L"name%d", i);
-            READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH, L".\\scores.ini");
-            score.name = buffer;
-        }
-
-        // Use -1 when reading them in, so the scores are sorted.
-        scoreTable.insertScore(score, -1);
+        scoreTable.insertScore(score);
 
     }
 
@@ -511,7 +483,7 @@ bool MainWindowPresenter::writeScores() {
     
     for(size_t i = 0; i < scores.size(); ++i) {
 
-        swprintf_s(buffer, ScoreTableConstants::MAX_NAME_LENGTH, L"%s", scores[i].name);
+        swprintf_s(buffer, ScoreTableConstants::MAX_NAME_LENGTH+1, L"%s", scores[i].name);
         wsprintf(keyName, L"name%d", i);
         if(!WRITE_INI_STRING(L"scores", keyName, buffer, L".\\scores.ini")) {
             return false;

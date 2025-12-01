@@ -25,7 +25,7 @@ class ScoreTable {
         ~ScoreTable();
         size_t isNewHighscore(const uint32_t& score) const;
 
-        bool insertScore(ScoreT& newScore, size_t index);
+        bool insertScore(ScoreT& newScore, size_t index = -1);
 
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }
 

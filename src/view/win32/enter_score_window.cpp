@@ -198,7 +198,7 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
 
             name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
             name[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
-            GetWindowText(textYourName, name, ScoreTableConstants::MAX_NAME_LENGTH);
+            GetWindowText(textYourName, name, ScoreTableConstants::MAX_NAME_LENGTH+1);
 
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);

@@ -136,14 +136,14 @@ LONG HighscoresWindow::findWidestName() {
 
     LONG retVal = 0;
     const std::vector<ScoreT>& scores = scoreTable->getScores();
-    wchar_t name[ScoreTableConstants::MAX_NAME_LENGTH] = {0};
+    wchar_t name[ScoreTableConstants::MAX_NAME_LENGTH+1] = {0};
 
     for(size_t i = 0; i < scores.size(); ++i) {
-        GetWindowText(labelName[i], name, ScoreTableConstants::MAX_NAME_LENGTH);
+        GetWindowText(labelName[i], name, ScoreTableConstants::MAX_NAME_LENGTH+1);
         retVal = max(metrics.calculateStringWidth(name), retVal);
     }
 
-    // Were going to make an assumption that the name label caption can never be bigger than an actualy name,
+    // Were going to make an assumption that the name label caption can never be bigger than an actually name,
     // surely there isn't a language like that, right?
 
     GetWindowText(labelHeader[0], name, ScoreTableConstants::MAX_NAME_LENGTH);
