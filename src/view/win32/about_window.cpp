@@ -161,13 +161,11 @@ bool AboutWindow::onCreate() {
 
     labelTitle      = createLabel(GET_LANG_STR(LangID::APP_TITLE), hWnd, CtrlID::TITLE_LABEL, hInst);
     
-    // TODO: Copyright and Version need a text replacement
     wchar_t* fullText = expandText(LangID::VERSION_TEXT, GIT_HASH);
     labelVersion    = createLabel(fullText, hWnd, CtrlID::VERSION_LABEL, hInst);
     free(fullText);
 
     seperatorBar    = createSeperator(hWnd, CtrlID::SEPERATOR, hInst);
-    
 
     fullText = expandText(LangID::COPYRIGHT_TEXT, COPYRIGHT_NAME);
     labelCopyright  = createLabel(fullText, hWnd, CtrlID::COPYRIGHT_LABEL, hInst);
