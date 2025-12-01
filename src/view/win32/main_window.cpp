@@ -302,6 +302,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 void MainWindowView::onChangeTileset() {
     
     // TODO: Warn user about this action starting a new game
+    // Need to do this because canceling the custom window as well breaks the program.
     
     OPENFILENAME ofnTileset = {0};
     wchar_t filePath[MAX_PATH] = L"";

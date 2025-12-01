@@ -18,7 +18,7 @@ namespace GameState {
 namespace WindowPresenterConstants {
     static const unsigned int IGNORE_WIDTH       = 255;
     static const unsigned int IGNORE_HEIGHT      = 255;
-    static const uint8_t IGNORE_NUMTILES    = 255;
+    static const unsigned int IGNORE_NUMTILES    = 255;
 }
 
 namespace GameBoardFlipErrors {
