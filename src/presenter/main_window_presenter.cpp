@@ -489,8 +489,8 @@ bool MainWindowPresenter::readScores() {
             score.name = buffer;
         }
 
-        // TODO: pass in a score object
-        scoreTable.tryAddScore(score.name, score.score, score.year, score.month, score.day);
+        // Use -1 when reading them in, so the scores are sorted.
+        scoreTable.insertScore(score, -1);
 
     }
 

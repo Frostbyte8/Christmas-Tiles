@@ -4,13 +4,6 @@
 #include <time.h>
 #include <vector>
 
-/*
-    time_t now = time(NULL);
-    tm *t = localtime(&now);
-
-    printf("%d", t->tm_hour);
-*/
-
 namespace ScoreTableConstants {
     static const int MAX_NAME_LENGTH = 25;
     static const size_t MAX_SCORES = 10;
@@ -34,8 +27,6 @@ class ScoreTable {
 
         bool insertScore(ScoreT& newScore, size_t index);
 
-        void insertScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day, const size_t& index);
-        bool tryAddScore(wchar_t* name, const uint32_t& score, const uint16_t& year, const uint8_t& month, const uint8_t& day);
         __forceinline const std::vector<ScoreT>& getScores() const { return scores; }
 
     private:
