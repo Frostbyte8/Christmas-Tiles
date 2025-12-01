@@ -164,7 +164,9 @@ bool MainWindowView::registerSelf() {
     
     WNDCLASSEX wc;
 
-    // TODO: DPI
+    // TODO [DPI]: DPI Icon related stuff.
+    // In Short: Pre-Vista/7, Windows selected the correct icon for the taskbar.
+    // Vista/7(?) and later for whatever reason scale the icon, but only, sometimes?
     
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
@@ -327,7 +329,7 @@ void MainWindowView::onChangeTileset() {
 
     if(GetOpenFileName(&ofnTileset)) {
 
-        // TODO: the tileset provided could actually be invalid!
+        // TODO: Problem: the tileset provided could actually be invalid!
 
         if(windowPresenter.changeTilesetPath(ofnTileset.lpstrFile)) {
 
@@ -532,8 +534,7 @@ void MainWindowView::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
 
-        // TODO: Reinit Window Metrics, and reset fonts, if DPI has actually changed.
-
+        // TODO [DPI/Settings Change]: Reinit Window Metrics, and reset fonts, if DPI has actually changed.
         moveControls(); // This will also center it
 
     }
@@ -707,7 +708,8 @@ __forceinline void MainWindowView::createMenuBar() {
 // getTallestPoint - Obtain the tallest point of the window.
 //------------------------------------------------------------------------------
 
-// TODO: Tallest and Widest could be merged into one function.
+// TODO [DPI]: Tallest and Widest could be merged into one function.
+// (Not really DPI, but it makes sense to deal with it then)
 
 LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
@@ -731,7 +733,7 @@ LONG MainWindowView::getTallestPoint() const {
 
 LONG MainWindowView::getWidestGroupBox() const {
 
-    // TODO: Actually write function properly
+    // TODO [DPI]: Actually write function properly
 
     //const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
@@ -753,7 +755,7 @@ void MainWindowView::moveControls() {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    // TODO: This entire code needs to be rewritten.
+    // TODO [DPI]: This entire code needs to be rewritten.
     // Client Area Width is Widest GroupBox + GameBoard Width
     // Client Area Height is whatever is taller: 3 Groupboxes + Button, or Gameboard
     // Min Width: GroupBox + at least 5 tiles
@@ -809,7 +811,6 @@ void MainWindowView::moveControls() {
 
     EndDeferWindowPos(hDeferedWindows);
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
-    // TODO: Prev monitor tracking
     CenterWindow(hWnd, rc, prevMonitor);
 
     // Update Panel's virtual size so it is consistent.

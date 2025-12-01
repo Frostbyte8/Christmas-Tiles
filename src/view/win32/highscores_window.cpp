@@ -97,8 +97,6 @@ void HighscoresWindow::onCreate() {
 
     labelCaption = createLabel(GET_LANG_STR(LangID::HIGHSCORES_TEXT), SS_CENTER, hWnd, 100, hInst);
 
-    // TODO: Lang Strs
-
     labelHeader[0] = createLabel(GET_LANG_STR(LangID::NAME_HEADER), SS_CENTER, hWnd, 100, hInst);
     labelHeader[1] = createLabel(GET_LANG_STR(LangID::SCORE_BOX_CAPTION), SS_CENTER, hWnd, 100, hInst);
     labelHeader[2] = createLabel(GET_LANG_STR(LangID::DATE_HEADER), SS_CENTER, hWnd, 100, hInst);
