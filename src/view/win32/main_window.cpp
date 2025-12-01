@@ -21,7 +21,7 @@ namespace MainWindowViewConstants {
     static const UINT MENU_DISABLED_FLAGS = MF_BYCOMMAND | MF_DISABLED | MF_GRAYED | MF_STRING;
     static const UINT MENU_CHECKED_FLAGS = MF_BYCOMMAND | MF_CHECKED;
     static const UINT MENU_UNCHECKED_FLAGS = MF_BYCOMMAND;
-    static const wchar_t BITMAP_FILTER[] = L" (*.bmp)\0*.bmp\0";
+    static const wchar_t BITMAP_FILTER[] = L" (*.bmp)\0*.bmp\0\0";
 }
 
 namespace CtrlID {
@@ -309,17 +309,12 @@ void MainWindowView::onChangeTileset() {
 
     ofnTileset.lStructSize = sizeof(ofnTileset);
     ofnTileset.hwndOwner = hWnd;
+    
+    // TODO: Somehow deal with this.
+    //wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
 
-    wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
-    // The +1 is for an extra null terminator required by OPENFILENAME
-    const LONG fullTextLen = wcslen(MainWindowViewConstants::BITMAP_FILTER) + wcslen(filterText) + 1;
 
-    wchar_t* fullText = (wchar_t*)malloc(sizeof(wchar_t) * (fullTextLen));
-    memset(fullText, 0, fullTextLen * sizeof(wchar_t));
-    wcscpy_s(fullText, fullTextLen, filterText);
-    wcscat_s(fullText, fullTextLen, MainWindowViewConstants::BITMAP_FILTER);
-
-    ofnTileset.lpstrFilter = fullText;
+    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0\0";
     ofnTileset.hInstance = hInstance;
     ofnTileset.nMaxFile = MAX_PATH;
     ofnTileset.lpstrFile = filePath;
@@ -344,7 +339,7 @@ void MainWindowView::onChangeTileset() {
 
     }
 
-    free(fullText);
+    //free(fullText);
 
 }
 
