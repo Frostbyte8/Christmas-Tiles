@@ -820,7 +820,7 @@ void MainWindowView::moveControls() {
 
     // 
 
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, tallestPoint, SWP_NOZORDER);
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, rc.bottom, SWP_NOZORDER);
 
     EndDeferWindowPos(hDeferedWindows);
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
