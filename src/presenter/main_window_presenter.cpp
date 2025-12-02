@@ -140,6 +140,26 @@ int MainWindowPresenter::requestNewGame() {
 }
 
 //------------------------------------------------------------------------------
+// shouldEndGameIfPlaying - Check if the game is playing, and ask the player if
+// they want to end it to complete the action they requested
+//------------------------------------------------------------------------------
+
+bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
+
+    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
+
+        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
+
+        if(retVal != MainWindowInterfaceResponses::YES) {
+            return false;
+        }
+
+    }
+
+    return true;
+}
+
+//------------------------------------------------------------------------------
 // tryAddScore - Attempt to add an entry to the score table
 //------------------------------------------------------------------------------
 
@@ -292,10 +312,12 @@ bool MainWindowPresenter::tryTogglePause() {
 // function completes.
 //------------------------------------------------------------------------------
 
-int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes) {
+int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes, bool dontWarn) {
     
-    if(!shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
-        return -1;
+    if(!dontWarn) {
+        if(!shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
+            return -1;
+        }
     }
     
     if(newWidth == WindowPresenterConstants::IGNORE_WIDTH) {
@@ -536,27 +558,6 @@ int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const 
     mainWindow.implGameStateChanged(windowData.gameState);
     
     return 1;
-}
-
-
-//------------------------------------------------------------------------------
-// shouldEndGameIfPlaying - Check if the game is playing, and ask the player if
-// they want to end it to complete the action they requested
-//------------------------------------------------------------------------------
-
-bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
-
-    if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
-
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
-
-        if(retVal != MainWindowInterfaceResponses::YES) {
-            return false;
-        }
-
-    }
-
-    return true;
 }
 
 //------------------------------------------------------------------------------

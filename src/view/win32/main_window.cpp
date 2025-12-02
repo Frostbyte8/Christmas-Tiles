@@ -249,6 +249,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
 
     unsigned int newWidth;
     unsigned int newHeight;
+    bool shouldIgnoreWarning = false;
 
     switch(menuID) {
         case MenuID::BOARD_3x3:
@@ -275,6 +276,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
             assert(customSizeWindow.getHandle());
             newWidth = customSizeWindow.getNewWidth();
             newHeight = customSizeWindow.getNewWidth();
+            shouldIgnoreWarning = true;
             break;
         default:
             NODEFAULT;
@@ -283,7 +285,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
     // Note that newWidth and newHeight can be altered by this function. This is fine because if they
     // are altered for whatever reason, we don't want to display the wrong menu as checked.
 
-    const int retVal = windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES);
+    const int retVal = windowPresenter.tryUpdateGameBoard(newWidth, newHeight, WindowPresenterConstants::IGNORE_NUMTILES, shouldIgnoreWarning);
 
     if(retVal == 1) {
         updateBoardSizeMenu(newWidth, newHeight, true);
@@ -303,6 +305,10 @@ void MainWindowView::onChangeTileset() {
     
     // TODO: Warn user about this action starting a new game
     // Need to do this because canceling the custom window as well breaks the program.
+
+    if(!windowPresenter.shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
+        return;
+    }
     
     OPENFILENAME ofnTileset = {0};
     wchar_t filePath[MAX_PATH] = L"";
@@ -331,7 +337,7 @@ void MainWindowView::onChangeTileset() {
             if(gamePanel.changeTileset()) {
                 unsigned int tempWidth = WindowPresenterConstants::IGNORE_WIDTH;
                 unsigned int tempHeight = WindowPresenterConstants::IGNORE_WIDTH;
-                windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, gamePanel.getNumTileTypes());
+                windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, gamePanel.getNumTileTypes(), true);
                 MainWindowView::moveControls();
             }
         }
@@ -425,7 +431,7 @@ bool MainWindowView::onCreate() {
     buttonPause = createButton(GET_LANG_STR(LangID::PAUSE_BUTTON_CAPTION), hWnd, CtrlID::BUTTON_PAUSE, hInstance);
     EnableWindow(buttonPause, FALSE);
 
-    windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, gamePanel.getNumTileTypes());
+    windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, gamePanel.getNumTileTypes(), true);
 
     updateBoardSizeMenu(boardDimensions.width, boardDimensions.height, false);
 
@@ -600,8 +606,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                     break;
 
                 case MenuID::BOARD_CUSTOM:
-                    customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
-                    activeModalDialog = customSizeWindow.getHandle();
+
+                    if(windowPresenter.shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
+                        customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                        activeModalDialog = customSizeWindow.getHandle();
+                    }
                     break;
                 
                 case MenuID::HIGHSCORES:

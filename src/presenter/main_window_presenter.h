@@ -65,10 +65,11 @@ class MainWindowPresenter {
         bool changeTilesetPath(wchar_t* newPath);
         const size_t& getScorePosition() const;
         int requestNewGame();
+        bool shouldEndGameIfPlaying(const int& LangIDTitle);
         bool tryAddScore(wchar_t* name, const size_t& index);
         int tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex);
         bool tryTogglePause();
-        int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes);
+        int tryUpdateGameBoard(unsigned int& newWidth, unsigned int& newHeight, unsigned int tileTypes, const bool dontWarn);
         inline void unflipTiles();
         
         // Public File I/O
@@ -83,7 +84,6 @@ class MainWindowPresenter {
         __forceinline void reset();
 
         int createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes);
-        bool shouldEndGameIfPlaying(const int& LangIDTitle);
         bool tryPause();
         bool tryUnpause();
         void updateElapsedTime();

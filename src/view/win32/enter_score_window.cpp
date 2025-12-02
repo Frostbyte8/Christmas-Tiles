@@ -187,7 +187,6 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             if(wParam != CtrlID::OK_BUTTON) {
                 return DefWindowProc(hWnd, msg, wParam, lParam);
             }
-            // Fall through
 
         case WM_CLOSE:
             SendMessage(parentHWnd, UWM_DIALOG_CLOSED, 0, 0);

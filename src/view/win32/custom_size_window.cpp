@@ -193,7 +193,7 @@ void CustomSizeWindow::onWindowMoved() {
 //-----------------------------------------------------------------------------
 
 LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
-
+    bool didCancel = false;
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -213,10 +213,16 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             else if (wParam != CtrlID::CANCEL_BUTTON) {
                 return DefWindowProc(hWnd, msg, wParam, lParam);
             }
+            else {
+                didCancel = true;
+            }
+
 
         case WM_CLOSE:
             SendMessage(parentHWnd, UWM_DIALOG_CLOSED, 0, 0);
-            SendMessage(parentHWnd, UWM_CUSTOM_SIZE_ENTERED, 0, 0);
+            if(!didCancel) {
+                SendMessage(parentHWnd, UWM_CUSTOM_SIZE_ENTERED, 0, 0);
+            }
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);
             DestroyWindow(hWnd);
