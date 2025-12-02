@@ -5,6 +5,11 @@
 [Bb]uild/
 [Mm]isc/
 
+![Bb]uild/VS2008/ChristmasTiles.sln
+![Bb]uild/VS2008/ChristmasTiles/ChristmasTiles.vcproj
+![Bb]uild/VS2015/ChristmasTiles.sln
+![Bb]uild/VS2015/ChristmasTiles/ChristmasTiles.vcproj
+
 #------------------------------------------------------------------------------
 # Auto generated files
 #------------------------------------------------------------------------------

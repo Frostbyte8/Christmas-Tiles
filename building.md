@@ -25,6 +25,12 @@ First go to Project > Properties. Change configuration to All Configurations.
 -- Additional Dependencies to "comctl32.lib"
 -  Manifest Tool > Input and Output, change:
 -- Additional Manifest Files to "$(InputDir)..\..\..\src\resources\application.manifest"
+--- Note that $(InputDir) might be $(SolutionDir) depending on your version.
+- Build Events > Post-Build Event
+-- Add these two lines to Command Line:
+--- XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
+--- XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D
+
 
 Next, Change configuration to Release.
 - Under C/C++ > Optimization, Change:

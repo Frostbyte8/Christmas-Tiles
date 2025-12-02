@@ -138,10 +138,10 @@ bool GameBoard::tryNewGame() {
         wsprintf(outStr, L"%02d \0", tiles[i].ID);
 
         ++k;
-        OutputDebugStr(outStr);
+        OutputDebugString(outStr);
         if(k == boardDimensions.width) {
             k = 0;
-            OutputDebugStr(L"\n");
+            OutputDebugString(L"\n");
         }
 
     }
