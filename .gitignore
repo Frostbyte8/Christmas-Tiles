@@ -5,10 +5,9 @@
 [Bb]uild/
 [Mm]isc/
 
-![Bb]uild/VS2008/ChristmasTiles.sln
-![Bb]uild/VS2008/ChristmasTiles/ChristmasTiles.vcproj
-![Bb]uild/VS2015/ChristmasTiles.sln
-![Bb]uild/VS2015/ChristmasTiles/ChristmasTiles.vcproj
+# Use these if you need to add project files quickly with Git Gui
+#!/[Bb]uild/
+#!/[Bb]uild/
 
 #------------------------------------------------------------------------------
 # Auto generated files
