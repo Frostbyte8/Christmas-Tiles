@@ -552,6 +552,8 @@ void MainWindowView::onWindowMoved() {
 
 LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
+    HINSTANCE retVal = 0;
+
     switch(msg) {
 
         default:
@@ -616,6 +618,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::HIGHSCORES:
                     highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
                     activeModalDialog = highscoresWindow.getHandle();
+                    break;
+
+                case MenuID::HELP_FILE:
+                    retVal = ShellExecute(0, 0, L".\\help\\en_index.html", 0, 0, SW_SHOW);
+                    if((LONG)retVal < 32) {
+                        // TODO: Display error
+                    }
                     break;
 
                 case MenuID::ABOUT:
