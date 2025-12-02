@@ -313,7 +313,6 @@ void MainWindowView::onChangeTileset() {
     // TODO: Somehow deal with this.
     //wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
 
-
     ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0\0";
     ofnTileset.hInstance = hInstance;
     ofnTileset.nMaxFile = MAX_PATH;

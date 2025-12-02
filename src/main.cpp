@@ -71,6 +71,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     return retVal;
 #else
-    return mainWindowView.doLoop();
+    return retVal;    
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 }
