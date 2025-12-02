@@ -9,7 +9,7 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     public:
 
-        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0) {
+        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0), windowMoving(true) {
         }
 
         ~AboutWindow() {
@@ -19,8 +19,6 @@ class AboutWindow : public WndAsClass<AboutWindow> {
             }
         }
 
-        bool onCreate();
-        void moveControls();
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
 
         static bool registerSelf(const HINSTANCE& hInst);
@@ -28,9 +26,13 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
+        bool onCreate();
+        void onDPIChange(const float xDPI, const float yDPI);
         void onWindowMoved();
+        void moveControls();
 
         static bool isRegistered;
+        bool windowMoving;
         HWND hWnd;
         HWND parentHWnd;
         HMONITOR prevMonitor;

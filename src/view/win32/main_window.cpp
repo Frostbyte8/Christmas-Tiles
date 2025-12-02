@@ -7,6 +7,22 @@
 #include "../../frost_util.h"
 #include <assert.h>
 
+#include <shellscalingapi.h>
+
+/*
+void DPIDebug(HWND hWnd, WPARAM wParam) {
+    
+    char buf[256] ={ 0 };
+    
+    HDC hdc = GetDC(hWnd);
+    int val = LOWORD(wParam);
+    ReleaseDC(hWnd, hdc);
+    sprintf(buf, "%d\n", val);
+    MessageBox(hWnd, buf, L"", MB_OK);
+    
+}
+*/
+
 //==============================================================================
 // Namespaces / Enums / Constants
 //==============================================================================
@@ -93,7 +109,7 @@ __forceinline BOOL DoesFileExist(const wchar_t* path) {
 //==============================================================================
 
 MainWindowView::MainWindowView(const HINSTANCE hIn) : windowPresenter(*this), hWnd(NULL),
-hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL) {
+hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL), windowMoving(true) {
 }
 
 //==============================================================================
@@ -167,6 +183,7 @@ bool MainWindowView::registerSelf() {
     // TODO [DPI]: DPI Icon related stuff.
     // In Short: Pre-Vista/7, Windows selected the correct icon for the taskbar.
     // Vista/7(?) and later for whatever reason scale the icon, but only, sometimes?
+    // MSDN States that SM_CXICON and SM_CXSMICON can get this information
     
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
@@ -395,7 +412,6 @@ void MainWindowView::onClose() {
 
 #pragma warning (pop) 
 
-
 //------------------------------------------------------------------------------
 // onCreate - Processes the WM_CREATE message
 //------------------------------------------------------------------------------
@@ -434,15 +450,16 @@ bool MainWindowView::onCreate() {
     windowPresenter.tryUpdateGameBoard(boardDimensions.width, boardDimensions.height, gamePanel.getNumTileTypes(), true);
 
     updateBoardSizeMenu(boardDimensions.width, boardDimensions.height, false);
-
-    metrics.initWindowMetrics();
-
-    HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+   
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-    moveControls();
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
 
+    moveControls();
+    windowMoving = false; // We were "moving" it into place. ;)
     // Now that the window is done being created, move and show it.
     // This is to reduce flicker.
     ShowWindow(hWnd, SW_NORMAL);
@@ -450,6 +467,19 @@ bool MainWindowView::onCreate() {
 
     return true;
 
+}
+
+//------------------------------------------------------------------------------
+// onDPIChange - Processes the WM_DPICHANGED messages
+//------------------------------------------------------------------------------
+
+void MainWindowView::onDPIChange(const float xDPI, const float yDPI) {
+    metrics.initWindowMetrics(xDPI, yDPI);
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    if(!windowMoving) {
+        moveControls();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -572,8 +602,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             }
             break;
 
+        case WM_ENTERSIZEMOVE:
+            windowMoving = true;
+            break;
+
         case WM_EXITSIZEMOVE:
-            onWindowMoved(); 
+            windowMoving = false;
+            onWindowMoved();
             break;
 
         case WM_CREATE:
@@ -662,6 +697,10 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
             onClose();
             break;
 
+        case WM_DPICHANGED:
+            onDPIChange(LOWORD(wParam), HIWORD(wParam));
+            break;
+
         case WM_DESTROY: 
             PostQuitMessage(0);
             break;
@@ -747,6 +786,7 @@ LONG MainWindowView::getTallestPoint() const {
 LONG MainWindowView::getWidestGroupBox() const {
 
     // TODO [DPI]: Actually write function properly
+    // TODO: The Button could actually be wider than the groupboxes.
 
     //const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();

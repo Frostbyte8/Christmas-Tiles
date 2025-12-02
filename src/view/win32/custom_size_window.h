@@ -10,11 +10,9 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
 
     public:
 
-        CustomSizeWindow() : hWnd(0), parentHWnd(0) {
+        CustomSizeWindow() : hWnd(0), parentHWnd(0), windowMoving(true) {
         }
 
-        void onCreate();
-        void moveControls();
         bool createWindow(const HINSTANCE& hInst, const HWND& parent);
 
         static bool registerSelf(const HINSTANCE& hInst);
@@ -24,10 +22,14 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
 
     private:
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
+        void onCreate();
+        void onDPIChange(const float xDPI, const float yDPI);
+        void moveControls();
         void onWindowMoved();
         void saveData();
 
         static bool isRegistered;
+        bool windowMoving;
         HWND hWnd;
         HWND parentHWnd;
         

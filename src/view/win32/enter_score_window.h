@@ -8,7 +8,7 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     friend WndAsClass;
 
     public:
-        EnterScoreWindow() : hWnd(0), parentHWnd(0), scoreIndex(0), name(0) {
+        EnterScoreWindow() : hWnd(0), parentHWnd(0), scoreIndex(0), name(0), windowMoving(true) {
             strCache[0] = NULL;
             strCache[1] = NULL;
         }
@@ -30,11 +30,13 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     private:
 
         void onCreate();
+        void onDPIChange(const float xDPI, const float yDPI);
         void onWindowMoved();
         void moveControls();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         
         static bool isRegistered;
+        bool windowMoving;
         HMONITOR prevMonitor;
         HWND hWnd;
         HWND parentHWnd;

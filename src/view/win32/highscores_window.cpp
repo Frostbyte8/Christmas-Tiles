@@ -1,7 +1,10 @@
 #include "highscores_window.h"
 #include "../../language_table.h"
 #include "shared_functions.h"
-#include <cassert>
+
+#include <shellscalingapi.h>
+
+#include <assert.h>
 
 bool HighscoresWindow::isRegistered = false;
 
@@ -117,17 +120,31 @@ void HighscoresWindow::onCreate() {
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
     SendMessage(hWnd, DM_SETDEFID, CtrlID::OK_BUTTON, 0);
 
-    metrics.initWindowMetrics();
-    HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
 
     moveControls();
-    
+    windowMoving = false;
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
 
+}
+
+//------------------------------------------------------------------------------
+// onDPIChange - Processes the WM_DPICHANGED messages
+//------------------------------------------------------------------------------
+
+void HighscoresWindow::onDPIChange(const float xDPI, const float yDPI) {
+    metrics.initWindowMetrics(xDPI, yDPI);
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    if(!windowMoving) {
+        moveControls();
+    }
 }
 
 LONG HighscoresWindow::findWidestName() {
@@ -206,6 +223,7 @@ void HighscoresWindow::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
         moveControls(); // This will also center it
+        RedrawWindow(hWnd, 0, 0, RDW_INVALIDATE);
     }
 
 }
@@ -219,11 +237,16 @@ LRESULT HighscoresWindow::windowProc(const UINT& msg, const WPARAM wParam, const
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_EXITSIZEMOVE: onWindowMoved(); break;
+        case WM_EXITSIZEMOVE: 
+            windowMoving = false;
+            onWindowMoved();
+            break;
         case WM_CREATE:
             onCreate();
             break;
-
+        case WM_ENTERSIZEMOVE:
+            windowMoving = true;
+            break;
         case DM_GETDEFID:
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
 
@@ -241,7 +264,9 @@ LRESULT HighscoresWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             DestroyWindow(hWnd);
             hWnd = NULL;
             break;
-
+        case WM_DPICHANGED:
+            onDPIChange(LOWORD(wParam), HIWORD(wParam));
+            break;
     }
 
     return 0;

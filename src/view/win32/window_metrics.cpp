@@ -3,10 +3,23 @@
 WindowMetrics::WindowMetrics() : fontHDC(0), curFont(0), oldFont(0), avgCharWidth(0), avgCharHeight(0) {
 }
 
-void WindowMetrics::initWindowMetrics() {
-    
+WindowMetrics::~WindowMetrics() {
     if(curFont) {
-        return; // TODO: Updating these values.
+        SelectObject(fontHDC, oldFont);
+        DeleteObject(curFont);
+        DeleteDC(fontHDC);
+    }
+}
+
+void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
+    
+    xScaleFactor = inScaleX / 96.0f;
+    yScaleFactor = inScaleY / 96.0f;
+
+    if(curFont) {
+        SelectObject(fontHDC, oldFont);
+        DeleteObject(curFont);
+        DeleteDC(fontHDC);
     }
 
     NONCLIENTMETRICS ncm;
@@ -37,11 +50,15 @@ void WindowMetrics::initWindowMetrics() {
     TEXTMETRIC tm;
     ZeroMemory(&tm, sizeof(TEXTMETRIC));
 
+    // Scale the DPI as needed.
+
+    ncm.lfMessageFont.lfWidth *= xScaleFactor;
+    ncm.lfMessageFont.lfHeight *= yScaleFactor;
+
     fontHDC     = CreateCompatibleDC(NULL);
     curFont     = CreateFontIndirect(&ncm.lfMessageFont);
     oldFont     = reinterpret_cast<HFONT>(SelectObject(fontHDC, curFont));
     GetTextMetrics(fontHDC, &tm);
-    
     // We only care about these two settings.
     avgCharWidth    = tm.tmAveCharWidth;
     avgCharHeight   = tm.tmHeight;

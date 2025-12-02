@@ -40,7 +40,8 @@ class WindowMetrics {
 
     public:
         WindowMetrics();
-        void initWindowMetrics();
+        ~WindowMetrics();
+        void initWindowMetrics(float inScaleX = 96.0f, float inScaleY = 96.0f);
 
         inline int XDLU2PIX(const int& x) const;
         inline int YDLU2PIX(const int& y) const;
@@ -57,6 +58,8 @@ class WindowMetrics {
         HFONT       oldFont;
         LONG        avgCharWidth;
         LONG        avgCharHeight;
+        float       xScaleFactor;
+        float       yScaleFactor;
 
         ControlSpacing      cs;
         ControlDimensions   cd;

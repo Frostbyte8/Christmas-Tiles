@@ -92,10 +92,10 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\..\src\resources\application.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -113,10 +113,10 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\..\src\resources\application.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -138,10 +138,10 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\..\src\resources\application.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -163,10 +163,10 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\..\src\resources\application.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D

@@ -3,7 +3,10 @@
 #include "shared_functions.h"
 #include "../../model/scores.h"
 
+#include <shellscalingapi.h>
+
 #include <assert.h>
+
 
 bool EnterScoreWindow::isRegistered = false;
 
@@ -108,15 +111,30 @@ void EnterScoreWindow::onCreate() {
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
     SendMessage(hWnd, DM_SETDEFID, CtrlID::OK_BUTTON, 0);
 
-    metrics.initWindowMetrics();
-    HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
-    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
 
     moveControls();
-
+    windowMoving = false;
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
+}
+
+//------------------------------------------------------------------------------
+// onDPIChange - Processes the WM_DPICHANGED messages
+//------------------------------------------------------------------------------
+
+void EnterScoreWindow::onDPIChange(const float xDPI, const float yDPI) {
+    metrics.initWindowMetrics(xDPI, yDPI);
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    if(!windowMoving) {
+        moveControls();
+    }
 }
 
 void EnterScoreWindow::moveControls() {
@@ -159,6 +177,7 @@ void EnterScoreWindow::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
         moveControls(); // This will also center it
+        RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
     }
 
 }
@@ -176,8 +195,14 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
         case WM_CREATE:
             onCreate();
             break;
+        case WM_ENTERSIZEMOVE:
+            windowMoving = true;
+            break;
 
-        case WM_EXITSIZEMOVE: onWindowMoved(); break;
+        case WM_EXITSIZEMOVE:
+            windowMoving = false;
+            onWindowMoved();
+            break;
 
         case DM_GETDEFID:
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
@@ -205,7 +230,9 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             SendMessage(parentHWnd, UWM_SCORE_ENTERED, 0, 0);
             hWnd = NULL;
             break;
-
+        case WM_DPICHANGED:
+            onDPIChange(LOWORD(wParam), HIWORD(wParam));
+            break;
     }
 
     return 0;

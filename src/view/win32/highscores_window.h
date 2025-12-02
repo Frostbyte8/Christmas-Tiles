@@ -9,7 +9,7 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
     friend WndAsClass;
 
     public:
-        HighscoresWindow() : hWnd(0), parentHWnd(0), scoreTable(NULL) {}
+        HighscoresWindow() : hWnd(0), parentHWnd(0), scoreTable(NULL), windowMoving(true) {}
 
         bool createWindow(const HINSTANCE& hInst, const HWND& parent, const ScoreTable& inScoreTable);
 
@@ -21,11 +21,13 @@ class HighscoresWindow : public WndAsClass<HighscoresWindow> {
         LONG findWidestName();
 
         void onCreate();
+        void onDPIChange(const float xDPI, const float yDPI);
         void moveControls();
         void onWindowMoved();
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
         
         static bool isRegistered;
+        bool windowMoving;
         HMONITOR prevMonitor;
         HWND hWnd;
         HWND parentHWnd;

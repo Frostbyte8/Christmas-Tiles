@@ -45,6 +45,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         void onChangeBoardSize(const int& menuID);
         void onChangeTileset();
         void onClose();
+        void onDPIChange(const float xDPI, const float yDPI);
         bool onCreate();
         void onElapsedTimeTimer();
         void onNewGame();
@@ -86,6 +87,8 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         DynamicLabel    pointsLabel;
         DynamicLabel    timeLabel;
         GamePanel       gamePanel;
+
+        bool windowMoving;
         
         WindowMetrics   metrics;
         bool            shouldUnflip;

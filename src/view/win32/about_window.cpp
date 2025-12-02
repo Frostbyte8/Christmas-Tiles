@@ -4,6 +4,8 @@
 #include "../../gitinfo.h"
 #include "shared_functions.h"
 
+#include <shellscalingapi.h>
+
 bool AboutWindow::isRegistered = false;
 
 static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
@@ -175,16 +177,32 @@ bool AboutWindow::onCreate() {
 
     metrics.initWindowMetrics();
 
-    HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 
-    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
 
     moveControls();
+    windowMoving = false;
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
 
     return true;
+}
+
+//------------------------------------------------------------------------------
+// onDPIChange - Processes the WM_DPICHANGED messages
+//------------------------------------------------------------------------------
+
+void AboutWindow::onDPIChange(const float xDPI, const float yDPI) {
+    metrics.initWindowMetrics(xDPI, yDPI);
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    if(!windowMoving) {
+        moveControls();
+    }
 }
 
 //-----------------------------------------------------------------------------
@@ -197,6 +215,7 @@ void AboutWindow::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
         moveControls(); // This will also center it
+        RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
     }
 
 }
@@ -210,11 +229,17 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_EXITSIZEMOVE: onWindowMoved(); break;
         case WM_CREATE:
             onCreate();
             break;
+        case WM_ENTERSIZEMOVE:
+            windowMoving = true;
+            break;
 
+        case WM_EXITSIZEMOVE:
+            windowMoving = false;
+            onWindowMoved();
+            break;
         case DM_GETDEFID:
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
 
@@ -232,7 +257,9 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
             DestroyWindow(hWnd);
             hWnd = NULL;
             break;
-
+        case WM_DPICHANGED:
+            onDPIChange(LOWORD(wParam), HIWORD(wParam));
+            break;
 
     }
 

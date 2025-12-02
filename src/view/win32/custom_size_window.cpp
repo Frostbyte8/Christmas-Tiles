@@ -1,6 +1,9 @@
 #include "custom_size_window.h"
 #include "shared_functions.h"
 #include "../../language_table.h"
+
+#include <shellscalingapi.h>
+
 bool CustomSizeWindow::isRegistered = false;
 
 static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
@@ -76,15 +79,30 @@ void CustomSizeWindow::onCreate() {
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, BS_DEFPUSHBUTTON, CtrlID::OK_BUTTON, hInst);
     buttonCancel = createButton(GET_LANG_STR(LangID::CANCEL_BUTTON_CAPTION), hWnd, 0, CtrlID::CANCEL_BUTTON, hInst);
 
-    metrics.initWindowMetrics();
-    HFONT dialogFont = metrics.GetCurrentFont();
-    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
-    prevMonitor = MonitorFromWindow(parentHWnd, MONITOR_DEFAULTTONEAREST);
+    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
 
     moveControls();
-
+    windowMoving = false;
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
+}
+
+//------------------------------------------------------------------------------
+// onDPIChange - Processes the WM_DPICHANGED messages
+//------------------------------------------------------------------------------
+
+void CustomSizeWindow::onDPIChange(const float xDPI, const float yDPI) {
+    metrics.initWindowMetrics(xDPI, yDPI);
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+    if(!windowMoving) {
+        moveControls();
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -185,6 +203,7 @@ void CustomSizeWindow::onWindowMoved() {
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
         moveControls(); // This will also center it
+        RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
     }
 
 }
@@ -197,11 +216,17 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);
-        case WM_EXITSIZEMOVE: onWindowMoved(); break;
         case WM_CREATE:
             onCreate();
             break;
+        case WM_ENTERSIZEMOVE:
+            windowMoving = true;
+            break;
 
+        case WM_EXITSIZEMOVE:
+            windowMoving = false;
+            onWindowMoved();
+            break;
         case DM_GETDEFID:
             return MAKEWPARAM(CtrlID::OK_BUTTON, DC_HASDEFID);
 
@@ -228,7 +253,9 @@ LRESULT CustomSizeWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             DestroyWindow(hWnd);
             hWnd = NULL;
             break;
-
+        case WM_DPICHANGED:
+            onDPIChange(LOWORD(wParam), HIWORD(wParam));
+            break;
 
     }
 
