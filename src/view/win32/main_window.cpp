@@ -87,12 +87,6 @@ __forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
     SetWindowText(ctrl, scoreStr);
 }
 
-__forceinline BOOL DoesFileExist(const wchar_t* path) {
-    const DWORD fileAttrib = GetFileAttributes(path);
-    return (fileAttrib != INVALID_FILE_ATTRIBUTES && !(fileAttrib & FILE_ATTRIBUTE_DIRECTORY));
-}
-
-
 //==============================================================================
 // Constructors
 //==============================================================================
@@ -233,7 +227,7 @@ void MainWindowView::implGameStateChanged(const int& newState) {
             size_t scorePosition = windowPresenter.getScorePosition();
 
             if(scorePosition != -1) {
-                enterScoreWindow.createWindow(hInstance, hWnd, scorePosition);
+                enterScoreWindow.createWindow(hInstance, hWnd, prevMonitor, scorePosition);
             }
 
         }
@@ -639,13 +633,13 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                 case MenuID::BOARD_CUSTOM:
 
                     if(windowPresenter.shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
-                        customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                        customSizeWindow.createWindow(GetModuleHandle(NULL), hWnd, prevMonitor);
                         activeModalDialog = customSizeWindow.getHandle();
                     }
                     break;
                 
                 case MenuID::HIGHSCORES:
-                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+                    highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, prevMonitor, windowPresenter.getScoreTable());
                     activeModalDialog = highscoresWindow.getHandle();
                     break;
 
@@ -657,7 +651,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                     break;
 
                 case MenuID::ABOUT:
-                    aboutWindow.createWindow(GetModuleHandle(NULL), hWnd);
+                    aboutWindow.createWindow(GetModuleHandle(NULL), hWnd, prevMonitor);
                     activeModalDialog = aboutWindow.getHandle();
                     break;
 
@@ -675,7 +669,7 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
 
         case UWM_SCORE_ENTERED:
             windowPresenter.tryAddScore(enterScoreWindow.getName(), enterScoreWindow.getScoreIndex());
-            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, windowPresenter.getScoreTable());
+            highscoresWindow.createWindow(GetModuleHandle(NULL), hWnd, prevMonitor, windowPresenter.getScoreTable());
             activeModalDialog = highscoresWindow.getHandle();
             break;
 

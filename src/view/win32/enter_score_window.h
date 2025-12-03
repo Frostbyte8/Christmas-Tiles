@@ -19,7 +19,7 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
             }
         }
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent, size_t& inScoreIndex);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor, size_t& inScoreIndex);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }

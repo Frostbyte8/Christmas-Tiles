@@ -45,17 +45,21 @@ __forceinline HWND createButton(const wchar_t* title, const HWND& parent, const 
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent) {
+bool AboutWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor) {
 
     if(hWnd) {
         return true; // Already created.
     }
 
     parentHWnd = parent;
+    prevMonitor = parentMonitor;
 
+    MONITORINFO monitorInfo = {0};
+    monitorInfo.cbSize = sizeof(MONITORINFO);
+    GetMonitorInfo(prevMonitor, &monitorInfo);
+    
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"AboutWindow", GET_LANG_STR(LangID::ABOUT_TITLE),
-        WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
+        WINDOW_STYLE, (monitorInfo.rcWork.left - monitorInfo.rcWork.right), (monitorInfo.rcWork.top - monitorInfo.rcWork.bottom), 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {
@@ -177,9 +181,7 @@ bool AboutWindow::onCreate() {
 
     buttonOK        = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
 
-    metrics.initWindowMetrics();
-
-    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
+    //prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 #ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;
@@ -266,6 +268,7 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
             break;
 #ifdef _DPI_AWARE_
         case WM_DPICHANGED:
+            OutputDebugString(L"Called\n");
             onDPIChange(LOWORD(wParam), HIWORD(wParam));
             break;
 #endif // _DPI_AWARE_

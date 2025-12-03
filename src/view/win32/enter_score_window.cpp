@@ -38,7 +38,7 @@ namespace CtrlID {
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, size_t& inScoreIndex) {
+bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor, size_t& inScoreIndex) {
 
     scoreIndex = inScoreIndex;
 
@@ -47,10 +47,14 @@ bool EnterScoreWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
     }
 
     parentHWnd = parent;
+    prevMonitor = parentMonitor;
+
+    MONITORINFO monitorInfo = {0};
+    monitorInfo.cbSize = sizeof(MONITORINFO);
+    GetMonitorInfo(prevMonitor, &monitorInfo);
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"EnterScoreWindow", GET_LANG_STR(LangID::ENTER_SCORE_WINDOW_TITLE),
-        WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
+        WINDOW_STYLE, (monitorInfo.rcWork.left - monitorInfo.rcWork.right), (monitorInfo.rcWork.top - monitorInfo.rcWork.bottom), 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {

@@ -33,7 +33,7 @@ namespace CtrlID {
 // createWindow - Creates the about Window
 //-----------------------------------------------------------------------------
 
-bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, const ScoreTable& inScoreTable) {
+bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor, const ScoreTable& inScoreTable) {
 
     scoreTable = &inScoreTable;
 
@@ -42,10 +42,14 @@ bool HighscoresWindow::createWindow(const HINSTANCE& hInst, const HWND& parent, 
     }
 
     parentHWnd = parent;
+    prevMonitor = parentMonitor;
+
+    MONITORINFO monitorInfo = {0};
+    monitorInfo.cbSize = sizeof(MONITORINFO);
+    GetMonitorInfo(prevMonitor, &monitorInfo);
 
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"HighscoresWindow", GET_LANG_STR(LangID::HIGHSCORES_TITLE),
-        WINDOW_STYLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
+        WINDOW_STYLE, (monitorInfo.rcWork.left - monitorInfo.rcWork.right), (monitorInfo.rcWork.top - monitorInfo.rcWork.bottom), 0, 0,
         parent, NULL, hInst, this);
 
     if(hWnd == NULL) {

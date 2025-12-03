@@ -19,7 +19,7 @@ class AboutWindow : public WndAsClass<AboutWindow> {
             }
         }
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }

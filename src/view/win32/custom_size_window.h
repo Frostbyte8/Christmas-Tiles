@@ -13,7 +13,7 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
         CustomSizeWindow() : hWnd(0), parentHWnd(0), windowMoving(true) {
         }
 
-        bool createWindow(const HINSTANCE& hInst, const HWND& parent);
+        bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor);
 
         static bool registerSelf(const HINSTANCE& hInst);
         inline const HWND& getHandle() const { return hWnd; }
