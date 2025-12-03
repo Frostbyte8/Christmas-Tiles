@@ -33,6 +33,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title);
         void implDisplayMessage(const wchar_t* message, const wchar_t* title);
         void implGameStateChanged(const int& gameState);
+        bool implTryLoadTileset(const wchar_t* fullPath);
 
     private:
         

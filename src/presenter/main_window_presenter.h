@@ -62,7 +62,7 @@ class MainWindowPresenter {
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
         
         // Public Functions
-        bool changeTilesetPath(wchar_t* newPath);
+        bool changeTilesetPath(const wchar_t* newPath);
         const size_t& getScorePosition() const;
         int requestNewGame();
         bool shouldEndGameIfPlaying(const int& LangIDTitle);

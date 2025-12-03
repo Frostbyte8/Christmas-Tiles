@@ -242,7 +242,14 @@ void MainWindowView::implGameStateChanged(const int& newState) {
 
     }
 
+}
 
+//------------------------------------------------------------------------------
+// implTryLoadTileset
+//------------------------------------------------------------------------------
+
+bool MainWindowView::implTryLoadTileset(const wchar_t* fullPath) {
+    return gamePanel.changeTileset(fullPath);
 }
 
 //==============================================================================
@@ -338,17 +345,7 @@ void MainWindowView::onChangeTileset() {
 
     if(GetOpenFileName(&ofnTileset)) {
 
-        // TODO: Problem: the tileset provided could actually be invalid!
-
-        if(windowPresenter.changeTilesetPath(ofnTileset.lpstrFile)) {
-
-            if(gamePanel.changeTileset()) {
-                unsigned int tempWidth = WindowPresenterConstants::IGNORE_WIDTH;
-                unsigned int tempHeight = WindowPresenterConstants::IGNORE_WIDTH;
-                windowPresenter.tryUpdateGameBoard(tempWidth, tempHeight, gamePanel.getNumTileTypes(), true);
-                MainWindowView::moveControls();
-            }
-        }
+        windowPresenter.changeTilesetPath(ofnTileset.lpstrFile);
 
     }
 

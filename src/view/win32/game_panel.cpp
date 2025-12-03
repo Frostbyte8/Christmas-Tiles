@@ -45,9 +45,9 @@ bool GamePanel::createWindow(const HINSTANCE& hInst, const HWND& parent, const H
     }
 
 
-    if(!changeTileset()) {
-        return false;
-    }
+    //if(!changeTileset(windowPresenter->getMainWindowData().pathToTileset)) {
+    //    return false;
+    //}
 
     ShowWindow(hWnd, SW_NORMAL);
     UpdateWindow(hWnd);
@@ -99,10 +99,10 @@ bool GamePanel::registerSelf(HINSTANCE hInst) {
 // changeTileset - Attempts to change the tileset to the new one provided.
 //------------------------------------------------------------------------------
 
-bool GamePanel::changeTileset() {
+bool GamePanel::changeTileset(const wchar_t* fullPath) {
 
     HBITMAP tempBMP;
-    tempBMP = (HBITMAP)LoadImage(NULL, windowPresenter->getMainWindowData().pathToTileset, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+    tempBMP = (HBITMAP)LoadImage(NULL, fullPath, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
     if(!tempBMP) {
         return false;

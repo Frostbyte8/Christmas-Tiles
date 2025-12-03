@@ -28,7 +28,7 @@ class GamePanel : public WndAsClass<GamePanel> {
 
         // Public Functions
 
-        bool changeTileset();
+        bool changeTileset(const wchar_t* fullPath);
         void updateVirtualSize(const WORD& numXTiles, const WORD& numYTiles);
 
     private:

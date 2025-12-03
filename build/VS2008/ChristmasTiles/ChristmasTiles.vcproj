@@ -304,10 +304,6 @@
 			Name="interface"
 			>
 			<File
-				RelativePath="..\..\..\src\interface\main_window_interface.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\interface\main_window_interface.h"
 				>
 			</File>

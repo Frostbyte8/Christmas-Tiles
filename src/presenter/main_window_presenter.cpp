@@ -89,7 +89,8 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 // changeTilesetPath - Attempts to change the tileset path
 //------------------------------------------------------------------------------
 
-bool MainWindowPresenter::changeTilesetPath(wchar_t* newPath) {
+bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
+
     if(!DoesFileExist(newPath)) {
         return false;
     }
@@ -105,6 +106,14 @@ bool MainWindowPresenter::changeTilesetPath(wchar_t* newPath) {
     newTilesetPath[strLength - 1] = 0;
     wcscpy_s(newTilesetPath, strLength, newPath);
 
+    // Make sure the BMP can be loaded first.
+
+    if(!mainWindow.implTryLoadTileset(newTilesetPath)) {
+        free(newTilesetPath);
+        return false;
+    }
+
+    // We can't free this yet, we have no idea if the view loaded it.
     if(windowData.pathToTileset) {
         free(windowData.pathToTileset);
     }
