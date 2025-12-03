@@ -3,7 +3,9 @@
 #include "shared_functions.h"
 #include "../../model/scores.h"
 
+#ifdef _DPI_AWARE_
 #include <shellscalingapi.h>
+#endif // _DPI_AWARE_
 
 #include <assert.h>
 
@@ -112,11 +114,16 @@ void EnterScoreWindow::onCreate() {
     SendMessage(hWnd, DM_SETDEFID, CtrlID::OK_BUTTON, 0);
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-
+#ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;
     GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
     onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
+#else
+    metrics.initWindowMetrics();
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+#endif // _DPI_AWARE_
 
     moveControls();
     windowMoving = false;
@@ -230,9 +237,11 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             SendMessage(parentHWnd, UWM_SCORE_ENTERED, 0, 0);
             hWnd = NULL;
             break;
+#ifdef _DPI_AWARE_
         case WM_DPICHANGED:
             onDPIChange(LOWORD(wParam), HIWORD(wParam));
             break;
+#endif // #ifdef _DPI_AWARE_
     }
 
     return 0;

@@ -7,21 +7,10 @@
 #include "../../frost_util.h"
 #include <assert.h>
 
+#ifdef _DPI_AWARE_
 #include <shellscalingapi.h>
+#endif
 
-/*
-void DPIDebug(HWND hWnd, WPARAM wParam) {
-    
-    char buf[256] ={ 0 };
-    
-    HDC hdc = GetDC(hWnd);
-    int val = LOWORD(wParam);
-    ReleaseDC(hWnd, hdc);
-    sprintf(buf, "%d\n", val);
-    MessageBox(hWnd, buf, L"", MB_OK);
-    
-}
-*/
 
 //==============================================================================
 // Namespaces / Enums / Constants
@@ -452,11 +441,16 @@ bool MainWindowView::onCreate() {
     updateBoardSizeMenu(boardDimensions.width, boardDimensions.height, false);
    
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-
+#ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;
     GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
     onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
+#else
+    metrics.initWindowMetrics();
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+#endif // _DPI_AWARE_
 
     moveControls();
     windowMoving = false; // We were "moving" it into place. ;)
@@ -696,10 +690,11 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
         case WM_CLOSE:
             onClose();
             break;
-
+#ifdef _DPI_AWARE_
         case WM_DPICHANGED:
             onDPIChange(LOWORD(wParam), HIWORD(wParam));
             break;
+#endif // _DPI_AWARE_
 
         case WM_DESTROY: 
             PostQuitMessage(0);

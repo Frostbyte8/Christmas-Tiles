@@ -4,7 +4,9 @@
 #include "../../gitinfo.h"
 #include "shared_functions.h"
 
+#ifdef _DPI_AWARE_
 #include <shellscalingapi.h>
+#endif
 
 bool AboutWindow::isRegistered = false;
 
@@ -178,11 +180,16 @@ bool AboutWindow::onCreate() {
     metrics.initWindowMetrics();
 
     prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-
+#ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;
     GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
     onDPIChange(static_cast<float>(xDPI), static_cast<float>(yDPI));
+#else
+    metrics.initWindowMetrics();
+    HFONT dialogFont = metrics.GetCurrentFont();
+    EnumChildWindows(hWnd, reinterpret_cast<WNDENUMPROC>(ChangeControlsFont), (LPARAM)dialogFont);
+#endif // _DPI_AWARE_
 
     moveControls();
     windowMoving = false;
@@ -257,9 +264,11 @@ LRESULT AboutWindow::windowProc(const UINT& msg, const WPARAM wParam, const LPAR
             DestroyWindow(hWnd);
             hWnd = NULL;
             break;
+#ifdef _DPI_AWARE_
         case WM_DPICHANGED:
             onDPIChange(LOWORD(wParam), HIWORD(wParam));
             break;
+#endif // _DPI_AWARE_
 
     }
 
