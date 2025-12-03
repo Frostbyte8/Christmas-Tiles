@@ -18,7 +18,7 @@ const uint8_t& newTileTypes) : matchesNeeded(0) {
     // TODO: Problem. A Gameboard can't be created with less than 2 types.
     numTileTypes = FrostUtil::ClampInts(newTileTypes, GameBoardConstants::MIN_TILE_TYPES, GameBoardConstants::MAX_TILE_TYPES);
 
-    tiles.resize(newWidth * newHeight);
+    tiles.resize(boardDimensions.width * boardDimensions.height);
 }
 
 GameBoard::GameBoard() : matchesNeeded(0), numTileTypes(0) {

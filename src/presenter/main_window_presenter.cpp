@@ -335,9 +335,10 @@ int MainWindowPresenter::tryUpdateGameBoard(unsigned int& newWidth, unsigned int
     if(tileTypes == WindowPresenterConstants::IGNORE_NUMTILES) {
         tileTypes = gameBoard.getNumTileTypes();
     }
-
-    // The first two tiles are special and are not part of the calculation.
-    tileTypes -= 2;
+    else {
+        // The first two tiles are special and are not part of the calculation.
+        tileTypes -= 2;
+    }
 
     FrostUtil::ClampInts(newWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
     FrostUtil::ClampInts(newHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);

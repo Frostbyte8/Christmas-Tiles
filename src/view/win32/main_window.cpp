@@ -292,7 +292,7 @@ void MainWindowView::onChangeBoardSize(const int& menuID) {
         case MenuID::BOARD_CUSTOM:
             assert(customSizeWindow.getHandle());
             newWidth = customSizeWindow.getNewWidth();
-            newHeight = customSizeWindow.getNewWidth();
+            newHeight = customSizeWindow.getNewHeight();
             shouldIgnoreWarning = true;
             break;
         default:
