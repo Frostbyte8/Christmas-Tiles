@@ -112,7 +112,7 @@ bool MainWindowView::createWindow() {
     hWnd = CreateWindowEx(WINDOW_STYLE_EX, L"XmasTilesMainWindow", GET_LANG_STR(LangID::APP_TITLE),
         WINDOW_STYLE, CW_USEDEFAULT, CW_USEDEFAULT, 0, 0,
         NULL, NULL, hInstance, this);
-    
+   
     const DWORD errorCode = GetLastError();
 
     if(hWnd == NULL) {
@@ -756,9 +756,8 @@ LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
-    const long minHeight = gamePanel.getTileSize() * 9;
+    const long minHeight = (gamePanel.getTileSize() * 9);
     const long boardheight = gamePanel.getTileSize() * windowPresenter.getGameBoard().getBoardDimensions().height;
-
 
     LONG tallestPoint = (CD.YLABEL * 3) + (CS.YFIRST_GROUPBOX_MARGIN * 3) + (CS.YLAST_GROUPBOX_MARGIN * 3) +
                         (CD.YBUTTON);
@@ -768,21 +767,19 @@ LONG MainWindowView::getTallestPoint() const {
     return (tallestPoint < minHeight) ? minHeight : tallestPoint;
 }
 
-//------------------------------------------------------------------------------
-// getWidestGroupBox - Identify which Groupbox is the widest
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+// getWidestGroupBox - Identify which Group box is the widest (Or Button)
+//-----------------------------------------------------------------------------
 
 LONG MainWindowView::getWidestGroupBox() const {
 
-    // TODO [DPI]: Actually write function properly
-    // TODO: The Button could actually be wider than the groupboxes.
-
-    //const ControlDimensions& CD = metrics.getControlDimensions();
+    const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
 
     wchar_t str[11] = L"000000000\0";
     LONG widestGroupBox = metrics.calculateStringWidth(str);
     widestGroupBox += CS.XGROUPBOX_MARGIN * 2;
+    widestGroupBox = max(widestGroupBox, CD.XBUTTON);
     return widestGroupBox;
 
 }
@@ -803,7 +800,7 @@ void MainWindowView::moveControls() {
     // Min Width: GroupBox + at least 5 tiles
     // Min Height: No less than 9 tiles tall.
 
-    const LONG tallestPoint = getTallestPoint();
+    LONG tallestPoint = getTallestPoint();
     const LONG widestGroupBox = getWidestGroupBox();
 
     // Resize Window
@@ -817,7 +814,7 @@ void MainWindowView::moveControls() {
 
     RECT rc = {0, 0, (gamePanel.getTileSize() * horzTiles) + widestGroupBox, tallestPoint};
 
-    // TODO: This is just for testing scroll bars. set it to a tiny size to try it out
+    // Cap the Window size to 80% of the monitor's screen.
 
     MONITORINFO mi = {0};
     mi.cbSize = sizeof(MONITORINFO);
@@ -832,6 +829,12 @@ void MainWindowView::moveControls() {
     }
 
     const LONG boxHeight = CD.YLABEL + CS.YFIRST_GROUPBOX_MARGIN + CS.YLAST_GROUPBOX_MARGIN;
+
+    // So we have to do this so we can get the scaled rect sizes first, otherwise DPI fails.
+    // We could probably ignore the center window
+    AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
+    CenterWindow(hWnd, rc, prevMonitor);
+    GetClientRect(hWnd, &rc);
     
     // Move Controls into position
     
@@ -850,10 +853,7 @@ void MainWindowView::moveControls() {
     // 
 
     hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, rc.bottom, SWP_NOZORDER);
-
     EndDeferWindowPos(hDeferedWindows);
-    AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
-    CenterWindow(hWnd, rc, prevMonitor);
 
     // Update Panel's virtual size so it is consistent.
     gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
