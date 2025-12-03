@@ -266,6 +266,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
             if(matchesMade == gameBoard.getMatchesNeeded()) {
                 updateElapsedTime();
                 windowData.gameState = GameState::STATE_GAMEWON;
+
+                mainWindow.implDisplayMessage(GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TEXT), GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TITLE));
+
                 mainWindow.implGameStateChanged(windowData.gameState);
             }
 

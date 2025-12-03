@@ -201,6 +201,14 @@ int MainWindowView::implAskYesNoQuestion(const wchar_t* message, const wchar_t* 
     return MessageBox(hWnd, message, title, MB_YESNOCANCEL | MB_ICONQUESTION);
 }
 
+//-----------------------------------------------------------------------------
+// implDisplayMessage - Display a message to the user
+//-----------------------------------------------------------------------------
+
+void MainWindowView::implDisplayMessage(const wchar_t* message, const wchar_t* title) {
+    MessageBox(hWnd, message, title, MB_OK | MB_ICONINFORMATION);
+}
+
 //------------------------------------------------------------------------------
 // implGameStateChanged - Game state was changed
 //------------------------------------------------------------------------------

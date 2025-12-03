@@ -85,8 +85,6 @@ void CustomSizeWindow::onCreate() {
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, BS_DEFPUSHBUTTON, CtrlID::OK_BUTTON, hInst);
     buttonCancel = createButton(GET_LANG_STR(LangID::CANCEL_BUTTON_CAPTION), hWnd, 0, CtrlID::CANCEL_BUTTON, hInst);
 
-    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
-
 #ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;

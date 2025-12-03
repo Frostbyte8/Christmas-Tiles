@@ -31,6 +31,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         // Public interface functions
 
         int implAskYesNoQuestion(const wchar_t* message, const wchar_t* title);
+        void implDisplayMessage(const wchar_t* message, const wchar_t* title);
         void implGameStateChanged(const int& gameState);
 
     private:

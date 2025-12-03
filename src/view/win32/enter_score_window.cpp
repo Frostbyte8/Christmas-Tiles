@@ -117,7 +117,6 @@ void EnterScoreWindow::onCreate() {
     buttonOK = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
     SendMessage(hWnd, DM_SETDEFID, CtrlID::OK_BUTTON, 0);
 
-    prevMonitor = MonitorFromWindow(hWnd, MONITOR_DEFAULTTONEAREST);
 #ifdef _DPI_AWARE_
     UINT xDPI;
     UINT yDPI;
