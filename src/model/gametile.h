@@ -18,6 +18,6 @@ namespace TileTypes {
 }
 
 struct TileData {
-    uint8_t ID;
-    uint8_t flags;
+    unsigned int ID;
+    unsigned int flags;
 };

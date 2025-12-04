@@ -87,7 +87,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DPI_AWARE_;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -95,7 +95,7 @@
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -131,7 +131,7 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;_DPI_AWARE_;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -141,7 +141,7 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D

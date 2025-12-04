@@ -63,7 +63,7 @@ class MainWindowPresenter {
         
         // Public Functions
         bool changeTilesetPath(const wchar_t* newPath);
-        const size_t& getScorePosition() const;
+        const size_t getScorePosition() const;
         int requestNewGame();
         bool shouldEndGameIfPlaying(const int& LangIDTitle);
         bool tryAddScore(wchar_t* name, const size_t& index);

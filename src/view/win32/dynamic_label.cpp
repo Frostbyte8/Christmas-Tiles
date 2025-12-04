@@ -116,7 +116,6 @@ void DynamicLabel::setText(const wchar_t* inCaption) {
 
 LRESULT DynamicLabel::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
-    LRESULT retVal;
     switch(msg) {
         
         default: return DefWindowProc(hWnd, msg, wParam, lParam);

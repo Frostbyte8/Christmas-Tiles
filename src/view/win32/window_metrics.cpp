@@ -52,8 +52,8 @@ void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
 
     // Scale the DPI as needed.
 
-    ncm.lfMessageFont.lfWidth *= xScaleFactor / 96.0f;
-    ncm.lfMessageFont.lfHeight *= yScaleFactor / 96.0f;
+    ncm.lfMessageFont.lfWidth *= static_cast<LONG>(xScaleFactor / 96.0f);
+    ncm.lfMessageFont.lfHeight *= static_cast<LONG>(yScaleFactor / 96.0f);
 
     fontHDC     = CreateCompatibleDC(NULL);
     curFont     = CreateFontIndirect(&ncm.lfMessageFont);

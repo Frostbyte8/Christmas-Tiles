@@ -877,7 +877,7 @@ void MainWindowView::moveControls() {
 
     // Update Panel's virtual size so it is consistent.
     
-    gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
+    gamePanel.updateVirtualSize(static_cast<WORD>(boardDimensions.width), static_cast<WORD>(boardDimensions.height));
 
     // Revalidate Game Panel, but then invalidate it only to repaint, not erase it.
     //GetClientRect(hWnd, &rc);

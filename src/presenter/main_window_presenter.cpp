@@ -131,7 +131,7 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
 // getScorePosition - Checks to see what position the score is in.
 //------------------------------------------------------------------------------
 
-const size_t& MainWindowPresenter::getScorePosition() const {
+const size_t MainWindowPresenter::getScorePosition() const {
     return getScoreTable().isNewHighscore(windowData.score);
 }
 
@@ -187,9 +187,9 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
     localtime_s(&timeInfo, &currentTime);
 
     ScoreT newScore = { windowData.score, 
-                        timeInfo.tm_year, 
-                        timeInfo.tm_mon, 
-                        timeInfo.tm_mday, 
+                        static_cast<unsigned int>(timeInfo.tm_year),
+                        static_cast<unsigned int>(timeInfo.tm_mon), 
+                        static_cast<unsigned int>(timeInfo.tm_mday), 
                         name };
 
 
@@ -458,8 +458,6 @@ bool MainWindowPresenter::readScores() {
     
         ScoreT score;
         buffer[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
-
-        bool defaultScore = false;
 
         wsprintf(keyName, L"date%d", i);
         READ_INI_STRINGW(L"scores", keyName, buffer, ScoreTableConstants::MAX_NAME_LENGTH-1, L".\\scores.ini");
