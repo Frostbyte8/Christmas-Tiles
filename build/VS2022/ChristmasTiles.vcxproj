@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\constants.h" />
+    <ClInclude Include="..\..\src\frost_util.h" />
+    <ClInclude Include="..\..\src\gitinfo.h" />
+    <ClInclude Include="..\..\src\interface\main_window_interface.h" />
+    <ClInclude Include="..\..\src\language_table.h" />
+    <ClInclude Include="..\..\src\model\gameboard.h" />
+    <ClInclude Include="..\..\src\model\gametile.h" />
+    <ClInclude Include="..\..\src\model\mainWindowModel.h" />
+    <ClInclude Include="..\..\src\model\scores.h" />
+    <ClInclude Include="..\..\src\presenter\main_window_presenter.h" />
+    <ClInclude Include="..\..\src\resources\resource.h" />
+    <ClInclude Include="..\..\src\stdint_compat.h" />
+    <ClInclude Include="..\..\src\view\win32\about_window.h" />
+    <ClInclude Include="..\..\src\view\win32\custom_size_window.h" />
+    <ClInclude Include="..\..\src\view\win32\dynamic_label.h" />
+    <ClInclude Include="..\..\src\view\win32\enter_score_window.h" />
+    <ClInclude Include="..\..\src\view\win32\game_panel.h" />
+    <ClInclude Include="..\..\src\view\win32\highscores_window.h" />
+    <ClInclude Include="..\..\src\view\win32\main_window.h" />
+    <ClInclude Include="..\..\src\view\win32\shared_functions.h" />
+    <ClInclude Include="..\..\src\view\win32\subclassed_controls.h" />
+    <ClInclude Include="..\..\src\view\win32\window_meterics.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\interface\main_window_interface.cpp" />
+    <ClCompile Include="..\..\src\language_table.cpp" />
+    <ClCompile Include="..\..\src\main.cpp" />
+    <ClCompile Include="..\..\src\model\gameboard.cpp" />
+    <ClCompile Include="..\..\src\model\scores.cpp" />
+    <ClCompile Include="..\..\src\presenter\main_window_presenter.cpp" />
+    <ClCompile Include="..\..\src\view\win32\about_window.cpp" />
+    <ClCompile Include="..\..\src\view\win32\custom_size_window.cpp" />
+    <ClCompile Include="..\..\src\view\win32\dynamic_label.cpp" />
+    <ClCompile Include="..\..\src\view\win32\enter_score_window.cpp" />
+    <ClCompile Include="..\..\src\view\win32\game_panel.cpp" />
+    <ClCompile Include="..\..\src\view\win32\highscores_window.cpp" />
+    <ClCompile Include="..\..\src\view\win32\main_window.cpp" />
+    <ClCompile Include="..\..\src\view\win32\shared_functions.cpp" />
+    <ClCompile Include="..\..\src\view\win32\subclassed_controls.cpp" />
+    <ClCompile Include="..\..\src\view\win32\window_metrics.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\src\resources\resource.rc" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{21f085a1-e17b-4d4c-875f-ee3b079a5dd3}</ProjectGuid>
+    <RootNamespace>ChristmasTiles</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_NON_CONFORMING_WCSTOK;_CRT_SECURE_NO_WARNINGS;_DPI_AWARE_;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
+XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_NON_CONFORMING_WCSTOK;_CRT_SECURE_NO_WARNINGS;_DPI_AWARE_;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>Full</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
+XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_NON_CONFORMING_WCSTOK;_CRT_SECURE_NO_WARNINGS;_DPI_AWARE_;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
+XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_NON_CONFORMING_WCSTOK;_CRT_SECURE_NO_WARNINGS;_DPI_AWARE_;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <Optimization>Full</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+    </Manifest>
+    <PostBuildEvent>
+      <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
+XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

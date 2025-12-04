@@ -420,6 +420,8 @@ bool MainWindowView::onCreate() {
         return false;
     }
 
+    gamePanel.setMetrics(&metrics);
+
     createMenuBar();
 
     static const DWORD DEF_STYLE_FLAGS = WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS;
@@ -805,7 +807,7 @@ void MainWindowView::moveControls() {
     // Min Width: GroupBox + at least 5 tiles
     // Min Height: No less than 9 tiles tall.
 
-    LONG tallestPoint = getTallestPoint();
+    const LONG tallestPoint = getTallestPoint();
     const LONG widestGroupBox = getWidestGroupBox();
 
     // Resize Window
@@ -825,6 +827,7 @@ void MainWindowView::moveControls() {
     mi.cbSize = sizeof(MONITORINFO);
     GetMonitorInfo(prevMonitor, &mi);
     
+    
     if(rc.right > abs(mi.rcMonitor.right - mi.rcMonitor.left) * 0.80) {
         rc.right = static_cast<LONG>(abs(mi.rcMonitor.right - mi.rcMonitor.right) * 0.80);
     }
@@ -837,7 +840,13 @@ void MainWindowView::moveControls() {
 
     // So we have to do this so we can get the scaled rect sizes first, otherwise DPI fails.
     // We could probably ignore the center window
+
+#ifdef _DPI_AWARE_
+    AdjustWindowRectExForDpi(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX, metrics.getDPI());
+#else
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
+#endif // _DPI_AWARE_
+
     CenterWindow(hWnd, rc, prevMonitor);
     GetClientRect(hWnd, &rc);
     
@@ -855,16 +864,15 @@ void MainWindowView::moveControls() {
     
     hDeferedWindows = DeferWindowPos(hDeferedWindows, buttonPause, HWND_NOTOPMOST, 0, boxHeight * 3, widestGroupBox, rc.bottom - (boxHeight * 3), SWP_NOZORDER);
 
-    // 
-
-    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, rc.right - widestGroupBox, rc.bottom, SWP_NOZORDER);
+    hDeferedWindows = DeferWindowPos(hDeferedWindows, gamePanel.getHandle(), HWND_NOTOPMOST, widestGroupBox, 0, (rc.right - widestGroupBox), rc.bottom, SWP_NOZORDER);
     EndDeferWindowPos(hDeferedWindows);
 
     // Update Panel's virtual size so it is consistent.
+    
     gamePanel.updateVirtualSize(boardDimensions.width, boardDimensions.height);
 
     // Revalidate Game Panel, but then invalidate it only to repaint, not erase it.
-    GetClientRect(hWnd, &rc);
+    //GetClientRect(hWnd, &rc);
     rc.left = widestGroupBox;
     ValidateRect(hWnd, &rc);
     InvalidateRect(hWnd, &rc, FALSE);

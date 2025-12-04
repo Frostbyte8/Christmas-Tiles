@@ -52,6 +52,9 @@ class WindowMetrics {
 
         LONG calculateStringWidth(const wchar_t* str) const;
 
+        const inline float& getDPI() const { return xScaleFactor; }
+
+
     private:
         HDC         fontHDC;
         HFONT       curFont;

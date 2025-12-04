@@ -8,7 +8,7 @@ bool CALLBACK ChangeControlsFont(HWND child, LPARAM font) {
 void CenterWindow(const HWND& hWnd, const RECT& windowRC, const HMONITOR& prevMonitor) {
 
     MONITORINFO monitorInfo = {0};
-    monitorInfo.cbSize = sizeof(monitorInfo);
+    monitorInfo.cbSize = sizeof(MONITORINFO);
     GetMonitorInfoW(prevMonitor, &monitorInfo);
   
     const int winWidth  = windowRC.right - windowRC.left; 

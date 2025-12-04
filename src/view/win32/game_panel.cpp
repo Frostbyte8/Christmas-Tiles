@@ -17,7 +17,7 @@ namespace ScrollType {
 //==============================================================================
 
 GamePanel::GamePanel() : hWnd(NULL), tilesetBMP(0), windowPresenter(NULL), xOffset(0), yOffset(0),
-virtualWidth(0), virtualHeight(0) {
+virtualWidth(0), virtualHeight(0), metrics(NULL) {
 }
 
 //==============================================================================
@@ -381,6 +381,7 @@ void GamePanel::onPaint() {
 void GamePanel::onSize() {
 
     RECT rc;
+
     ShowScrollBar(hWnd, SB_BOTH, FALSE); // Turn off scrollbars to get correct client size.
     GetClientRect(hWnd, &rc);
 
@@ -390,9 +391,10 @@ void GamePanel::onSize() {
     }
 
     // First, we need to figure out which scroll bars we need
+    const ControlDimensions& CD = metrics->getControlDimensions();
 
-    const int ScrollSpanX = GetSystemMetrics(SM_CXHSCROLL);
-    const int ScrollSpanY = GetSystemMetrics(SM_CXVSCROLL);
+    const int ScrollSpanX = CD.XSCROLLBAR;
+    const int ScrollSpanY = CD.YSCROLLBAR;
 
     int whichBars = 0;
 

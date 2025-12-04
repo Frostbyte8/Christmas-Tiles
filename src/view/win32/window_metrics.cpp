@@ -13,8 +13,8 @@ WindowMetrics::~WindowMetrics() {
 
 void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
     
-    xScaleFactor = inScaleX / 96.0f;
-    yScaleFactor = inScaleY / 96.0f;
+    xScaleFactor = inScaleX;
+    yScaleFactor = inScaleY;
 
     if(curFont) {
         SelectObject(fontHDC, oldFont);
@@ -52,8 +52,8 @@ void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
 
     // Scale the DPI as needed.
 
-    ncm.lfMessageFont.lfWidth *= xScaleFactor;
-    ncm.lfMessageFont.lfHeight *= yScaleFactor;
+    ncm.lfMessageFont.lfWidth *= xScaleFactor / 96.0f;
+    ncm.lfMessageFont.lfHeight *= yScaleFactor / 96.0f;
 
     fontHDC     = CreateCompatibleDC(NULL);
     curFont     = CreateFontIndirect(&ncm.lfMessageFont);
@@ -107,8 +107,13 @@ void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
     cd.YTEXTBOX_ONE_LINE_ALONE     = YDLU2PIX(12);
 
     // A Few extras that are obtained via GetSystemMetrics
+#ifdef _DPI_AWARE_
+    cd.XSCROLLBAR                   = GetSystemMetricsForDpi(SM_CXVSCROLL, xScaleFactor);
+    cd.YSCROLLBAR                   = GetSystemMetricsForDpi(SM_CYHSCROLL, xScaleFactor);
+#else
     cd.XSCROLLBAR                   = GetSystemMetrics(SM_CXVSCROLL);
     cd.YSCROLLBAR                   = GetSystemMetrics(SM_CYHSCROLL);
+#endif // _DPI_AWARE_
 
 }
 

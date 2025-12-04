@@ -5,6 +5,8 @@
 #include "../../model/gameboard.h"
 #include "../../presenter/main_window_presenter.h"
 
+#include "window_meterics.h"
+
 class GamePanel : public WndAsClass<GamePanel> {
     friend WndAsClass;
 
@@ -26,6 +28,10 @@ class GamePanel : public WndAsClass<GamePanel> {
             windowPresenter = mwp;
         }
 
+        void setMetrics(WindowMetrics* inMetrics) {
+            metrics = inMetrics;
+        }
+
         // Public Functions
 
         bool changeTileset(const wchar_t* fullPath);
@@ -41,6 +47,7 @@ class GamePanel : public WndAsClass<GamePanel> {
         LRESULT windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam);
 
         MainWindowPresenter const *windowPresenter;
+        WindowMetrics const* metrics;
 
         HWND        hWnd;
         static bool isRegistered;
