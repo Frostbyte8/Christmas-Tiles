@@ -107,7 +107,6 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
     wcscpy_s(newTilesetPath, strLength, newPath);
 
     // Make sure the BMP can be loaded first.
-
     if(!mainWindow.implTryLoadTileset(newTilesetPath)) {
         free(newTilesetPath);
         return false;
@@ -119,6 +118,13 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
     }
 
     windowData.pathToTileset = newTilesetPath;
+
+    if(windowData.gameState != GameState::STATE_NO_GAME) {
+        unsigned int width = WindowPresenterConstants::IGNORE_WIDTH;
+        unsigned int height = WindowPresenterConstants::IGNORE_HEIGHT;
+        tryUpdateGameBoard(width, height, mainWindow.implGetNumTileTypes(), true);
+    }
+    return true;
 }
 
 //------------------------------------------------------------------------------
@@ -187,16 +193,7 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
                         name };
 
 
-    // Use the same format as the TM structure, the score table will verify and sanitize it for us.
-
-    /*
-    newScore.score = windowData.score;
-    newScore.year = timeInfo.tm_year;
-    newScore.month = timeInfo.tm_mon;
-    newScore.day = timeInfo.tm_mday;
-    newScore.name = name;
-    */
-
+    // the score table will verify and sanitize it for us.
     scoreTable.insertScore(newScore, index);
     
     return true; 
