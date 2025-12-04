@@ -35,7 +35,7 @@ class ScoreTable {
     private:
 
         // Private Functions
-        __forceinline bool tryInsertAndPop(ScoreT& newScore, size_t& index);
+        __forceinline bool tryInsertAndPop(ScoreT& newScore, const size_t& index);
 
         std::vector<ScoreT> scores;
 };

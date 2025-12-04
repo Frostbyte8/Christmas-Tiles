@@ -44,7 +44,7 @@ class MainWindowPresenter {
 
     public:
 
-        MainWindowPresenter(MainWindowInterface& inMWI);
+        MainWindowPresenter();
 
         ~MainWindowPresenter() {
             if(windowData.pathToTileset) {
@@ -60,6 +60,12 @@ class MainWindowPresenter {
         __forceinline const int& getGameState() const { return windowData.gameState; }
         __forceinline const MainWindowData& getMainWindowData() const { return windowData; }
         __forceinline const ScoreTable& getScoreTable() const { return scoreTable; }
+
+        // Mutators
+
+        void setMainWindowInterface(MainWindowInterface* inMWI) {
+            mainWindow = inMWI;
+        }
         
         // Public Functions
         bool changeTilesetPath(const wchar_t* newPath);
@@ -80,7 +86,8 @@ class MainWindowPresenter {
         bool writeSettings();
 
     private:
-
+        MainWindowPresenter(const MainWindowPresenter&);
+        MainWindowPresenter& operator=(const MainWindowPresenter&);
         __forceinline void reset();
 
         int createNewGameBoard(const unsigned int& newWidth, const unsigned int& newHeight, const unsigned int& newTileTypes);
@@ -99,5 +106,5 @@ class MainWindowPresenter {
         MainWindowData          windowData;
         GameBoard               gameBoard;
         ScoreTable              scoreTable;
-        MainWindowInterface&    mainWindow;
+        MainWindowInterface*    mainWindow;
 };

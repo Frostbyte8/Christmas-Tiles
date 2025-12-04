@@ -113,15 +113,22 @@ bool ScoreTable::insertScore(ScoreT& newScore, size_t index) {
         newScore.month += 1;
         // Day is already valid
     }
-        
-    if(index != -1) {
-        return tryInsertAndPop(newScore, index);
-    }
-
-    for(index = 0; index < scores.size(); ++index) {
-        if(newScore.score > scores[index].score) {
+    
+    try {
+        if(index != -1) {
             return tryInsertAndPop(newScore, index);
         }
+
+        for(index = 0; index < scores.size(); ++index) {
+            if(newScore.score > scores[index].score) {
+                return tryInsertAndPop(newScore, index);
+            }
+        }
+    }
+    catch(std::bad_alloc) { // We have to catch this here or it fails to inline.
+        free(newScore.name);
+        newScore.name = NULL;
+        return false;
     }
 
     free(newScore.name);
@@ -151,17 +158,12 @@ size_t ScoreTable::isNewHighscore(const uint32_t& score) const {
 //------------------------------------------------------------------------------
 // tryInsertAndPop - Tries to insert a score, and if it does, it then releases
 // the last scores resources and pop's it off the back of the score table.
+// Note that this can throw std::bad_alloc
 //------------------------------------------------------------------------------
 
-__forceinline bool ScoreTable::tryInsertAndPop(ScoreT& newScore, size_t& index) {
+__forceinline bool ScoreTable::tryInsertAndPop(ScoreT& newScore, const size_t& index) {
 
-    try { 
-        scores.insert(scores.begin()+index, newScore);
-    }
-    catch(std::exception) {
-        free(newScore.name);
-        return false;
-    }
+    scores.insert(scores.begin()+index, newScore);
 
     free(scores[ScoreTableConstants::MAX_SCORES].name);
     scores[ScoreTableConstants::MAX_SCORES].name = NULL;

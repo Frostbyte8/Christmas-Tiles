@@ -43,7 +43,7 @@ static const unsigned int FILE_PATH_MAX = MAX_PATH;
 // Constructors
 //==============================================================================
 
-MainWindowPresenter::MainWindowPresenter(MainWindowInterface& inMWI) : mainWindow(inMWI) {
+MainWindowPresenter::MainWindowPresenter() : mainWindow(NULL) {
     reset();
     windowData.pathToTileset = NULL;
 }
@@ -91,6 +91,8 @@ const uint32_t& MainWindowPresenter::getElapsedTime() {
 
 bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
 
+    assert(mainWindow);
+
     if(!DoesFileExist(newPath)) {
         return false;
     }
@@ -107,7 +109,7 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
     wcscpy_s(newTilesetPath, strLength, newPath);
 
     // Make sure the BMP can be loaded first.
-    if(!mainWindow.implTryLoadTileset(newTilesetPath)) {
+    if(!mainWindow->implTryLoadTileset(newTilesetPath)) {
         free(newTilesetPath);
         return false;
     }
@@ -122,7 +124,7 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
     if(windowData.gameState != GameState::STATE_NO_GAME) {
         unsigned int width = WindowPresenterConstants::IGNORE_WIDTH;
         unsigned int height = WindowPresenterConstants::IGNORE_HEIGHT;
-        tryUpdateGameBoard(width, height, mainWindow.implGetNumTileTypes(), true);
+        tryUpdateGameBoard(width, height, mainWindow->implGetNumTileTypes(), true);
     }
     return true;
 }
@@ -161,9 +163,11 @@ int MainWindowPresenter::requestNewGame() {
 
 bool MainWindowPresenter::shouldEndGameIfPlaying(const int& LangStrID) {
 
+    assert(mainWindow);
+
     if(windowData.gameState != GameState::STATE_GAMEWON && windowData.gameState != GameState::STATE_NO_GAME) {
 
-        const int retVal = mainWindow.implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
+        const int retVal = mainWindow->implAskYesNoQuestion(GET_LANG_STR(LangStrID), GET_LANG_STR(LangStrID+1));
 
         if(retVal != MainWindowInterfaceResponses::YES) {
             return false;
@@ -205,6 +209,8 @@ bool MainWindowPresenter::tryAddScore(wchar_t* name, const size_t& index) {
 //------------------------------------------------------------------------------
 
 int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned int& yIndex) {
+
+    assert(mainWindow);
 
     if(windowData.gameState != GameState::STATE_PLAYING) {
 
@@ -273,9 +279,9 @@ int MainWindowPresenter::tryFlipTileAtCoodinates(unsigned int& xIndex, unsigned 
                 updateElapsedTime();
                 windowData.gameState = GameState::STATE_GAMEWON;
 
-                mainWindow.implDisplayMessage(GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TEXT), GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TITLE));
+                mainWindow->implDisplayMessage(GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TEXT), GET_LANG_STR(LangID::YOU_WIN_MESSAGE_TITLE));
 
-                mainWindow.implGameStateChanged(windowData.gameState);
+                mainWindow->implGameStateChanged(windowData.gameState);
             }
 
             return GameBoardFlipErrors::TilesMatched;
@@ -468,6 +474,8 @@ bool MainWindowPresenter::readScores() {
             // We need to put this into the format TM struct expect since
             // insertScore uses that.
             
+            // TODO: At somepoint, wcstok needs to be replaced, as it apparently it isn't even complaint.
+
             wchar_t* token = wcstok(buffer, L"/");
 
             if(token) {
@@ -513,6 +521,8 @@ bool MainWindowPresenter::writeScores() {
     wchar_t buffer[ScoreTableConstants::MAX_NAME_LENGTH+1] = {0};
     wchar_t keyName[16] = {0};
     const std::vector<ScoreT>& scores = scoreTable.getScores();
+
+    // TODO: At somepoint, _wfopen needs to be replaced.
 
     fclose(_wfopen(L".\\scores.ini", L"w"));
     
@@ -563,7 +573,7 @@ int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const 
     windowData.gameState = GameState::STATE_NOT_STARTED;
     gameBoard = newBoard;
 
-    mainWindow.implGameStateChanged(windowData.gameState);
+    mainWindow->implGameStateChanged(windowData.gameState);
     
     return 1;
 }
@@ -575,6 +585,8 @@ int MainWindowPresenter::createNewGameBoard(const unsigned int& newWidth, const 
 
 bool MainWindowPresenter::tryPause() {
 
+    assert(mainWindow);
+
     if(windowData.gameState != GameState::STATE_PLAYING) {
         // You can only pause games that are being played.
         return false;
@@ -582,7 +594,7 @@ bool MainWindowPresenter::tryPause() {
 
     updateElapsedTime();
     windowData.gameState = GameState::STATE_PAUSED;
-    mainWindow.implGameStateChanged(windowData.gameState);
+    mainWindow->implGameStateChanged(windowData.gameState);
 
     return true;
 
@@ -595,6 +607,8 @@ bool MainWindowPresenter::tryPause() {
 
 bool MainWindowPresenter::tryUnpause() {
 
+    assert(mainWindow);
+
     // Cannot Unpause if game is playing or won. (Which all states above PAUSED
     // are.
     if(windowData.gameState > GameState::STATE_PAUSED) {
@@ -604,7 +618,7 @@ bool MainWindowPresenter::tryUnpause() {
    
     milliStartTime = GET_MILLI_COUNT();
     windowData.gameState = GameState::STATE_PLAYING;
-    mainWindow.implGameStateChanged(windowData.gameState);
+    mainWindow->implGameStateChanged(windowData.gameState);
 
     return true;
 }

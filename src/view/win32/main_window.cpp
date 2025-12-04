@@ -91,8 +91,9 @@ __forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
 // Constructors
 //==============================================================================
 
-MainWindowView::MainWindowView(const HINSTANCE hIn) : windowPresenter(*this), hWnd(NULL),
+MainWindowView::MainWindowView(const HINSTANCE hIn) : hWnd(NULL),
 hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL), windowMoving(true) {
+    windowPresenter.setMainWindowInterface(this);
 }
 
 //==============================================================================
