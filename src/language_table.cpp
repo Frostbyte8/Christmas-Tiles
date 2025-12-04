@@ -8,6 +8,13 @@ static const long MAX_FILE_SIZE = 65535;
 
 void LanguageTable::loadStrings() {
     
+    wchar_t BAD_ID[] = L"!BAD ID!";
+    const size_t BAD_LEN = wcslen(BAD_ID) + 1;
+    wchar_t* NotFoundString = (wchar_t*)malloc(sizeof(wchar_t) * BAD_LEN);
+    wcscpy_s(NotFoundString, BAD_LEN, BAD_ID);
+    languageStrings.push_back(NotFoundString);
+    languageStrings.reserve(LangID::LANG_ID_COUNT + 1);
+
     FILE* fp = NULL; 
     fopen_s(&fp, "lang_en.txt", "rb");
 
@@ -40,13 +47,6 @@ void LanguageTable::loadStrings() {
 
     // Now convert char buffer into wchar_t
     // long wideLen = MultiByteToWideChar(CP_UTF8, 0, charBuffer, fileSize, 0, 0);
-    wchar_t BAD_ID[] = L"!BAD ID!";
-    const size_t BAD_LEN = wcslen(BAD_ID) + 1;
-    wchar_t* NotFoundString = (wchar_t*)malloc(sizeof(wchar_t) * BAD_LEN);
-    wcscpy_s(NotFoundString, BAD_LEN, BAD_ID);
-    languageStrings.push_back(NotFoundString);
-
-    languageStrings.reserve(LangID::LANG_ID_COUNT + 1);
 
     for(int i = LangID::APP_TITLE; i < LangID::LANG_ID_COUNT; ) {
 
@@ -94,7 +94,7 @@ void LanguageTable::loadStrings() {
 wchar_t* GET_LANG_STR(const size_t& ID) {
     const std::vector<wchar_t*> languageStrings = languageTable.getStrings();
 
-    if(ID > languageStrings.size()) {
+    if(ID > languageStrings.size() - 1) {
         return languageStrings[LangID::ERROR_STR_NOT_FOUND];
     }
 
