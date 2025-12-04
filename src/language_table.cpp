@@ -40,6 +40,13 @@ void LanguageTable::loadStrings() {
 
     // Now convert char buffer into wchar_t
     // long wideLen = MultiByteToWideChar(CP_UTF8, 0, charBuffer, fileSize, 0, 0);
+    wchar_t BAD_ID[] = L"!BAD ID!";
+    const size_t BAD_LEN = wcslen(BAD_ID) + 1;
+    wchar_t* NotFoundString = (wchar_t*)malloc(sizeof(wchar_t) * BAD_LEN);
+    wcscpy_s(NotFoundString, BAD_LEN, BAD_ID);
+    languageStrings.push_back(NotFoundString);
+
+    languageStrings.reserve(LangID::LANG_ID_COUNT + 1);
 
     for(int i = LangID::APP_TITLE; i < LangID::LANG_ID_COUNT; ) {
 
@@ -81,6 +88,15 @@ void LanguageTable::loadStrings() {
 
     free(charBuffer);
     charBuffer = NULL;
-    
 
+}
+
+wchar_t* GET_LANG_STR(const size_t& ID) {
+    const std::vector<wchar_t*> languageStrings = languageTable.getStrings();
+
+    if(ID > languageStrings.size()) {
+        return languageStrings[LangID::ERROR_STR_NOT_FOUND];
+    }
+
+    return languageStrings[ID];
 }

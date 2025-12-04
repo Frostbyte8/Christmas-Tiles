@@ -2,12 +2,12 @@
 
 #include <vector>
 
-#define GET_LANG_STR(x) languageTable.getStrings()[x]
+//#define GET_LANG_STR(x) languageTable.getStrings()[x]
 
 namespace LangID {
     enum LangID {
-        ERROR_STR_NOT_FOUND = -1,
-        APP_TITLE = 0,
+        ERROR_STR_NOT_FOUND = 0,
+        APP_TITLE = 1,
         OK_BUTTON_CAPTION,
         CANCEL_BUTTON_CAPTION,
         SCORE_BOX_CAPTION,
@@ -101,7 +101,12 @@ class LanguageTable {
         languageStrings.resize(0);
     }
 
-    const inline std::vector<wchar_t*>& getStrings() const { return languageStrings; }
+    const inline std::vector<wchar_t*>& getStrings() const { 
+
+        
+
+        return languageStrings; 
+    }
 
     private:
         std::vector<wchar_t*> languageStrings;
@@ -109,5 +114,8 @@ class LanguageTable {
 };
 
 extern LanguageTable languageTable;
+
+wchar_t* GET_LANG_STR(const size_t& ID);
+
 
 #undef PROGRAM_TITLE
