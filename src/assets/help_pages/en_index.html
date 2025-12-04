@@ -6,58 +6,66 @@
 </head>
 <body>
 
-<div id="head"><h1>Christmas Tiles</h1></div>
-<div id="content-wrapper">
-<div class="content">
-    <p>Christmas Tiles is a simple tile matching game for Windows.</p>
-
-    <h2>Requirements</h2>
-
-    <ul>
-        <li>Windows (2000 or Newer)</li>
-        <li>Web Browser that has at least basic HTML5 support (Required for Help)</li>
-        <li class="no-bullet"><ul>
-            <li>Windows 2000 users can get this via Firefox 12</li>
-        </ul></li>
-    </ul>
-
-    <h2>Features</h2>
-
-    <ul>
-        <li>Custom Tilesets</li>
-        <li>Per Monitor DPI Compatible (Coming soon)</li>
-        <li>Full Language Support</li>
-    </ul>
-
-    <p>The Game supports the following operating systems:</p>
-
-    <ul>
-        <li>Windows 11</li>
-        <li>Windows 10</li>
-        <li>Windows 8 / Windows 8.1</li>
-        <li>Windows 7</li>
-        <li>Windows Vista*</li>
-        <li>Windows XP**</li>
-        <li>Windows 2000**</li>
-    </ul>
+<div id="head"><span>Christmas Tiles</span></div>
+    <div id="content-wrapper">
+    <div class="content">
+    <article>
     
-    <p>*Untested.</p>
-    <p>**Windows 2000 and XP support is a work in progress, but appears to be working fine.</p>
-    <p>The program may run on newer versions of Windows, but those are untested.</p>
-
-    <h2>Playing the Game</h2>
-
-    <div class="img-wrapper"><img src="main.png" alt="The main window of Christmas Tiles"></div>
-
-    <p>This is the main window of the game. All you have to do is click tiles and find matching ones.</p>
-    
-    <p>Score is how many points you have earned so far.</p>
-
-    <p>You start off with 50 points, and lose 1 point for every second it takes you to find a match, and 5 for every incorrect match. It resets back to 50 when you find a match</p>
-
-    <p>Time is how long you have been playing.</p>
-
-    <p>You can click the Pause button to pause the game, and then click it again to unpause it.</p>
+        <h1 id="christmas-tiles">Christmas Tiles</h1>
+        
+        <p>Christmas Tiles is a simple tile matching memory game for Windows (2000 all the way to 11). Flip over a present, and find a matching present to score.</p>
+        <p>Written in Pure Win32 API and C++.</p>
+        
+        <h2 id="requirements">Requirements</h2>
+        
+        <ul>
+            <li><p>Windows 11(64-Bit Only)</p></li>
+            <li><p>Windows 10 (64-Bit Only)</p></li>
+            <li><p>Windows 8.1 (64-Bit Only) [1]</p></li>
+            <li><p>Windows 7 (64-Bit Only)</p></li>
+            <li><p>Windows Vista (64-Bit Only) [1]</p></li>
+            <li><p>Windows XP[2] (32-Bit Only)</p></li>
+            <li><p>Windows 2000[2] (32-Bit Only)</p></li>
+            <li><p>Windows 98/ME (Via Kernel Ex)[3]</p></li>
+        </ul>
+        
+        <p>[1] Untested, no plans to test it.</p>
+        <p>[2] May have issues.</p>
+        <p>[3] Not officially supported, but happy to note it does work.</p>
+        
+        <h2 id="features">Features</h2>
+        
+        <ul>
+            <li><p>Custom Tile sets</p></li>
+            <li><p>Per Monitor DPI support</p></li>
+            <li><p>Classic Windows 2000/XP DPI support</p></li>
+            <li><p>UTF-8 Compliant, and easy to translate</p></li>
+            <li><p>Small EXE. With just the standard tile set, the game is less than 150 KB.</p></li>
+        </ul>
+        
+        <h2 id="screenshots">Screenshots</h2>
+        
+        <p><img src="main_win10.png" alt="Christmas Tiles on Windows 10"></p>
+        <p>Windows 10</p>
+        
+        <p><img src="main.png" alt="Christmas Tiles on Windows 2000"></p>
+        <p>Windows 2000</p>
+        
+        <p><img src="main_98.png" alt="Christmas Tiles on Windows 98 SE"></p>
+        <p>Windows 98 SE</p>
+        
+        <h2 id="custom-tile-sets">Custom Tile Sets</h2>
+        
+        <p>Tiles are equal height and width. The height of the tile set image determines how wide each individual tile is. Thus if the height of the bitmap is 32 pixels tall, each tile will be 32 tiles wide.</p>
+        
+        <h2 id="translations">Translations</h2>
+        
+        <p>Currently only English is supported, and the menu item does nothing. If you would like to translate this program, please edit lang_en.txt and submit it to me.</p>
+        
+        <h2 id="license">License</h2>
+        <p>The code of Christmas Tiles is made available under the 3-Clause BSD license with the addition of the <strong>Redistributions</strong> clause from the Sleepycat License.</p>
+        
+    </article>
 </div>
 </div>
 </body>

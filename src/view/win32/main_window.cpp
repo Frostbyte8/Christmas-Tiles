@@ -851,7 +851,7 @@ void MainWindowView::moveControls() {
     // We could probably ignore the center window
 
 #ifdef _DPI_AWARE_
-    AdjustWindowRectExForDpi(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX, metrics.getDPI());
+    AdjustWindowRectExForDpi(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX, static_cast<unsigned int>(metrics.getDPI()));
 #else
     AdjustWindowRectEx(&rc, WINDOW_STYLE, TRUE, WINDOW_STYLE_EX);
 #endif // _DPI_AWARE_

@@ -9,7 +9,9 @@ class AboutWindow : public WndAsClass<AboutWindow> {
 
     public:
 
-        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0), windowMoving(true) {
+        AboutWindow() : hWnd(0), parentHWnd(0), iconHandle(0), windowMoving(true), appIcon(NULL), 
+                        labelTitle(NULL), labelVersion(NULL), seperatorBar(0), buttonOK(NULL),
+                        prevMonitor(NULL), labelCopyright(NULL) {
         }
 
         ~AboutWindow() {

@@ -37,6 +37,12 @@ void LanguageTable::loadStrings() {
     // Read Buffer into memory
 
     char* charBuffer = (char *)malloc(sizeof(char) * (fileSize+1));
+
+    if (!charBuffer) {
+        fclose(fp);
+        return;
+    }
+
     fread(charBuffer, sizeof(char), fileSize, fp);
     fclose(fp);
     fp = NULL;

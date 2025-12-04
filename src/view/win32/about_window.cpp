@@ -148,9 +148,12 @@ wchar_t* expandText(const int& LANG_ID, const wchar_t* textToAdd) {
     const int TEXT_LEN = wcslen(langText) + wcslen(textToAdd);
     wchar_t* fullText = (wchar_t*)malloc(sizeof(wchar_t) * TEXT_LEN);
 
-    wsprintf(fullText, langText, textToAdd);
+    if(fullText) {
+        wsprintf(fullText, langText, textToAdd);
+        return fullText;
+    }
 
-    return fullText;
+    return NULL;
 
 }
 
@@ -171,13 +174,18 @@ bool AboutWindow::onCreate() {
     
     wchar_t* fullText = expandText(LangID::VERSION_TEXT, GIT_HASH);
     labelVersion    = createLabel(fullText, hWnd, CtrlID::VERSION_LABEL, hInst);
-    free(fullText);
+    if(fullText) {
+        free(fullText);
+    }
 
     seperatorBar    = createSeperator(hWnd, CtrlID::SEPERATOR, hInst);
 
     fullText = expandText(LangID::COPYRIGHT_TEXT, COPYRIGHT_NAME);
     labelCopyright  = createLabel(fullText, hWnd, CtrlID::COPYRIGHT_LABEL, hInst);
-    free(fullText);
+
+    if(fullText) {
+        free(fullText);
+    }
 
     buttonOK        = createButton(GET_LANG_STR(LangID::OK_BUTTON_CAPTION), hWnd, CtrlID::OK_BUTTON, hInst);
 

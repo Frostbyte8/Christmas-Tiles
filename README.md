@@ -74,4 +74,4 @@ Currently only English is supported, and the menu item does nothing. If you woul
 
 ## License
 
-The code of Christmas Tiles is made available under the 3-Clause BSD license with the addition of the **Redistributions** clause from the Sleepcat License.
+The code of Christmas Tiles is made available under the 3-Clause BSD license with the addition of the **Redistributions** clause from the Sleepycat License.

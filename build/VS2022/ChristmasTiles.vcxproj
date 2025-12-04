@@ -128,7 +128,7 @@
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2022.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -151,7 +151,7 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2022.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -171,7 +171,7 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2022.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
@@ -194,7 +194,7 @@ XCOPY "$(SolutionDir)..\\..\\src\\assets\\lang_en.txt" "$(TargetDir)" /Y /D</Com
       <AdditionalDependencies>comctl32.lib;Shcore.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
-      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2015.manifest</AdditionalManifestFiles>
+      <AdditionalManifestFiles>$(SolutionDir)..\..\src\resources\application_2022.manifest</AdditionalManifestFiles>
     </Manifest>
     <PostBuildEvent>
       <Command>XCOPY "$(SolutionDir)..\\..\\src\\assets\\tileset.bmp" "$(TargetDir)" /Y /D
