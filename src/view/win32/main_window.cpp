@@ -65,12 +65,12 @@ namespace MenuID {
 // Inline Functions
 //==============================================================================
 
-__forceinline HWND createGroupBox(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createGroupBox(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"BUTTON", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_GROUPBOX, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
@@ -134,11 +134,11 @@ bool MainWindowView::createWindow() {
     return true;
 }
 
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 // doLoop - Standard run of the mill message loop
-//------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
-UINT MainWindowView::doLoop() {
+WPARAM MainWindowView::doLoop() {
     
     MSG msg;
     
@@ -269,7 +269,7 @@ bool MainWindowView::implTryLoadTileset(const wchar_t* fullPath) {
 // onChangeBoardSize - User wants to change the size of the game board
 //------------------------------------------------------------------------------
 
-void MainWindowView::onChangeBoardSize(const int& menuID) {
+void MainWindowView::onChangeBoardSize(const INT_PTR& menuID) {
 
     unsigned int newWidth;
     unsigned int newHeight;
@@ -531,8 +531,8 @@ void MainWindowView::onNewGame() {
 
 void MainWindowView::onTileSelected(const WPARAM& wParam, const LPARAM& lParam) {
     
-    unsigned int xPos = wParam / gamePanel.getTileSize();
-    unsigned int yPos = lParam / gamePanel.getTileSize();
+    unsigned int xPos = static_cast<unsigned int>(wParam / gamePanel.getTileSize());
+    unsigned int yPos = static_cast<unsigned int>(lParam / gamePanel.getTileSize());
 
     const int retVal = windowPresenter.tryFlipTileAtCoodinates(xPos, yPos);
 
@@ -586,7 +586,7 @@ void MainWindowView::onWindowMoved() {
 
 LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const LPARAM lParam) {
 
-    HINSTANCE retVal = 0;
+    INT_PTR retVal = 0;
 
     switch(msg) {
 
@@ -660,8 +660,8 @@ LRESULT MainWindowView::windowProc(const UINT& msg, const WPARAM wParam, const L
                     break;
 
                 case MenuID::HELP_FILE:
-                    retVal = ShellExecute(0, 0, L".\\help\\en_index.html", 0, 0, SW_SHOW);
-                    if((LONG)retVal < 32) {
+                    retVal = reinterpret_cast<INT_PTR>(ShellExecute(0, 0, L".\\help\\en_index.html", 0, 0, SW_SHOW));
+                    if(retVal < 32) {
                         // TODO: Display error
                     }
                     break;

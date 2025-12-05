@@ -48,12 +48,6 @@ bool DynamicLabel::registerSelf(HINSTANCE hInst) {
 
 bool DynamicLabel::createWindow(const HINSTANCE& hInst, const wchar_t* inCaption, const HWND& parent, const HMENU& ID) {
 
-    // Future Ideas:
-    // Being able to set style flags
-    // X,Y,W,H is pretty much no needed as it will just get moved anyways
-    // Bolding
-    // Cache String to avoid a call GetWindowText each time
-
     if(hWnd) {
         return true; // Already created.
     }
@@ -80,6 +74,9 @@ void DynamicLabel::setText(const wchar_t* inCaption) {
     // outlined by Raymond Chen's Post on 2003-08-21.
 
     if(!inCaption) {
+
+        // Null inCaption means no string at all.
+
         if(caption) {
             free(caption);
             caption = NULL;
@@ -94,6 +91,11 @@ void DynamicLabel::setText(const wchar_t* inCaption) {
     // So kind of like a Fatty Struct/Pointer.
 
     wchar_t* newCaption = (wchar_t*)malloc((sizeof(wchar_t) * (strLen+2)));
+
+    if(!newCaption) {
+        return;
+    }
+
     newCaption[strLen] = 0;
     newCaption[0] = static_cast<wchar_t>(strLen);
 
@@ -168,7 +170,7 @@ void DynamicLabel::onPaint() {
 
     if(caption) {
 
-        const size_t strLen = static_cast<size_t>(caption[0]);
+        const int strLen = static_cast<int>(caption[0]);
 
         if(strLen != 0) {
 

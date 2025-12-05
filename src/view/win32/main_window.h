@@ -26,7 +26,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
 
         bool createWindow();
         bool registerSelf();
-        UINT doLoop();
+        WPARAM doLoop();
         
         // Public interface functions
 
@@ -45,7 +45,7 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         
         // Window Message Processing
         
-        void onChangeBoardSize(const int& menuID);
+        void onChangeBoardSize(const INT_PTR& menuID);
         void onChangeTileset();
         void onClose();
         void onDPIChange(const float xDPI, const float yDPI);

@@ -98,7 +98,7 @@ bool MainWindowPresenter::changeTilesetPath(const wchar_t* newPath) {
     }
 
     wchar_t* newTilesetPath = NULL;
-    const LONG strLength = wcsnlen(newPath, FILE_PATH_MAX) + 1;
+    const size_t strLength = wcsnlen(newPath, FILE_PATH_MAX) + 1;
     newTilesetPath = (wchar_t*)malloc(sizeof(wchar_t) * (strLength+1));
     
     if(!newTilesetPath) {
@@ -523,8 +523,12 @@ bool MainWindowPresenter::writeScores() {
     const std::vector<ScoreT>& scores = scoreTable.getScores();
 
     // TODO: At somepoint, _wfopen needs to be replaced.
+    FILE* fp;
+    if(_wfopen_s(&fp, L".\\scores.ini", L"w") != 0) {
+        return false;
+    }
 
-    fclose(_wfopen(L".\\scores.ini", L"w"));
+    fclose(fp);
     
     for(size_t i = 0; i < scores.size(); ++i) {
 

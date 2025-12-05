@@ -6,20 +6,31 @@ LanguageTable languageTable;
 
 static const long MAX_FILE_SIZE = 65535;
 
-void LanguageTable::loadStrings() {
+bool LanguageTable::loadStrings() {
     
     wchar_t BAD_ID[] = L"!BAD ID!";
     const size_t BAD_LEN = wcslen(BAD_ID) + 1;
     wchar_t* NotFoundString = (wchar_t*)malloc(sizeof(wchar_t) * BAD_LEN);
+
+    if(!NotFoundString) {
+        return false;
+    }
+
     wcscpy_s(NotFoundString, BAD_LEN, BAD_ID);
-    languageStrings.push_back(NotFoundString);
-    languageStrings.reserve(LangID::LANG_ID_COUNT + 1);
+
+    try {
+        languageStrings.push_back(NotFoundString);
+        languageStrings.reserve(LangID::LANG_ID_COUNT + 1);
+    }
+    catch(std::exception) {
+        return false;
+    }
 
     FILE* fp = NULL; 
     fopen_s(&fp, "lang_en.txt", "rb");
 
     if(!fp) {
-        return;
+        return false;
     }
 
     // Get Buffer Size
@@ -29,7 +40,7 @@ void LanguageTable::loadStrings() {
 
     if(fileSize > MAX_FILE_SIZE || fileSize == 0) {
         fclose(fp);
-        return;
+        return false;
     }
 
     fseek(fp, 0, SEEK_SET);
@@ -40,7 +51,7 @@ void LanguageTable::loadStrings() {
 
     if (!charBuffer) {
         fclose(fp);
-        return;
+        return false;
     }
 
     fread(charBuffer, sizeof(char), fileSize, fp);
@@ -67,10 +78,15 @@ void LanguageTable::loadStrings() {
                 break; // EOF
             }
 
-            const long lineLen = lineEnd - bufPos;
+            const long lineLen = static_cast<long>(lineEnd - bufPos);
 
             long wideLen = MultiByteToWideChar(CP_UTF8, 0, bufPos, lineLen, 0, 0);
             wchar_t* inStr = (wchar_t*)malloc(sizeof(wchar_t) * (wideLen+1));
+
+            if(!inStr) {
+                return false; // TODO: Error Codes
+            }
+
             inStr[wideLen] = 0;
             MultiByteToWideChar(CP_UTF8, 0, bufPos, lineLen, inStr, wideLen);
             languageStrings.push_back(inStr);
@@ -94,6 +110,7 @@ void LanguageTable::loadStrings() {
 
     free(charBuffer);
     charBuffer = NULL;
+    return true;
 
 }
 

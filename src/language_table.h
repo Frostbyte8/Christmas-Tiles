@@ -74,22 +74,9 @@ class LanguageTable {
 
     public:
     LanguageTable() {
-
-        /*
-        languageStrings.resize(1);
-
-        wchar_t* str = NULL;
-        const size_t stringLength = wcslen(PROGRAM_TITLE);
-        str = (wchar_t*)malloc(sizeof(wchar_t) * (stringLength+1));       
-
-        wcsncpy_s(str, stringLength+1, PROGRAM_TITLE, stringLength);
-        str[stringLength] = 0;
-        */
-
-        //languageStrings[LangID::APP_TITLE] = str;
     }
 
-    void loadStrings();
+    bool loadStrings();
 
     void freeStrings() {
         for(size_t i = 0; i < languageStrings.size(); ++i) {

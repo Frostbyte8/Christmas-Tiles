@@ -126,7 +126,7 @@ inline int WindowMetrics::YDLU2PIX(const int& y) const {
 }
 
 LONG WindowMetrics::calculateStringWidth(const wchar_t* str) const {
-    const int numChars = wcslen(str);
+    const int numChars = static_cast<int>(wcslen(str));
     SIZE size;
     GetTextExtentPoint32(fontHDC, str, numChars, &size);
     return size.cx;

@@ -21,7 +21,10 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_DEBUG); 
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 
-    languageTable.loadStrings();
+    if(!languageTable.loadStrings()) {
+        MessageBox(NULL, L"Unable to load lang_en.json. If this error persists, reinstalling Christmas Tiles may fix this problem. The Application will now close", L"File Not Found", MB_OK);
+        return 0;
+    }
 
     MainWindowView mainWindowView(hInstance);
     
@@ -56,7 +59,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     }
 
     // Create Window and do the message loop
-    UINT retVal = 0;
+    UINT_PTR retVal = 0;
     if(mainWindowView.createWindow()) {
         retVal = mainWindowView.doLoop();
     }
@@ -69,7 +72,7 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     // legitimate leaks.
     languageTable.freeStrings();
 
-    return retVal;
+    return static_cast<unsigned int>(retVal);
 #else
     return retVal;    
 #endif // defined(_MSC_VER) && defined(_DEBUG)

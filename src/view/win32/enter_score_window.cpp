@@ -15,12 +15,12 @@ bool EnterScoreWindow::isRegistered = false;
 static const DWORD WINDOW_STYLE = WS_POPUPWINDOW | WS_CAPTION | WS_DLGFRAME | DS_MODALFRAME;
 static const DWORD WINDOW_STYLE_EX = WS_EX_DLGMODALFRAME;
 
-__forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"Static", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_CENTER, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_DEFPUSHBUTTON, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
@@ -231,8 +231,10 @@ LRESULT EnterScoreWindow::windowProc(const UINT& msg, const WPARAM wParam, const
             }
 
             name = (wchar_t*)malloc(sizeof(wchar_t) * (ScoreTableConstants::MAX_NAME_LENGTH + 1));
-            name[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
-            GetWindowText(textYourName, name, ScoreTableConstants::MAX_NAME_LENGTH+1);
+            if(name) {
+                name[ScoreTableConstants::MAX_NAME_LENGTH] = 0;
+                GetWindowText(textYourName, name, ScoreTableConstants::MAX_NAME_LENGTH+1);
+            }
 
             EnableWindow(parentHWnd, TRUE);
             SetFocus(parentHWnd);

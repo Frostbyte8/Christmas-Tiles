@@ -26,17 +26,17 @@ namespace CtrlID {
     };
 }
 
-__forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createLabel(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"Static", title, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_CENTER, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline HWND createSeperator(const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createSeperator(const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"Static", L"", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | SS_ETCHEDHORZ, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
 
-__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const int& ID, const HINSTANCE& hInst) {
+__forceinline HWND createButton(const wchar_t* title, const HWND& parent, const UINT_PTR& ID, const HINSTANCE& hInst) {
     return CreateWindowEx(0, L"BUTTON", title, WS_TABSTOP | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | BS_PUSHBUTTON | BS_DEFPUSHBUTTON, 
                           0, 0, 0, 0, parent, reinterpret_cast<HMENU>(ID), hInst, NULL);
 }
@@ -145,7 +145,7 @@ bool AboutWindow::registerSelf(const HINSTANCE& hInst) {
 wchar_t* expandText(const int& LANG_ID, const wchar_t* textToAdd) {
 
     const wchar_t* langText = GET_LANG_STR(LANG_ID);
-    const int TEXT_LEN = wcslen(langText) + wcslen(textToAdd);
+    const size_t TEXT_LEN = wcslen(langText) + wcslen(textToAdd);
     wchar_t* fullText = (wchar_t*)malloc(sizeof(wchar_t) * TEXT_LEN);
 
     if(fullText) {
