@@ -433,6 +433,8 @@ bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
 
     // Sanitize Input 
 
+    // Try the file listed in settings.ini, and if that doesn't work try the default tileset
+
     if(!DoesFileExist(tilesetPath)) {
         
         wsprintf(tilesetPath, L"tileset.bmp");
@@ -441,7 +443,22 @@ bool MainWindowPresenter::readSettings(GameBoardDimensions& boardDimensions) {
         }
     }
 
-    changeTilesetPath(tilesetPath);
+    // This could be better, but, try and load the tileset, and if it fails, try and load
+    // the default set, and if that fails, that's it, that's all.
+
+    if(!changeTilesetPath(tilesetPath)) {            
+        
+        wsprintf(tilesetPath, L"tileset.bmp");
+        
+        if(!DoesFileExist(tilesetPath)) {
+            return false;
+        }
+
+        if(!changeTilesetPath(tilesetPath)) {
+            return false;
+        }
+
+    }
     boardDimensions.width = FrostUtil::ClampInts(boardWidth, GameBoardConstants::MIN_WIDTH, GameBoardConstants::MAX_WIDTH);
     boardDimensions.height = FrostUtil::ClampInts(boardHeight, GameBoardConstants::MIN_HEIGHT, GameBoardConstants::MAX_HEIGHT);
 

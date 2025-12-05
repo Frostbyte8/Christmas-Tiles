@@ -108,16 +108,23 @@ bool GamePanel::changeTileset(const wchar_t* fullPath) {
         return false;
     }
 
+    BITMAP bmInfo = {0};
+    GetObject(tempBMP, sizeof(BITMAP), &bmInfo);
+
+    // Not enough tiles.
+    if(floor( static_cast<float>(bmInfo.bmWidth) / static_cast<float>(bmInfo.bmHeight)) < GameBoardConstants::MIN_TILE_TYPES + 2) {
+        DeleteObject(tempBMP);
+        return false;
+    }
+
     if(tilesetBMP) {
         DeleteObject(tilesetBMP);
     }
 
     tilesetBMP = tempBMP;
-
-    BITMAP bmInfo = {0};
-    GetObject(tilesetBMP, sizeof(BITMAP), &bmInfo);
     bmpWidth    = bmInfo.bmWidth;
     bmpHeight   = bmInfo.bmHeight;
+    
 
     return true;
 }
