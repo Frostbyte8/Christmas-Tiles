@@ -143,7 +143,6 @@ void CustomSizeWindow::moveControls() {
     yOffset += CD.YLABEL + CS.YRELATED_MARGIN;
     
     // The second line, we need to calculate how long it will be, and where the center is.
-    // TODO [DPI]: the total length could exceed totalWidth, so it should be in that calculation
     int xOffset = (totalWidth / 2) - ( ((LabelLength * 2) + (textBoxLength * 2) + (CS.XLABELASSOC_MARGIN * 2) + (CS.XUNRELATED_MARGIN)) / 2);
 
     // First Set of Coordinates

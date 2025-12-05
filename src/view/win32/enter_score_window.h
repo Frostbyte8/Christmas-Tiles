@@ -8,7 +8,8 @@ class EnterScoreWindow : public WndAsClass<EnterScoreWindow> {
     friend WndAsClass;
 
     public:
-        EnterScoreWindow() : hWnd(0), parentHWnd(0), scoreIndex(0), name(0), windowMoving(true) {
+        EnterScoreWindow() : hWnd(0), parentHWnd(0), scoreIndex(0), name(0), windowMoving(true), buttonOK(NULL), textYourName(NULL),
+        labelMessage1(NULL), labelMessage2(NULL), prevMonitor(NULL) {
             strCache[0] = NULL;
             strCache[1] = NULL;
         }

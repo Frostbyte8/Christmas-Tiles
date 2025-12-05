@@ -10,7 +10,8 @@ class DynamicLabel : public WndAsClass<DynamicLabel> {
     friend WndAsClass;
 
     public:
-        DynamicLabel() : hWnd(0), caption(NULL) {}
+        DynamicLabel() : hWnd(0), caption(NULL), currentFont(0) {
+        }
         ~DynamicLabel() {
             if(caption) {
                 free(caption);

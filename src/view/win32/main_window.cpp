@@ -92,7 +92,14 @@ __forceinline void updateScore(const HWND& ctrl, const uint32_t& score) {
 //==============================================================================
 
 MainWindowView::MainWindowView(const HINSTANCE hIn) : hWnd(NULL),
-hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL), windowMoving(true) {
+hInstance(hIn), shouldUnflip(false), activeModalDialog(NULL), windowMoving(true),
+buttonPause(NULL), fileMenu(NULL), optionsMenu(NULL), helpMenu(NULL), menuBar(NULL),
+prevMonitor(NULL) {
+
+    groupStats[0] = NULL;
+    groupStats[1] = NULL;
+    groupStats[2] = NULL;
+
     windowPresenter.setMainWindowInterface(this);
 }
 
@@ -164,10 +171,26 @@ bool MainWindowView::registerSelf() {
     
     WNDCLASSEX wc;
 
-    // TODO [DPI]: DPI Icon related stuff.
-    // In Short: Pre-Vista/7, Windows selected the correct icon for the taskbar.
-    // Vista/7(?) and later for whatever reason scale the icon, but only, sometimes?
-    // MSDN States that SM_CXICON and SM_CXSMICON can get this information
+#ifdef _DPI_AWARE_
+    UINT xDPI;
+    UINT yDPI;
+    GetDpiForMonitor(prevMonitor, MONITOR_DPI_TYPE::MDT_DEFAULT, &xDPI, &yDPI);
+    
+    int iconXSize = GetSystemMetricsForDpi(SM_CXICON, xDPI);
+    int iconYSize = GetSystemMetricsForDpi(SM_CYICON, yDPI);
+    int iconSmallXSize = GetSystemMetricsForDpi(SM_CXSMICON, xDPI);
+    int iconSmallYSize = GetSystemMetricsForDpi(SM_CYSMICON, yDPI);
+#else
+    int iconXSize = GetSystemMetrics(SM_CXICON);
+    int iconYSize = GetSystemMetrics(SM_CYICON);
+    int iconSmallXSize = GetSystemMetrics(SM_CXSMICON);
+    int iconSmallYSize = GetSystemMetrics(SM_CYSMICON);
+#endif // _DPI_AWARE_
+
+    iconXSize = FrostUtil::ClampInts(iconXSize, 64, 16);
+    iconYSize = FrostUtil::ClampInts(iconYSize, 64, 16);
+    iconSmallXSize = FrostUtil::ClampInts(iconSmallXSize, 64, 16);
+    iconSmallYSize = FrostUtil::ClampInts(iconSmallYSize, 64, 16);
     
     wc.cbSize        = sizeof(WNDCLASSEX);
     wc.style         = 0;
@@ -175,12 +198,12 @@ bool MainWindowView::registerSelf() {
     wc.cbClsExtra    = 0;
     wc.cbWndExtra    = 0;
     wc.hInstance     = hInstance;
-    wc.hIcon         = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 32, 32, 0);
+    wc.hIcon         = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, iconXSize, iconYSize, 0);
     wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
     wc.hbrBackground = (HBRUSH)(COLOR_BTNFACE+1);
     wc.lpszMenuName  = NULL;
     wc.lpszClassName = L"XmasTilesMainWindow";
-    wc.hIconSm       = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, 16, 16, 0);
+    wc.hIconSm       = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, iconSmallXSize, iconSmallYSize, 0);
 
     if(!RegisterClassEx(&wc)) {
         MessageBox(NULL, L"Error registering window class.", L"Error", MB_OK | MB_ICONERROR);
@@ -327,9 +350,6 @@ void MainWindowView::onChangeBoardSize(const INT_PTR& menuID) {
 
 void MainWindowView::onChangeTileset() {
     
-    // TODO: Warn user about this action starting a new game
-    // Need to do this because canceling the custom window as well breaks the program.
-
     if(!windowPresenter.shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
         return;
     }
@@ -484,6 +504,23 @@ void MainWindowView::onDPIChange(const float xDPI, const float yDPI) {
     if(!windowMoving) {
         moveControls();
     }
+
+#ifdef _DPI_AWARE_    
+    int iconXSize = GetSystemMetricsForDpi(SM_CXICON, static_cast<UINT>(xDPI));
+    int iconYSize = GetSystemMetricsForDpi(SM_CYICON, static_cast<UINT>(yDPI));
+    int iconSmallXSize = GetSystemMetricsForDpi(SM_CXSMICON, static_cast<UINT>(xDPI));
+    int iconSmallYSize = GetSystemMetricsForDpi(SM_CYSMICON, static_cast<UINT>(yDPI));
+
+    iconXSize = FrostUtil::ClampInts(iconXSize, 64, 16);
+    iconYSize = FrostUtil::ClampInts(iconYSize, 64, 16);
+    iconSmallXSize = FrostUtil::ClampInts(iconSmallXSize, 64, 16);
+    iconSmallYSize = FrostUtil::ClampInts(iconSmallYSize, 64, 16);
+
+    SendMessage(hWnd, WM_SETICON, ICON_BIG, (LPARAM)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, iconXSize, iconYSize, 0));
+    SendMessage(hWnd, WM_SETICON, ICON_SMALL, (LPARAM)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_APPICON), IMAGE_ICON, iconSmallXSize, iconSmallYSize, 0));
+
+#endif
+
 }
 
 //------------------------------------------------------------------------------
@@ -568,10 +605,7 @@ void MainWindowView::onWindowMoved() {
 
     if(currentMonitor != prevMonitor) {
         prevMonitor = currentMonitor;
-
-        // TODO [DPI/Settings Change]: Reinit Window Metrics, and reset fonts, if DPI has actually changed.
         moveControls(); // This will also center it
-
     }
     
 }
@@ -765,9 +799,6 @@ __forceinline void MainWindowView::createMenuBar() {
 // getTallestPoint - Obtain the tallest point of the window.
 //------------------------------------------------------------------------------
 
-// TODO [DPI]: Tallest and Widest could be merged into one function.
-// (Not really DPI, but it makes sense to deal with it then)
-
 LONG MainWindowView::getTallestPoint() const {
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
@@ -809,12 +840,6 @@ void MainWindowView::moveControls() {
 
     const ControlDimensions& CD = metrics.getControlDimensions();
     const ControlSpacing& CS = metrics.getControlSpacing();
-
-    // TODO [DPI]: This entire code needs to be rewritten.
-    // Client Area Width is Widest GroupBox + GameBoard Width
-    // Client Area Height is whatever is taller: 3 Groupboxes + Button, or Gameboard
-    // Min Width: GroupBox + at least 5 tiles
-    // Min Height: No less than 9 tiles tall.
 
     const LONG tallestPoint = getTallestPoint();
     const LONG widestGroupBox = getWidestGroupBox();

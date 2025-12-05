@@ -10,7 +10,12 @@ class CustomSizeWindow : public WndAsClass<CustomSizeWindow> {
 
     public:
 
-        CustomSizeWindow() : hWnd(0), parentHWnd(0), windowMoving(true) {
+        CustomSizeWindow() : hWnd(0), parentHWnd(0), windowMoving(true), buttonCancel(NULL), buttonOK(NULL),
+        labelEnterSize(NULL), newWidth(0), newHeight(0), prevMonitor(NULL) {
+            labelCoord[0] = NULL;
+            labelCoord[1] = NULL;
+            textCoord[0] = NULL;
+            textCoord[1] = NULL;
         }
 
         bool createWindow(const HINSTANCE& hInst, const HWND& parent, const HMONITOR& parentMonitor);

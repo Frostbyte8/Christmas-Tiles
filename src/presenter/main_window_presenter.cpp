@@ -522,7 +522,6 @@ bool MainWindowPresenter::writeScores() {
     wchar_t keyName[16] = {0};
     const std::vector<ScoreT>& scores = scoreTable.getScores();
 
-    // TODO: At somepoint, _wfopen needs to be replaced.
     FILE* fp;
     if(_wfopen_s(&fp, L".\\scores.ini", L"w") != 0) {
         return false;

@@ -1,6 +1,6 @@
 #include "window_meterics.h"
 
-WindowMetrics::WindowMetrics() : fontHDC(0), curFont(0), oldFont(0), avgCharWidth(0), avgCharHeight(0) {
+WindowMetrics::WindowMetrics() : fontHDC(0), curFont(0), oldFont(0), avgCharWidth(0), avgCharHeight(0), xScaleFactor(96.0f), yScaleFactor(96.0f) {
 }
 
 WindowMetrics::~WindowMetrics() {
@@ -108,8 +108,8 @@ void WindowMetrics::initWindowMetrics(float inScaleX, float inScaleY) {
 
     // A Few extras that are obtained via GetSystemMetrics
 #ifdef _DPI_AWARE_
-    cd.XSCROLLBAR                   = GetSystemMetricsForDpi(SM_CXVSCROLL, xScaleFactor);
-    cd.YSCROLLBAR                   = GetSystemMetricsForDpi(SM_CYHSCROLL, xScaleFactor);
+    cd.XSCROLLBAR                   = GetSystemMetricsForDpi(SM_CXVSCROLL, static_cast<UINT>(xScaleFactor));
+    cd.YSCROLLBAR                   = GetSystemMetricsForDpi(SM_CYHSCROLL, static_cast<UINT>(xScaleFactor));
 #else
     cd.XSCROLLBAR                   = GetSystemMetrics(SM_CXVSCROLL);
     cd.YSCROLLBAR                   = GetSystemMetrics(SM_CYHSCROLL);

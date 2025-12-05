@@ -74,6 +74,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
     return static_cast<unsigned int>(retVal);
 #else
-    return retVal;    
+    return static_cast<unsigned int>(retVal);
 #endif // defined(_MSC_VER) && defined(_DEBUG)
 }
