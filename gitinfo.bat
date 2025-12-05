@@ -21,7 +21,7 @@ IF %ERRORLEVEL%==0 (
 echo #else >> ".\src\gitinfo.h"
 
 set githash=fatal
-FOR /F "usebackq tokens=* delims=" %%I IN (`git.exe describe --exact-match --tags`) DO (
+FOR /F "usebackq tokens=* delims=" %%I IN (`git.exe rev-parse --abbrev-ref HEAD`) DO (
 	SET githash=%%I
 )
 
