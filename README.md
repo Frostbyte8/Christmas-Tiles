@@ -30,11 +30,11 @@ Written in Pure Win32 API and C++.
 
 ## Downloading
 
-Windows 10 and 11 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/0.99-Beta/x64_ChristmasTiles_Win10_Win11.7z). They are Per-Monitor DPI compatible and only support 64-Bit.
+Windows 10 and 11 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/V1.00/V1.00.x64_ChristmasTiles_Win10_Win11.7z). They are Per-Monitor DPI compatible and only support 64-Bit.
 
-Windows Vista/7/8 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/0.99-Beta/x64_ChristmasTiles_Vista_Win7_Win8.7z). They **should** work with DPI, and they are also 64-Bit only.
+Windows Vista/7/8 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/V1.00/V1.00.x64_ChristmasTiles_Vista_Win7_Win8.7z). They **should** work with DPI, and they are also 64-Bit only.
 
-Windows XP and 2000 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/0.99-Beta/x86_ChristmasTiles_W2K_XP.7z). These builds will work with the DPI API that they had and they are 32-Bit only.
+Windows XP and 2000 builds are [here](https://github.com/Frostbyte8/Christmas-Tiles/releases/download/V1.00/V1.00.x86_ChristmasTiles_W2K_XP.7z). These builds will work with the DPI API that they had and they are 32-Bit only.
 
 The 32-Bit builds will also run on 32-Bit versions of Windows Vista/7/8/10, but they may or may not have issues, and DPI awareness is not a guarantee for them.
 
