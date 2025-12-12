@@ -36,6 +36,8 @@ class MainWindowView : public WndAsClass<MainWindowView>, public MainWindowInter
         void implGameStateChanged(const int& gameState);
         bool implTryLoadTileset(const wchar_t* fullPath);
 
+        void fixOpenFileDialog(const wchar_t* inStr);
+
     private:
         
         // Disable Copy Constructor

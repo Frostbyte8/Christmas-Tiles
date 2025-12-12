@@ -353,17 +353,23 @@ void MainWindowView::onChangeTileset() {
     if(!windowPresenter.shouldEndGameIfPlaying(LangID::ACTION_STARTS_NEW_GAME_TEXT)) {
         return;
     }
-    
+
     OPENFILENAME ofnTileset = {0};
     wchar_t filePath[MAX_PATH] = L"";
 
-    ofnTileset.lStructSize = sizeof(ofnTileset);
+    ofnTileset.lStructSize = sizeof(OPENFILENAME);
     ofnTileset.hwndOwner = hWnd;
     
-    // TODO: Somehow deal with this.
-    //wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
+    
+    wchar_t* filterText = GET_LANG_STR(LangID::BITMAP_FILES_FILTER_TEXT);
+    wchar_t filterOptions[17] = L" (*.bmp)\0*.bmp\0\0";
+    const size_t text_length = wcslen(filterText);
+    wchar_t* fullText = (wchar_t*)malloc( sizeof(wchar_t) * (text_length + 17));
+    memcpy(fullText, filterText, sizeof(wchar_t) * text_length);
+    memcpy(&fullText[text_length], filterOptions, sizeof(wchar_t) * 16);
 
-    ofnTileset.lpstrFilter = L"Bitmap Files (*.bmp)\0*.bmp\0\0";
+
+    ofnTileset.lpstrFilter = fullText;
     ofnTileset.hInstance = hInstance;
     ofnTileset.nMaxFile = MAX_PATH;
     ofnTileset.lpstrFile = filePath;
@@ -378,7 +384,7 @@ void MainWindowView::onChangeTileset() {
 
     }
 
-    //free(fullText);
+    free(fullText);
 
 }
 
